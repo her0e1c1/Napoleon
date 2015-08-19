@@ -1,4 +1,5 @@
 *.pyc
+*.rdb
 *.db
 *.sqlite3
 venv34
