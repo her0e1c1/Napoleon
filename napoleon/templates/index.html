@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{# {% import "macros.jinja2" as m %} #}
+
+
+{% block javascript %}
+  <script type="text/javascript" src="/static/js/finance.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="icon-add"></div>
+
+<ul>
+  {% for g in games %}
+  <li>
+    <div>
+      <a href="{{ url('detail', kwargs={'game_id': 1}) }}">{{ g.label }}</a>
+
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+
+{% if request.user %}
+   <form id="new_game" class="new_game" action="{{ url('game.views.create') }}" method="post">
+     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+     <input type="text" name="label">
+     <input type="submit">
+   </form>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  {% for p in players %}
+
+  {% endfor %}
+
+   <form id="new_game" class="new_game" action="{{ url('game.views.join') }}" method="post">
+     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+     <input type="submit" value="参加">
+   </form>
+
+{% endblock %}
