@@ -12,6 +12,8 @@ django-debug-toolbar
 gunicorn
 django-jinja
 PyYAML
+tornado
+redis
 
 #static
 #wsgiref
