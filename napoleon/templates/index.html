@@ -7,14 +7,29 @@
 {% endblock %}
 
 {% block content %}
+  <script language="javascript">
+
+  {# // var ws = new WebSocket("ws://localhost:8888/ws"); #}
+  {# var ws = new WebSocket("ws://192.168.56.2:8888/ws"); #}
+  {# ws.onopen = function() { #}
+  {#   var s = {"name": "Hello, world!!!"}; #}
+  {#   ws.send(JSON.stringify(s)); #}
+  {# }; #}
+  {# ws.onmessage = function (evt) { #}
+  {#   var json = JSON.parse(evt.data); #}
+  {#   var s = $("<strong>" + json.name + "</strong>"); #}
+  {#   $("form").append(s); #}
+  {# }; #}
+  </script>
+
+
 <div class="icon-add"></div>
 
 <ul>
   {% for g in games %}
   <li>
     <div>
-      <a href="{{ url('detail', kwargs={'game_id': 1}) }}">{{ g.label }}</a>
-
+      <a href="{{ url('detail', kwargs={'game_id': g.id}) }}">{{ g.label }}</a>
     </div>
   </li>
   {% endfor %}

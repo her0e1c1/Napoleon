@@ -1,14 +1,41 @@
 {% extends "base.html" %}
 
+{% block javascript %}
+ {# <script type="text/javascript" src="{{ static('js/game.js') }}"></script> #}
+ <script type="text/javascript" src="/static/js/game.js"></script>
+{% endblock %}
+
 {% block content %}
+  <div ng-controller="GameController as game"
+       ng-init="
+       game_id={{ game.id }};
+       game.declaration={{ auction.declaration or 0 }};
+       game.players={{ players }};
+       game.hand={{ hand }}">
 
-  {% for p in players %}
+    <ul>
+      <li ng-repeat="p in game.players">[[ p ]]</li>
+    </ul>
 
-  {% endfor %}
+    <ul>
+      <li ng-repeat="h in game.hand">[[ h ]]</li>
+    </ul>
 
-   <form id="new_game" class="new_game" action="{{ url('game.views.join') }}" method="post">
-     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-     <input type="submit" value="参加">
-   </form>
+    現在の宣言： [[ game.declaration ]]
+    <select ng-model="game.declaration"
+            ng-change="game.declare()">
+      {% for d in declarations %}
+        {# can't use int filter? #}
+        {% set val = d.__int__() %}
+        {% if val > auction.declaration|int %}
+          <option value="{{ val }}">{{ d }}</option>
+        {% endif %}
+      {% endfor %}
+    </select>
 
+  <button ng-if="game.is_joined" ng-click="game.quit()">不参加</button>
+  <button ng-if="!game.is_joined" ng-click="game.join()">参加</button>
+  <button ng-click="game.start()">開始</button>
+
+  </div>
 {% endblock %}
