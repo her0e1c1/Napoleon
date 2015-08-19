@@ -1,0 +1,18 @@
+Jinja2
+ipython
+ipdb
+psycopg2  # install postgresql first
+python-dateutil
+requests
+six
+django
+dj-database-url
+dj-static
+django-debug-toolbar
+gunicorn
+django-jinja
+PyYAML
+
+#static
+#wsgiref
+#tweepy
