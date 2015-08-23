@@ -8,34 +8,53 @@
 {% block content %}
   <div ng-controller="GameController as game"
        ng-init="
-       game_id={{ game.id }};
-       game.declaration={{ auction.declaration or 0 }};
-       game.players={{ players }};
-       game.hand={{ hand }}">
+       game.user_id={{ request.user.id }};
+       game.game_id={{ game.id }};
+       game.declarations={{ declarations }};
+       ">
 
+    <br>sid [[ game.sid ]]
+    <br>プレイヤーID: [[ game.user_id ]]
+    <br>Am I napoleon [[ game.is_napoleon ]]
+    <br>pass: [[ game.is_passed ]]
+    <br>turn: [[ game.turn ]]
+    <br>first round: [[ game.first_round ]]
+
+    <br>参加プレーヤ：
     <ul>
       <li ng-repeat="p in game.players">[[ p ]]</li>
     </ul>
 
+    手札：
     <ul>
       <li ng-repeat="h in game.hand">[[ h ]]</li>
     </ul>
 
+    宣言パス： [[ game.pass_ids ]]
+
+    現在のナポレオン： [[ game.napoleon ]]
     現在の宣言： [[ game.declaration ]]
     <select ng-model="game.declaration"
+            ng-disabled="game.is_napoleon"
+            disabled="false"
             ng-change="game.declare()">
-      {% for d in declarations %}
-        {# can't use int filter? #}
-        {% set val = d.__int__() %}
-        {% if val > auction.declaration|int %}
-          <option value="{{ val }}">{{ d }}</option>
-        {% endif %}
-      {% endfor %}
+            <option ng-repeat="d in game.declarations"
+                    ng-if="!game.declaration || d.value > game.declaration"
+                    value="[[ d.value ]]">
+                    [[ d.str ]]
+            </option>
     </select>
+
+  {% if request.user.is_authenticated() %}
+  <button ng-if="!game.is_napoleon"
+          ng-disabled="game.is_passed"
+          ng-click="game.pass()">宣言パス</button>
 
   <button ng-if="game.is_joined" ng-click="game.quit()">不参加</button>
   <button ng-if="!game.is_joined" ng-click="game.join()">参加</button>
-  <button ng-click="game.start()">開始</button>
+
+  <button ng-if="!game.is_started" ng-click="game.start()">開始</button>
+  {% endif %}
 
   </div>
 {% endblock %}

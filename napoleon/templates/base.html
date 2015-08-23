@@ -10,39 +10,35 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript" src="/static/js/jquery.cookie.js"></script>
-    <!-- <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script> -->
-    <!-- <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1/i18n/jquery.ui.datepicker-ja.min.js"></script> -->
-    <!-- <link type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1/themes/ui-lightness/jquery-ui.css" rel="stylesheet" /> -->
-    <!-- <script type="text/javascript" src="/static/js/highcharts.src.js"></script> -->
     {% block javascript %}{% endblock %}
   </head>
   <body ng-app="GameApp">
     <div class="wrap">
-      <header>
-        <div class="logo"><a href="/">HOME</a></div>
-        <div class="options">
-          <ul>
-            <li>Search</li>
-            <li>Menu</li>
-          </ul>
-        </div>
-        <div class="clear"></div>
-        <div class="search-box">
-          <form action="#">
-            <input type="text" placeholder="Search gallery" />
-            <input type="submit" value="Go" />
-          </form>
-          <div class="clear"></div>
-        </div>
-        <nav class="vertical menu">
-          <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/stock">stock</a></li>
-            <li><a href="/graph">graph</a></li>
-            <li><a href="single.html">Single page</a></li>
-          </ul>
-        </nav>
-      </header>
+      <!-- <header> -->
+      <!--   <div class="logo"><a href="/">HOME</a></div> -->
+      <!--   <div class="options"> -->
+      <!--     <ul> -->
+      <!--       <li>Search</li> -->
+      <!--       <li>Menu</li> -->
+      <!--     </ul> -->
+      <!--   </div> -->
+      <!--   <div class="clear"></div> -->
+      <!--   <div class="search-box"> -->
+      <!--     <form action="#"> -->
+      <!--       <input type="text" placeholder="Search gallery" /> -->
+      <!--       <input type="submit" value="Go" /> -->
+      <!--     </form> -->
+      <!--     <div class="clear"></div> -->
+      <!--   </div> -->
+      <!--   <nav class="vertical menu"> -->
+      <!--     <ul> -->
+      <!--       <li><a href="/">Home</a></li> -->
+      <!--       <li><a href="/stock">stock</a></li> -->
+      <!--       <li><a href="/graph">graph</a></li> -->
+      <!--       <li><a href="single.html">Single page</a></li> -->
+      <!--     </ul> -->
+      <!--   </nav> -->
+      <!-- </header> -->
 
       <div class="content">
         {% block content %}{% endblock %}
