@@ -44,8 +44,21 @@ class Card(object):
         self.suit = suit
 
     def __int__(self):
-        # return self.pip + 13 * (self.suit.value - 1)
         return self.suit.value + (self.pip - 1) * 4
+
+    def to_json(self):
+        return {
+            "pip": self.pip,
+            "suit": self.suit.value,
+            "str": str(self),
+            "value": int(self),
+        }
+
+    @classmethod
+    def from_int(cls, i):
+        p = (i // 4)
+        s = list(Suit)[(i - 1) % 4]
+        return cls(p + 1, s)
 
     def __str__(self):
         pip = self.pip
@@ -112,7 +125,10 @@ def deal(number_of_players=5):
 
 
 class Declaration(Card):
-    pass
+
+    @property
+    def over(self):
+        return [d for d in declarations if d > self]
 
 declarations = [
     Declaration(p, s)
