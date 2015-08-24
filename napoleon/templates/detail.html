@@ -10,6 +10,7 @@
        ng-init="
        game.user_id={{ request.user.id }};
        game.game_id={{ game.id }};
+       game.deck={{ deck }};
        game.declarations={{ declarations }};
        ">
 
@@ -18,43 +19,80 @@
     <br>Am I napoleon [[ game.is_napoleon ]]
     <br>pass: [[ game.is_passed ]]
     <br>turn: [[ game.turn ]]
-    <br>first round: [[ game.first_round ]]
+    <br>first round: [[ game.is_first_round ]]
+    <br>my turn: [[ game.is_my_turn ]]
+    <br>phase: [[ game.phase ]]
+    <br>waiting_next_turn: [[ game.waiting_next_turn ]]
 
     <br>参加プレーヤ：
-    <ul>
-      <li ng-repeat="p in game.players">[[ p ]]</li>
+    <ul><li ng-repeat="p in game.player_ids">[[ p ]]</li></ul>
+
+    message
+    <div ng-if="!game.phase">プレイヤーの参加待ちです。</div>
+    <div ng-if="game.phase == 'declare'">ナポレオンの宣言をお願いします。</div>
+    <div ng-if="game.phase == 'adjutant'">副官を決定します。</div>
+    <div ng-if="game.phase == 'discard'">
+      <span ng-if="!game.is_unused_careds_selected()">不要なカードを選択してください</span>
+      <span ng-if="game.is_unused_careds_selected()">始めに場に出すカードを選択してください</span>
+    </div>
+    <div ng-if="game.waiting_next_turn">誰が勝った？</div>
+
+    <br>board:
+    <ul><li ng-repeat="c in game.board"
+            ng-click="game.unselect(c)">[[ c.str ]]</li></ul>
+
+    first round face cards
+    <ul ng-if="game.phase == 'first_round'">
+      <li ng-repeat="c in game.unused"
+          ng-click="game.unselect(c)">[[ c.str ]]</li>
     </ul>
+
+    <br>selected:
+    <ul><li ng-repeat="c in game.unused"
+            ng-if="game.phase == 'discard'"
+            ng-click="game.unselect(c)">[[ c.str ]]</li></ul>
 
     手札：
-    <ul>
-      <li ng-repeat="h in game.hand">[[ h ]]</li>
-    </ul>
-
-    宣言パス： [[ game.pass_ids ]]
+    <ul><li ng-repeat="c in game.hand| orderBy:'order_by_suit'">
+        <button ng-if="game.phase == 'discard' && game.is_napoleon"
+                ng-click="game.discard(c)">d [[ c.str ]]</button>
+        <button ng-if="game.is_my_turn && (game.phase == 'first_round' || game.phase == 'rounds')"
+                ng-click="game.select(c)">[[ c.str ]]</button>
+        [[ c.str ]]
+    </li></ul>
 
     現在のナポレオン： [[ game.napoleon ]]
-    現在の宣言： [[ game.declaration ]]
-    <select ng-model="game.declaration"
-            ng-disabled="game.is_napoleon"
-            disabled="false"
-            ng-change="game.declare()">
-            <option ng-repeat="d in game.declarations"
-                    ng-if="!game.declaration || d.value > game.declaration"
-                    value="[[ d.value ]]">
-                    [[ d.str ]]
-            </option>
-    </select>
+    現在の宣言： [[ game.declaration.str ]]
 
-  {% if request.user.is_authenticated() %}
+  <div ng-if="!game.phase">
+    <button ng-if="game.is_joined" ng-click="game.quit()">不参加</button>
+    <button ng-if="!game.is_joined" ng-click="game.join()">参加</button>
+    <button ng-if="game.is_appropriate_player_number" ng-click="game.start()">開始</button>
+  </div>
+
+  <div ng-if="game.phase == 'declare'">
+   宣言パス： [[ game.pass_ids ]]
   <button ng-if="!game.is_napoleon"
           ng-disabled="game.is_passed"
           ng-click="game.pass()">宣言パス</button>
 
-  <button ng-if="game.is_joined" ng-click="game.quit()">不参加</button>
-  <button ng-if="!game.is_joined" ng-click="game.join()">参加</button>
+    <select ng-model="game.declaration"
+            ng-disabled="game.is_napoleon"
+            ng-change="game.declare()">
+            <option ng-repeat="d in game.declarations"
+                    ng-if="!game.declaration || d.value > game.declaration"
+                    value="[[ d.value ]]">[[ d.str ]]</option></select>
+  </div>
 
-  <button ng-if="!game.is_started" ng-click="game.start()">開始</button>
-  {% endif %}
+  <div ng-if="game.phase == 'adjutant'">
+    副官
+    <select ng-model="game.adjutant"
+            ng-if="game.is_napoleon"
+            ng-change="game.determine_adjutant()">
+            <option ng-repeat="d in game.deck"
+                    value="[[ d.value ]]">[[ d.str ]]</option></select>
+
+  </div>
 
   </div>
 {% endblock %}
