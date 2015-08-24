@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 
 {% block javascript %}
- {# <script type="text/javascript" src="{{ static('js/game.js') }}"></script> #}
- <script type="text/javascript" src="/static/js/game.js"></script>
+ <script type="text/javascript" src="{{ static('js/game.js') }}"></script> 
 {% endblock %}
 
 {% block content %}
@@ -20,6 +19,7 @@
     <br>pass: [[ game.is_passed ]]
     <br>turn: [[ game.turn ]]
     <br>first round: [[ game.is_first_round ]]
+    <br>faces [[ game.face ]]
     <br>my turn: [[ game.is_my_turn ]]
     <br>phase: [[ game.phase ]]
     <br>waiting_next_turn: [[ game.waiting_next_turn ]]
@@ -53,7 +53,7 @@
             ng-click="game.unselect(c)">[[ c.str ]]</li></ul>
 
     手札：
-    <ul><li ng-repeat="c in game.hand| orderBy:'order_by_suit'">
+    <ul><li ng-repeat="c in game.hand.concat(game.rest) | orderBy:'order_by_suit'">
         <button ng-if="game.phase == 'discard' && game.is_napoleon"
                 ng-click="game.discard(c)">d [[ c.str ]]</button>
         <button ng-if="game.is_my_turn && (game.phase == 'first_round' || game.phase == 'rounds')"
