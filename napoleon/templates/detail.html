@@ -35,7 +35,7 @@
           <td ng-repeat="p in game.player_ids track by $index"
               ng-init="u=game.users[p]">
               <span ng-if="p == game.napoleon">N</span>
-              <span ng-if="game.pass_ids.indexOf(p) >= 0">P</span>
+              <span ng-if="game.phase == 'declare' && game.pass_ids.indexOf(p) >= 0">PASS</span>
               <span ng-class="{turn: p == game.turn, me: p == game.user_id}">
                 [[ u.name ]]([[ p ]])
                 {# face #}
@@ -45,7 +45,7 @@
         </tr>
         <tr>
           <td>Board</td>
-          <td ng-repeat="c in game.board" ng-click="game.unselect(c)">[[ c.str ]]</td>
+          <td ng-repeat="pid in game.player_ids">[[ game.player_cards[pid].str ]]</td>
         </tr>
         <tr ng-if="game.phase == 'first_round'">
           <td>first round face cards</td>
@@ -54,7 +54,7 @@
         <tr  ng-if="game.phase == 'discard'">
           <td>Selected</td>
           <td ng-repeat="c in game.unused" ng-click="game.unselect(c)">[[ c.str ]]</td>
-        <tr>
+        </tr>
       </table>
     </div>
 
@@ -65,7 +65,7 @@
       <span ng-if="!game.is_unused_careds_selected()">不要なカードを選択してください</span>
       <span ng-if="game.is_unused_careds_selected()">始めに場に出すカードを選択してください</span>
     </div>
-    <div ng-if="game.waiting_next_turn">誰が勝った？</div>
+    <div ng-if="game.waiting_next_turn">[[ game.users[game.turn].name ]]の勝ち</div>
 
     <div id="hand">
       <ul><li ng-repeat="c in game.hand.concat(game.rest) | orderBy:'order_by_suit'">
