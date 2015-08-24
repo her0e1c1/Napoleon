@@ -13,13 +13,12 @@ class WSHandlerMixin(object):
 
     @property
     def room_id(self):
-        return self.path_kwargs["game_id"]
+        return self.path_kwargs["room_id"]
 
     def check_origin(self, origin):
         return True
 
-    def open(self, game_id):
-        room_id = game_id
+    def open(self, room_id):
         WSHandlerMixin.connections[room_id].add(self)
 
     def on_close(self):
@@ -55,38 +54,60 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         mode = json.get("mode")
         if mode == "join":
             state.set_user_id(self.room_id, json["session_id"], json["user_id"])
-            pgs = state.PrivateGameState(session_id=json["session_id"], room_id=self.room_id)
+
+        pgs = state.PrivateGameState(session_id=json["session_id"], room_id=self.room_id)
+        if mode == "join":
             pgs.join()
         elif mode == "quit":
-            pgs = state.PrivateGameState(session_id=json["session_id"], room_id=self.room_id)
             pgs.quit()
-        elif mode == "start":
-            # TODO: I must make the initial action only one time
+        elif not pgs.phase:
             pgs = state.PrivateGameState(room_id=self.room_id)
-            players = pgs.players
+            players = pgs.player_ids
             number_of_players = len(players)
-            if number_of_players <= 2:  # TODO: catch an error
-                return
+            if number_of_players <= 2:
+                return  # Ignore
             hands, rest = card.deal(number_of_players)
             pgs.rest = rest
             for (p, h) in zip(players, hands):
                 st = state.PrivateGameState(user_id=p, room_id=self.room_id)
                 st.hand = h
+                st.face = 0
+            pgs.phase = "declare"
         elif mode == "declare":
-            pgs = state.PrivateGameState(room_id=self.room_id, session_id=json["session_id"])
             pgs.declaration = json["declaration"]
+            if pgs.is_napoleon_determined:
+                pgs.phase = "adjutant"
         elif mode == "pass":
-            pgs = state.PrivateGameState(room_id=self.room_id, session_id=json["session_id"])
             pgs.set_pass_ids()
-        elif mode == "unused":
-            pass
+            if pgs.is_napoleon_determined:
+                pgs.phase = "adjutant"
+            elif pgs.are_all_players_passed:
+                pgs.phase = None
+        elif mode == "adjutant":
+            pgs.adjutant = json["adjutant"]
+            pgs.phase = "discard"
+            pgs.set_role(json["adjutant"])
+        elif pgs.phase == "discard":
+            pgs.discard(json["unused"], json["selected"])
+            pgs.next()
+            pgs.phase = "first_round"
+        elif pgs.phase == "first_round":
+            if pgs.waiting_next_turn:
+                pgs.phase = "rounds"
+            else:
+                pgs.select(json["selected"])
+            pgs.next()
+        elif pgs.phase == "rounds":
+            if not pgs.waiting_next_turn:
+                pgs.select(json["selected"])
+            pgs.next()
 
         self.write_on_same_room({"update": True})
 
 
 def make_app():
     return tornado.web.Application([
-        (r"/game/(?P<game_id>\d+)", GameHandler),
+        (r"/game/(?P<room_id>\d+)", GameHandler),
     ])
 
 
