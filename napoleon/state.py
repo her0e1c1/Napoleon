@@ -15,8 +15,7 @@ def get_connection(host="localhost", port=6379, db=0):
     if not uri:
         return redis.Redis(host, port=port, db=db)
     else:
-        o = urlparse(uri)
-        return redis.Redis(o.hostname, port=o.port, db=db)
+        return redis.from_url(uri)
 
 
 def get_user_id(room_id, session_id):
