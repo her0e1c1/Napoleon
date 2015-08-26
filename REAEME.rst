@@ -49,3 +49,10 @@ When using django, you need to migrate and create a super user ::
 connect to postgres ::
 
     heroku pg:psql --app napolo
+
+Automatical Deploy
+------------------
+
+heroku supports this but you also need to configure settings of github.
+
+https://developer.github.com/guides/automating-deployments-to-integrators/
