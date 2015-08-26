@@ -25,8 +25,7 @@ SECRET_KEY = 'kq@0rv+%=1@d^6w53+-24+p$^02%2@c28b+vv0rc&=#^hpgwsn'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+# ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -117,3 +116,12 @@ STATICFILES_DIRS = [
 ]
 
 SESSION_COOKIE_HTTPONLY = False
+
+
+# https://devcenter.heroku.com/articles/getting-started-with-django
+import dj_database_url
+DATABASES['default'] =  dj_database_url.config()
+
+# Honor the 'X-Forwarded-Proto' header for request.is_secure()
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+ALLOWED_HOSTS = ['*']
