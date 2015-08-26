@@ -30,6 +30,10 @@
   <div ng-if="game.waiting_next_turn">[[ game.users[game.turn].name ]] [[ game.player_cards[game.turn].str ]]の勝ち</div>
   <div ng-if="(game.phase == 'first_round' || game.phase == 'rounds') && game.is_my_turn">あなたの番です</div>
   <div ng-if="game.impossible_card">[[ game.impossible_card.str]]は選べません</div>
+  <div ng-if="game.phase == 'finished'">
+      <span ng-if="game.did_napoleon_win">ナポレオンの勝ち</span>
+      <span ng-if="game.did_napoleon_lose">ナポレオンの負け</span>
+  </div>
 {% endmacro %}
 
 
@@ -61,7 +65,7 @@
               <span ng-if="p == game.napoleon">N</span>
               <span ng-if="game.phase == 'declare' && game.pass_ids.indexOf(p) >= 0">PASS</span>
               <span ng-class="{turn: p == game.turn, me: p == game.user_id}">
-                [[ game.users[p].name ]] () {# face #}
+                [[ game.users[p].name ]] ([[ game.player_faces[p] ]])
             </span>
           </td>
         </tr>
