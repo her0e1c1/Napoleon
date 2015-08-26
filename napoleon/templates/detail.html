@@ -4,6 +4,35 @@
  <script type="text/javascript" src="{{ static('js/game.js') }}"></script>
 {% endblock %}
 
+
+{% macro message() %}
+  <div ng-if="!game.phase" ng-switch="!game.is_joined">
+    <span ng-switch-when="true">ナポレオンに参加しますか？</span>
+    <span ng-switch-when="false">プレイヤーの参加待ちです...</span>
+  </div>
+  <div ng-if="game.phase == 'declare'" ng-switch="!game.is_passed">
+    <span ng-switch-when="true">ナポレオンの宣言をしますか？</span>
+    <span ng-switch-when="false">パスしました</span>
+  </div>
+  <div ng-if="game.phase == 'adjutant'" ng-switch="game.is_napoleon">
+    <span ng-switch-when="true">副官を選択してください。</span>
+    <span ng-switch-when="false">副官の選択中...</span>
+  </div>
+  <div ng-if="game.phase == 'discard'">
+    <div ng-if="game.is_napoleon">
+      <span ng-if="!game.is_unused_careds_selected()">不要なカードを選択してください</span>
+      <span ng-if="game.is_unused_careds_selected()">始めに場に出すカードを選択してください</span>
+    </div>
+    <div ng-if="!game.is_napoleon">
+      ナポレオンがカードの交換中...
+    </div>
+  </div>
+  <div ng-if="game.waiting_next_turn">[[ game.users[game.turn].name ]] [[ game.player_cards[game.turn].str ]]の勝ち</div>
+  <div ng-if="(game.phase == 'first_round' || game.phase == 'rounds') && game.is_my_turn">あなたの番です</div>
+  <div ng-if="game.impossible_card">[[ game.impossible_card.str]]は選べません</div>
+{% endmacro %}
+
+
 {% block content %}
   <div ng-controller="GameController as game"
        ng-init="
@@ -28,14 +57,11 @@
       <table>
         <tr id="player">
           <td>Players</td>
-          <td ng-repeat="p in game.player_ids track by $index"
-              ng-init="u=game.users[p]">
+          <td ng-repeat="p in game.player_ids track by $index">
               <span ng-if="p == game.napoleon">N</span>
               <span ng-if="game.phase == 'declare' && game.pass_ids.indexOf(p) >= 0">PASS</span>
               <span ng-class="{turn: p == game.turn, me: p == game.user_id}">
-                [[ u.name ]]([[ p ]])
-                {# face #}
-              {# <span ng-if="p == game.pass_ids">P</span> #}
+                [[ game.users[p].name ]] () {# face #}
             </span>
           </td>
         </tr>
@@ -45,7 +71,7 @@
         </tr>
         <tr ng-if="game.phase == 'first_round'">
           <td>first round face cards</td>
-          <td ng-repeat="c in game.unused" ng-click="game.unselect(c)">[[ c.str ]]</td>
+          <td ng-repeat="c in game.unused">[[ c.str ]]</td>
         </tr>
         <tr  ng-if="game.phase == 'discard'">
           <td>Selected</td>
@@ -54,17 +80,10 @@
       </table>
     </div>
 
-    <div ng-if="!game.phase">プレイヤーの参加待ちです。</div>
-    <div ng-if="game.phase == 'declare'">ナポレオンの宣言をお願いします。</div>
-    <div ng-if="game.phase == 'adjutant'">副官を決定します。</div>
-    <div ng-if="game.phase == 'discard'">
-      <span ng-if="!game.is_unused_careds_selected()">不要なカードを選択してください</span>
-      <span ng-if="game.is_unused_careds_selected()">始めに場に出すカードを選択してください</span>
-    </div>
-    <div ng-if="game.waiting_next_turn">[[ game.users[game.turn].name ]] [[ game.player_cards[game.turn].str ]]の勝ち</div>
+    {{ message() }}
 
     <div id="hand">
-      <ul><li ng-repeat="c in game.hand.concat(game.rest) | orderBy:'order_by_suit'">
+      <ul><li ng-repeat="c in game.hand.concat(game.rest) | orderBy:'order_by_suit' track by $index">
           <span ng-click="game.select_or_discard(c)">[[ c.str ]]</span>
       </li></ul>
     </div>
@@ -80,13 +99,13 @@
   <button ng-if="!game.is_napoleon" ng-disabled="game.is_passed" ng-click="game.pass()">パス</button>
 
   <select ng-model="game.declaration" ng-disabled="game.is_napoleon || game.is_passed" ng-change="game.declare()">
-    <option ng-repeat="d in game.declarations" ng-if="d.value > game.declaration.value" value="[[ d.value ]]">[[ d.str ]]</option>
+    <option ng-repeat="d in game.declarations" ng-if="!game.declaration || d.value > game.declaration.value" value="[[ d.value ]]">[[ d.str ]]</option>
   </select>
   </div>
 
-  <div ng-if="game.phase == 'adjutant'">
+  <div ng-if="game.phase == 'adjutant' && game.is_napoleon">
     副官
-    <select ng-model="game.adjutant" ng-if="game.is_napoleon" ng-change="game.determine_adjutant()">
+    <select ng-model="game.adjutant" ng-change="game.determine_adjutant()">
       <option ng-repeat="d in game.deck" value="[[ d.value ]]">[[ d.str ]]</option>
     </select>
   </div>
