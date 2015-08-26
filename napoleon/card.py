@@ -105,8 +105,9 @@ class Card(Mixin):
 
     @classmethod
     def from_int(cls, i):
+        i -= 1
         p = (i // 4)
-        s = list(Suit)[(i - 1) % 4]
+        s = list(Suit)[(i) % 4]
         return cls(p + 1, s)
 
     def __str__(self):
@@ -220,7 +221,7 @@ def decide(cards, trump_suit, is_first_round=False, rule=None):
         else:
             return ALMIGHTY
 
-    lead = cards[0]
+    lead = cards[-1]
     if Joker.black in cards and Joker.red in cards:
         if trump_suit.is_black:
             return Joker.black
@@ -253,12 +254,12 @@ def decide(cards, trump_suit, is_first_round=False, rule=None):
     return max([c for c in cards if c.suit == lead.suit])
 
 
-def winner(board, player_ids, last_turn, trump_suit, rule=None):
+def winner(board, player_cards, trump_suit, rule=None):
     """
     Decide which player wins at one round.
     :return: user id
     """
-    pc = player_cards(board, player_ids, last_turn)
+    pc = player_cards
     strongest = decide(board, trump_suit, rule)
     return {int(v): k for k, v in pc.items()}[int(strongest)]
 
@@ -270,7 +271,7 @@ def possible_cards(board, hand, trump_suit):
     if not board:
         return hand
 
-    lead = board[0]
+    lead = board[-1]
     if lead == CLUB3 in hand:
         return list(Joker)
 
@@ -286,28 +287,3 @@ def possible_cards(board, hand, trump_suit):
 
 def always_cards(trump_suit):
     return list(Joker) + [counter_jack(trump_suit)]
-
-
-def player_cards(board, player_ids, turn, reverse=False):
-    # The player in turn doesn't give a card yet
-    try:
-        current_player_index = player_ids.index(turn)
-    except ValueError:
-        raise
-
-    number_of_players = len(player_ids)
-    number_of_cards = len(board)
-    if number_of_cards > number_of_players:
-        raise
-
-    pc = {}
-    first_player_index = (current_player_index - number_of_cards) % number_of_players
-    for bindex, i in enumerate(range(first_player_index, first_player_index + number_of_players)):
-        if bindex < number_of_cards:
-            card = board[bindex]
-        else:
-            card = None
-        pid = player_ids[i % number_of_players]
-        pc[pid] = card
-
-    return pc
