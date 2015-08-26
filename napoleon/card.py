@@ -173,6 +173,7 @@ deck = [
 
 number_of_cards = len(deck)  # 54
 NUMBER_OF_CARDS = len(deck)  # 54
+NUMBER_OF_FACE_CARDS = len([c for c in deck if c.is_faced])  # 20
 
 REST = {
     3: 6,
