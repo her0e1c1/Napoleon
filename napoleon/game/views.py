@@ -48,8 +48,6 @@ def game_state(request, room_id):
     for p in st.player_ids:
         q |= Q(id=p)
     users = models.User.objects.filter(q).all()
-
-    # pcards = card.player_cards(st.board, st.player_ids, st.turn)
     return JsonResponse({
         "player_cards": {k: v and v.to_json() for k, v in st.player_cards.items()},
         "player_faces": {k: v for k, v in st.player_faces.items()},
@@ -76,12 +74,13 @@ def game_state(request, room_id):
     })
 
 
+@login_required
 def detail(request, game_id):
-    game = get_object_or_404(models.Room, pk=game_id)
+    room = get_object_or_404(models.Room, pk=game_id)
     session_id = request.COOKIES["sessionid"]
     state.reset_session_id_if_changed(game_id, session_id, request.user.id)
     return render(request, "detail.html", {
-        "game": game,
+        "game": room,
         "deck": [c.to_json() for c in card.deck],
         "declarations": [d.to_json() for d in card.declarations],
     })
