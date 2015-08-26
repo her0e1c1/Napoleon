@@ -1,3 +1,8 @@
+var urls = {
+    "state": "/json/state/",  // {room_id}
+    "room": "ws://192.168.56.2:8888/room/"  // {room_id}
+};
+
 var app = angular.module("GameApp", []);
 
 app.config(function($interpolateProvider) {
@@ -13,7 +18,7 @@ app.controller("GameController", ["$scope", function($scope){
     self.unused = [];
 
     this.update = function(){
-        $.get("/games/json/state/" + self.game_id, {}, function(data){
+        $.get(urls.state + self.game_id, {}, function(data){
             $.extend(self, data);
 
             self.impossible_card = null;
@@ -27,7 +32,7 @@ app.controller("GameController", ["$scope", function($scope){
 
     $scope.$watch("game.game_id", function(){
         self.update();
-        wsGame = new WebSocket("ws://192.168.56.2:8888/game/" + self.game_id);
+        wsGame = new WebSocket(urls.room + self.game_id);
         wsGame.onmessage = function (evt) {
             var json = JSON.parse(evt.data);
             if (json.update)

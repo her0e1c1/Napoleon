@@ -122,7 +122,7 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
 
 def make_app():
     return tornado.web.Application([
-        (r"/game/(?P<room_id>\d+)", GameHandler),
+        (r"/room/(?P<room_id>\d+)", GameHandler),
     ])
 
 
