@@ -1,4 +1,8 @@
+import sys
+import logging
+
 import tornado.ioloop
+import tornado.options
 import tornado.web
 import tornado.websocket
 from tornado.websocket import WebSocketHandler
@@ -6,6 +10,12 @@ import tornado.escape
 from collections import defaultdict
 import card
 import state
+
+args = sys.argv
+tornado.options.parse_command_line(args)
+
+
+logger = logging.getLogger(__name__)
 
 
 class WSHandlerMixin(object):
@@ -85,22 +95,27 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
                 pgs.phase = None
         elif mode == "adjutant":
             pgs.adjutant = json["adjutant"]
-            pgs.phase = "discard"
             pgs.set_role(json["adjutant"])
+            pgs.phase = "discard"
         elif pgs.phase == "discard":
-            pgs.discard(json["unused"], json["selected"])
+            pgs.discard(json["unused"])
+            pgs.select(json["selected"])
             pgs.next()
             pgs.phase = "first_round"
         elif pgs.phase == "first_round":
             if pgs.waiting_next_turn:
+                pgs.next_round()
                 pgs.phase = "rounds"
-            else:
-                pgs.select(json["selected"])
+            pgs.select(json["selected"])
             pgs.next()
         elif pgs.phase == "rounds":
-            if not pgs.waiting_next_turn:
-                pgs.select(json["selected"])
+            if pgs.waiting_next_turn:
+                pgs.next_round()
+            pgs.select(json["selected"])
             pgs.next()
+            if pgs.is_finished:
+                # record
+                pgs.phase = "finished"
 
         self.write_on_same_room({"update": True})
 
