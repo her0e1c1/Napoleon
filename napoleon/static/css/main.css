@@ -1,0 +1,10 @@
+
+
+.icon-add {
+    display: inline-block;
+    background-image: url(/static/img/icons.png);
+    height: 32px;
+    width: 32px;
+    background-position-x: 160px;
+    background-position-y: -128px;
+}
