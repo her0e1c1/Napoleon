@@ -12,21 +12,15 @@ def get_user(session_key):
         return None
 
 
-# Roomに変更する
-class Game(models.Model):
+class Room(models.Model):
     label = models.CharField(max_length=200, blank=False)
     waiting = models.BooleanField(default=True, null=False)
     finished = models.BooleanField(default=False, null=False)
     created_at = models.DateTimeField(auto_now=True, null=False)
-    players = models.ManyToManyField(User, related_name="games")
+    user = models.ForeignKey(User, null=False)
 
     def __str__(self):
         return "%s" % self.label
 
     def __unicode__(self):
         return "%s" % self.label
-
-
-class Player(models.Model):
-    user = models.OneToOneField(User, unique=True)
-    games = models.ManyToManyField(Game)
