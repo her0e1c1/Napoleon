@@ -19,7 +19,7 @@
 </ul>
 
 {% if request.user %}
-   <form id="new_game" class="new_game" action="{{ url('game.views.create') }}" method="post">
+   <form id="new_game" class="new_game" action="{{ url('napoleon.game.views.create') }}" method="post">
      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
      <input type="text" name="label">
      <input type="submit">
