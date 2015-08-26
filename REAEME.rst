@@ -21,6 +21,12 @@ FreeBSD::
    # project root
    python manage.py makemigrations game
 
+Django
+======
+run server ::
+
+    python manage.py runserver 0.0.0.0:8001 --noreload --settings=napoleon.settings.local
+
 Heroku
 ======
 
