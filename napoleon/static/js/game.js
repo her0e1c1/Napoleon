@@ -1,6 +1,6 @@
 var urls = {
     "state": "/json/state/",  // {room_id}
-    "room": "ws://" + location.host + "/room/"  // {room_id}
+    "room": "ws://" + location.host + "/ws/"  // {room_id}
 };
 
 var app = angular.module("GameApp", []);

@@ -12,7 +12,7 @@
   {% for g in games %}
   <li>
     <div>
-      <a href="{{ url('detail', kwargs={'game_id': g.id}) }}">{{ g.label }}</a>
+      <a href="{{ url('napoleon.game.views.detail', kwargs={'game_id': g.id}) }}">{{ g.label }}</a>
     </div>
   </li>
   {% endfor %}

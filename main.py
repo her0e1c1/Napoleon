@@ -16,7 +16,7 @@ if __name__ == "__main__":
     from napoleon.wsgi import application
     wsgi_app = WSGIContainer(application)
     app = Application([
-        (r"/room/(?P<room_id>\d+)", GameHandler),
+        (r"/ws/(?P<room_id>\d+)", GameHandler),
         (r".*", FallbackHandler, {"fallback": wsgi_app}),
     ])
     server = HTTPServer(app)
