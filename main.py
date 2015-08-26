@@ -10,7 +10,7 @@ from tornado.web import FallbackHandler
 from napoleon.handlers.game import GameHandler
 
 
-if __name__ == "__main__":
+def main():
     define("port", type=int, default=80)
     parse_command_line()
     from napoleon.wsgi import application
@@ -23,3 +23,7 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", options.port))
     server.listen(port)
     tornado.ioloop.IOLoop.instance().start()
+
+
+if __name__ == "__main__":
+    main()
