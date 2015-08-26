@@ -92,4 +92,4 @@ def create(request):
     label = request.POST["label"]
     game = models.Room(label=label, user=request.user)
     game.save()
-    return redirect("napoleon.game.views.index")
+    return redirect("napoleon.room.views.index")

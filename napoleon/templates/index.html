@@ -12,14 +12,14 @@
   {% for g in games %}
   <li>
     <div>
-      <a href="{{ url('napoleon.game.views.detail', kwargs={'game_id': g.id}) }}">{{ g.label }}</a>
+      <a href="{{ url('napoleon.room.views.detail', kwargs={'game_id': g.id}) }}">{{ g.label }}</a>
     </div>
   </li>
   {% endfor %}
 </ul>
 
 {% if request.user %}
-   <form id="new_game" class="new_game" action="{{ url('napoleon.game.views.create') }}" method="post">
+   <form id="new_game" class="new_game" action="{{ url('napoleon.room.views.create') }}" method="post">
      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
      <input type="text" name="label">
      <input type="submit">

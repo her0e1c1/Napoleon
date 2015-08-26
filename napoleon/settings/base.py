@@ -36,7 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'debug_toolbar',
     'gunicorn',
-    'napoleon.game',
+    'napoleon.room',
 )
 
 MIDDLEWARE_CLASSES = (
