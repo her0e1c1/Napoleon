@@ -30,10 +30,11 @@ if __name__ == "__main__":
     parse_command_line()
     wsgi_app = WSGIContainer(django.core.handlers.wsgi.WSGIHandler())
     app = Application([
-        (r"/room/(?P<room_id>\d+)", GameHandler),
-        (r".*", FallbackHandler, {"fallback": wsgi_app}),
+        # (r"/room/(?P<room_id>\d+)", GameHandler),
+        # (r".*", FallbackHandler, {"fallback": wsgi_app}),
     ], **settings)
     server = HTTPServer(app)
-    server.listen(options.port)
+    port = int(os.environ.get("PORT", options.port))
+    server.listen(port)
     # tornado.ioloop.IOLoop.current().start()
     tornado.ioloop.IOLoop.instance().start()
