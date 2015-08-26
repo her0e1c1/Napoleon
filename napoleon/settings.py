@@ -58,7 +58,7 @@ ROOT_URLCONF = 'napoleon.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.jinja2.Jinja2',
-        'DIRS': [os.path.join(BASE_DIR, 'templates/')],
+        'DIRS': [os.path.join(BASE_DIR, 'napoleon/templates/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'environment': 'napoleon.jinja2.environment',
@@ -113,7 +113,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, "napoleon/static/"),
 ]
 
 SESSION_COOKIE_HTTPONLY = False
