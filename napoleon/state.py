@@ -1,5 +1,7 @@
 import redis
 import card
+import logging
+logger = logging.getLogger(__name__)
 
 
 class InvalidSession(Exception):
@@ -55,6 +57,7 @@ def get_key(key, room_id, user_id=None):
         "adjutant": "{room_id}_adjutant",  # hash
         "unused": "{room_id}_unused",  # list
         "face": "{room_id}_{user_id}_face",  # value
+        "player_cards": "{room_id}_player_cards",  # hash (int: int)
         "waiting_next_turn": "{room_id}_waiting_next_turn",  # bool
 
         # private
@@ -70,6 +73,12 @@ def get_key(key, room_id, user_id=None):
 def decode(s, type=None):
     if s is None:
         return None
+
+    if isinstance(s, (dict,)):
+        if type:
+            return {k.decode("utf-8"): type(v.decode("utf-8")) for k, v in s.items()}
+        else:
+            return {k.decode("utf-8"): v.decode("utf-8") for k, v in s.items()}
 
     if isinstance(s, (list, set)):
         if type:
@@ -226,6 +235,22 @@ class PrivateGameState(object):
                 raise InvalidSession
 
     @property
+    def player_cards(self):
+        d = decode(self.conn.hgetall(self.key("player_cards")), type=int)
+        if d:
+            return {k: card.from_int(v) for k, v in d.items()}
+        else:
+            return {}
+
+    @player_cards.setter
+    def player_cards(self, value):
+        self.conn.hset(self.key("player_cards"), self.user_id, value)
+
+    @player_cards.deleter
+    def player_cards(self):
+        self.conn.delete(self.key("player_cards"))
+
+    @property
     def player_ids(self):
         return self._get_list("player_ids", type=int)
 
@@ -251,23 +276,29 @@ class PrivateGameState(object):
 
         if 0 <= len(board) < len(pids):
             # board is not full
-            self.waiting_next_turn = False
             if 0 <= index < len(pids) - 1:
                 self.turn = pids[index + 1]
             else:
                 self.turn = pids[0]
         else:
-            if self.waiting_next_turn:
-                winner = card.winner(board, pids, self.turn, self.declaration.suit)
-                faces = [c for c in self.board if c.is_faced]
-                self.turn = winner
-                key = get_key("face", self.room_id, winner)
-                new = len(faces) + decode(self.conn.get(key), type=int)
-                self.conn.set(key, new)
-                del self.board
-                self.waiting_next_turn = False
-            else:
-                self.waiting_next_turn = True
+            winner = card.winner(board, self.player_cards, self.declaration.suit)
+            logger.debug(
+"""
+winner={winner}
+board={self.board}
+cards={self.player_cards}
+""".format(**locals()))
+            self.turn = winner
+            self.waiting_next_turn = True
+
+    def next_round(self):
+        faces = [c for c in self.board if c.is_faced]
+        key = get_key("face", self.room_id, self.turn)
+        new = len(faces) + decode(self.conn.get(key), type=int)
+        self.conn.set(key, new)
+        del self.board
+        del self.player_cards
+        self.waiting_next_turn = False
 
     @property
     def rest(self):
@@ -288,6 +319,7 @@ class PrivateGameState(object):
 
         self.conn.lrem(self.key("hand"), selected, 0)
         self.board = selected
+        self.player_cards = selected
 
     @property
     def unused(self):
@@ -304,6 +336,7 @@ class PrivateGameState(object):
 
     def discard(self, unused, selected):
         if self.user_id != self.napoleon:
+            logger.debug("{} is not in turn".format(self.user_id))
             return
 
         hand = self.hand + self.rest
@@ -313,7 +346,6 @@ class PrivateGameState(object):
             except ValueError:  # malice request
                 return
 
-        self.board = selected
         self.hand = hand
         self.unused = unused
 
@@ -356,7 +388,9 @@ class PrivateGameState(object):
     @property
     def possible_cards(self):
         d = self.declaration
-        if d:
+        if len(self.board) == len(self.player_ids):
+            return self.hand
+        elif d:
             return card.possible_cards(self.board, self.hand, d.suit)
         else:
             return []
