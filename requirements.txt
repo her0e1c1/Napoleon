@@ -10,7 +10,6 @@ dj-database-url
 dj-static
 django-debug-toolbar
 gunicorn
-django-jinja
 PyYAML
 tornado
 redis
