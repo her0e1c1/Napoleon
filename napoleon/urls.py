@@ -17,6 +17,6 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^games/', include('game.urls')),
+    url(r'^games/', include('napoleon.game.urls')),
     url(r'^admin/', include(admin.site.urls)),
 ]

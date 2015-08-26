@@ -8,8 +8,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 
 from . import models
-import card
-import state
+from napoleon import card
+from napoleon import state
 
 
 def index(request):

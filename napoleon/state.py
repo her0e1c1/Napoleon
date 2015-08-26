@@ -1,6 +1,6 @@
-import redis
-import card
 import logging
+import redis
+from napoleon import card
 logger = logging.getLogger(__name__)
 
 
