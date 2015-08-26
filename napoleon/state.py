@@ -69,7 +69,6 @@ def get_key(key, room_id, user_id=None):
     return fmt[key].format(**locals())
 
 
-# TODO: use sider
 def decode(s, type=None):
     if s is None:
         return None
@@ -94,9 +93,6 @@ def decode(s, type=None):
 class PrivateGameState(object):
 
     def __init__(self, room_id, user_id=None, session_id=None, **kw):
-        # must create user_id by django before
-        # or request by a malice session
-        # raise InvalidSession("Session is invalid")
 
         self.conn = get_connection()
         self.room_id = room_id
@@ -132,8 +128,8 @@ class PrivateGameState(object):
         n = 0
         for pid in self.player_ids:
             key = get_key("hand", self.room_id, pid)
-            hand = self._get_list(key)
-            n += len(hand)
+            ints = decode(self.conn.lrange(key, 0, -1), type=int)
+            n += len(ints)
         return n == 0
 
     @property
@@ -147,6 +143,35 @@ class PrivateGameState(object):
     @property
     def are_all_players_passed(self):
         return len(self.pass_ids) == len(self.player_ids)
+
+    @property
+    def did_napoleon_win(self):
+        if not self.declaration:
+            return False
+        n, _ = self._each_side_face_cards
+        return n >= self.declaration.pip
+
+    @property
+    def did_napoleon_lose(self):
+        if not self.declaration:
+            return False
+        _, n = self._each_side_face_cards
+        return n > card.NUMBER_OF_FACE_CARDS - self.declaration.pip
+
+    @property
+    def _each_side_face_cards(self):
+        napo = 0
+        allies = 0
+        for pid in self.player_ids:
+            key = get_key("role", self.room_id, pid)
+            role = decode(self.conn.get(key), type=int)
+            key = get_key("face", self.room_id, pid)
+            num = decode(self.conn.get(key), type=int)
+            if role == 1:  # napo
+                napo += num
+            else:
+                allies += num
+        return napo, allies
 
     def _get_list(self, key, type=None):
         return decode(self.conn.lrange(self.key(key), 0, -1), type=type)
@@ -293,20 +318,18 @@ class PrivateGameState(object):
                 self.turn = pids[0]
         else:
             winner = card.winner(board, self.player_cards, self.declaration.suit)
-            logger.debug(
-"""
-winner={winner}
-board={self.board}
-cards={self.player_cards}
-""".format(**locals()))
+            cards = self.board
+            if self.phase == "first_round":
+                cards += self.unused
+
+            faces = [c for c in cards if c.is_faced]
+            key = get_key("face", self.room_id, winner)
+            new = len(faces) + decode(self.conn.get(key), type=int)
+            self.conn.set(key, new)
             self.turn = winner
             self.waiting_next_turn = True
 
     def next_round(self):
-        faces = [c for c in self.board if c.is_faced]
-        key = get_key("face", self.room_id, self.turn)
-        new = len(faces) + decode(self.conn.get(key), type=int)
-        self.conn.set(key, new)
         del self.board
         del self.player_cards
         self.waiting_next_turn = False
@@ -326,7 +349,8 @@ cards={self.player_cards}
 
     def select(self, selected):
         if self.turn != self.user_id:
-            return  # invalid request
+            logger.debug("{} is not in turn".format(self.user_id))
+            return
 
         self.conn.lrem(self.key("hand"), selected, 0)
         self.board = selected
@@ -335,7 +359,7 @@ cards={self.player_cards}
     @property
     def unused(self):
         if self.phase == "first_round":
-            ints = self._get_list("rest", type=int)
+            ints = self._get_list("unused", type=int)
             return [c for c in card.from_list(ints) if c.is_faced]
         else:
             return []
@@ -345,7 +369,7 @@ cards={self.player_cards}
         l = sorted(int(i) for i in value)
         self._set_list("unused", l)
 
-    def discard(self, unused, selected):
+    def discard(self, unused):
         if self.user_id != self.napoleon:
             logger.debug("{} is not in turn".format(self.user_id))
             return
@@ -401,7 +425,7 @@ cards={self.player_cards}
         f = {}
         for pid in self.player_ids:
             key = get_key("face", self.room_id, pid)
-            f[pid] = self._get(key, type=int)
+            f[pid] = decode(self.conn.get(key), type=int)
         return f
 
     @property
