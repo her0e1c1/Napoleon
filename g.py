@@ -8,8 +8,8 @@ import tornado.websocket
 from tornado.websocket import WebSocketHandler
 import tornado.escape
 from collections import defaultdict
-import card
-import state
+from napoleon import card
+from napoleon import state
 
 args = sys.argv
 tornado.options.parse_command_line(args)
