@@ -7,17 +7,11 @@ from tornado.wsgi import WSGIContainer
 from tornado.web import Application
 from tornado.web import FallbackHandler
 
-import django
-import django.core.handlers.wsgi
-
 from napoleon.handlers.game import GameHandler
-
-define("port", type=int, default=80)
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "napoleon.settings")
-django.setup()
 
 
 if __name__ == "__main__":
+    define("port", type=int, default=80)
     parse_command_line()
     from napoleon.wsgi import application
     wsgi_app = WSGIContainer(application)
