@@ -1,4 +1,6 @@
+import os
 import logging
+from urllib.parse import urlparse
 import redis
 from napoleon import card
 logger = logging.getLogger(__name__)
@@ -9,7 +11,12 @@ class InvalidSession(Exception):
 
 
 def get_connection(host="localhost", port=6379, db=0):
-    return redis.Redis(host, port=port, db=db)
+    uri = os.environ.get("REDISTOGO_URL")
+    if not uri:
+        return redis.Redis(host, port=port, db=db)
+    else:
+        o = urlparse(uri)
+        return redis.Redis(o.hostname, port=o.port, db=db)
 
 
 def get_user_id(room_id, session_id):
