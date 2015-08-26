@@ -3,6 +3,10 @@
  Napoleon
 ==========
 
+Introduction
+============
+Napoleon is a game.
+You can play Napoleon at https://napolo.herokuapp.com
 
 Install
 =======
