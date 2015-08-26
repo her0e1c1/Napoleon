@@ -79,8 +79,8 @@
    宣言
   <button ng-if="!game.is_napoleon" ng-disabled="game.is_passed" ng-click="game.pass()">パス</button>
 
-  <select ng-model="game.declaration" ng-disabled="game.is_napoleon" ng-change="game.declare()">
-    <option ng-repeat="d in game.declarations" ng-if="(!game.declaration || d.value > game.declaration)" value="[[ d.value ]]">[[ d.str ]]</option>
+  <select ng-model="game.declaration" ng-disabled="game.is_napoleon || game.is_passed" ng-change="game.declare()">
+    <option ng-repeat="d in game.declarations" ng-if="d.value > game.declaration.value" value="[[ d.value ]]">[[ d.str ]]</option>
   </select>
   </div>
 
