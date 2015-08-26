@@ -16,18 +16,12 @@ app.controller("GameController", ["$scope", function($scope){
         $.get("/games/json/state/" + self.game_id, {}, function(data){
             $.extend(self, data);
 
+            self.impossible_card = null;
             self.is_my_turn = self.user_id == data.turn;
             self.is_napoleon = self.user_id == data.napoleon;
             self.is_passed = elem(self.pass_ids, self.user_id);
 
             $scope.$apply();
-
-            if (data.waiting_next_turn){
-                var time = 1 * 1000;
-                $("body").delay(time).queue(function(){
-                    self.next_turn();
-                });
-            }
         });
     };
 
@@ -44,10 +38,6 @@ app.controller("GameController", ["$scope", function($scope){
     this.send = function (json){
         json["session_id"] = sid;
         wsGame.send(JSON.stringify(json));
-    };
-
-    self.next_turn = function(){
-        self.send({"next_turn": true});
     };
 
     this.pass = function(){
@@ -84,7 +74,7 @@ app.controller("GameController", ["$scope", function($scope){
         if (!self.is_my_turn)
             return;
         else if (!elem(self.possible_cards, card.value)){
-            alert("You can't select");
+            self.impossible_card = card;
             return;
         }
         self.send({"mode": "select", "selected": card.value});
