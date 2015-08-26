@@ -1,1 +1,1 @@
-web: gunicorn napoleon.napoleon.wsgi
+web: gunicorn napoleon.wsgi
