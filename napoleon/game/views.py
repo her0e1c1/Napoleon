@@ -30,14 +30,6 @@ def login(request):
     return render(request, "index.html", {})
 
 
-# TODO: users in public
-@login_required
-def user(request):
-    # FIXME
-    user = serializers.serialize("json", models.User.objects.filter(pk=request.user.id))
-    return JsonResponse({"user": user})
-
-
 def _get_private_game_state(request, room_id):
     session_id = request.COOKIES["sessionid"]
     return state.PrivateGameState(
@@ -47,30 +39,42 @@ def _get_private_game_state(request, room_id):
     )
 
 
-@require_http_methods(["POST"])
-@login_required
-def join(request, room_id):
-    _get_private_game_state(request, room_id).user_id = request.user.id
-    return JsonResponse({})
-
-
 @require_http_methods(["GET"])
 @login_required
-def private_game_state(request, room_id):
+def game_state(request, room_id):
     st = _get_private_game_state(request, room_id)
     d = st.declaration
+    a = st.adjutant
+    from django.db.models import Q
+    q = Q(id=request.user.id)
+    for p in st.player_ids:
+        q |= Q(id=p)
+    users = models.User.objects.filter(q).all()
+
+    # pcards = card.player_cards(st.board, st.player_ids, st.turn)
     return JsonResponse({
+        "player_cards": {k: v and v.to_json() for k, v in st.player_cards.items()},
+        "player_faces": {k: v for k, v in st.player_faces.items()},
+        "did_napoleon_win": st.did_napoleon_win,
+        "did_napoleon_lose": st.did_napoleon_lose,
+        "users": {u.id: {"name": u.get_username()} for u in users},
+        "phase": st.phase,
+        "is_finished": st.is_finished,
         "is_joined": st.is_joined,
-        "is_started": st.is_started,
-        "is_declared": st.is_declared,
-        "is_first_round": st.is_first_round,
+        "is_appropriate_player_number": st.is_appropriate_player_number,
+        "waiting_next_turn": st.waiting_next_turn,
         "turn": st.turn,
-        "rest": [r.to_json() for r in st.rest],
-        "players": st.player_ids,
+        "board": [c.to_json() for c in st.board],
+        "player_ids": st.player_ids,
         "pass_ids": st.pass_ids,
         "napoleon": st.napoleon,
+        "adjutant": a and a.to_json(),
+        "unused": [c.to_json() for c in st.unused],
+        "declaration": d and d.to_json(),
         "hand": [h.to_json() for h in st.hand],
-        "declaration": d and int(d),
+        "possible_cards": [int(c) for c in st.possible_cards],
+        "role": st.role,
+        "rest": [r.to_json() for r in st.rest],
     })
 
 
@@ -80,6 +84,7 @@ def detail(request, game_id):
     state.reset_session_id_if_changed(game_id, session_id, request.user.id)
     return render(request, "detail.html", {
         "game": game,
+        "deck": [c.to_json() for c in card.deck],
         "declarations": [d.to_json() for d in card.declarations],
     })
 
