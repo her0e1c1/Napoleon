@@ -3,11 +3,14 @@
  Napoleon
 ==========
 
+.. contents::
+
 Introduction
 ============
 
 Napoleon is a card game.
 You can play Napoleon at https://napolo.herokuapp.com if you want.
+
 
 Install
 =======
@@ -21,11 +24,6 @@ FreeBSD::
    # project root
    python manage.py makemigrations game
 
-Django
-======
-run server ::
-
-    python manage.py runserver 0.0.0.0:8001 --noreload --settings=napoleon.settings.local
 
 Heroku
 ======
@@ -62,3 +60,14 @@ Automatical Deploy
 heroku supports this but you also need to configure settings of github.
 
 https://developer.github.com/guides/automating-deployments-to-integrators/
+
+
+Django
+======
+run server ::
+
+    python manage.py runserver 0.0.0.0:8001 --noreload --settings=napoleon.settings.local
+
+so you need to set an environment valiable on heroku ::
+
+    heroku config:set DJANGO_SETTINGS_MODULE=napoleon.settings.production --app napolo
