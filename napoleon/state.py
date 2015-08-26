@@ -126,6 +126,17 @@ class PrivateGameState(object):
             return True
 
     @property
+    def is_finished(self):
+        if self.phase != "rounds":
+            return False
+        n = 0
+        for pid in self.player_ids:
+            key = get_key("hand", self.room_id, pid)
+            hand = self._get_list(key)
+            n += len(hand)
+        return n == 0
+
+    @property
     def is_appropriate_player_number(self):
         return len(self.player_ids) in card.RANGE_OF_PLAYERS
 
@@ -137,7 +148,7 @@ class PrivateGameState(object):
     def are_all_players_passed(self):
         return len(self.pass_ids) == len(self.player_ids)
 
-    def _get_list(self, key, type):
+    def _get_list(self, key, type=None):
         return decode(self.conn.lrange(self.key(key), 0, -1), type=type)
 
     def _set_list(self, key, iterable):
@@ -384,6 +395,14 @@ cards={self.player_cards}
                     role = 2
             key = get_key("role", room_id, pid)
             conn.set(key, role)
+
+    @property
+    def player_faces(self):
+        f = {}
+        for pid in self.player_ids:
+            key = get_key("face", self.room_id, pid)
+            f[pid] = self._get(key, type=int)
+        return f
 
     @property
     def possible_cards(self):
