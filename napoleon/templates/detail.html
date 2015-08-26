@@ -13,10 +13,6 @@
        game.declarations={{ declarations }};
        ">
 
-    <br>first round: [[ game.is_first_round ]]
-    <br>phase: [[ game.phase ]]
-    <br>waiting_next_turn: [[ game.waiting_next_turn ]]
-
     <table id="player_ids">
       <tr>
         <td>宣言</td>
@@ -65,7 +61,7 @@
       <span ng-if="!game.is_unused_careds_selected()">不要なカードを選択してください</span>
       <span ng-if="game.is_unused_careds_selected()">始めに場に出すカードを選択してください</span>
     </div>
-    <div ng-if="game.waiting_next_turn">[[ game.users[game.turn].name ]]の勝ち</div>
+    <div ng-if="game.waiting_next_turn">[[ game.users[game.turn].name ]] [[ game.player_cards[game.turn].str ]]の勝ち</div>
 
     <div id="hand">
       <ul><li ng-repeat="c in game.hand.concat(game.rest) | orderBy:'order_by_suit'">
@@ -80,8 +76,8 @@
   </div>
 
   <div ng-if="game.phase == 'declare'">
-   宣言パス： [[ game.pass_ids ]]
-  <button ng-if="!game.is_napoleon" ng-disabled="game.is_passed" ng-click="game.pass()">宣言パス</button>
+   宣言
+  <button ng-if="!game.is_napoleon" ng-disabled="game.is_passed" ng-click="game.pass()">パス</button>
 
   <select ng-model="game.declaration" ng-disabled="game.is_napoleon" ng-change="game.declare()">
     <option ng-repeat="d in game.declarations" ng-if="(!game.declaration || d.value > game.declaration)" value="[[ d.value ]]">[[ d.str ]]</option>
