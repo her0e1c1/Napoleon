@@ -1,4 +1,3 @@
-from django.core import serializers
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
@@ -6,14 +5,13 @@ from django.template.context_processors import csrf
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, redirect, get_object_or_404
 
-
-from . import models
 from napoleon import card
 from napoleon import state
+from . import models
 
 
 def index(request):
-    games = models.Game.objects.filter(finished=False).all()
+    games = models.Room.objects.filter(finished=False).all()
     ctx = {"games": games}
     ctx.update(csrf(request))
     return render(request, "index.html", ctx)
@@ -79,7 +77,7 @@ def game_state(request, room_id):
 
 
 def detail(request, game_id):
-    game = get_object_or_404(models.Game, pk=game_id)
+    game = get_object_or_404(models.Room, pk=game_id)
     session_id = request.COOKIES["sessionid"]
     state.reset_session_id_if_changed(game_id, session_id, request.user.id)
     return render(request, "detail.html", {
@@ -93,9 +91,6 @@ def detail(request, game_id):
 @login_required
 def create(request):
     label = request.POST["label"]
-    game = models.Game(label=label)
-    # TODO: reduce calling save()
+    game = models.Room(label=label, user=request.user)
     game.save()
-    game.users.add(request.user)
-    game.save()
-    return redirect("game.views.index")
+    return redirect("napoleon.game.views.index")
