@@ -55,6 +55,8 @@ def game_state(request, room_id):
         q |= Q(id=p)
     users = models.User.objects.filter(q).all()
     return JsonResponse({
+        "is_valid_session": st.is_valid_session,
+        "is_player": st.is_player,
         "player_cards": {k: v and v.to_json() for k, v in st.player_cards.items()},
         "player_faces": {k: v for k, v in st.player_faces.items()},
         "did_napoleon_win": st.did_napoleon_win,

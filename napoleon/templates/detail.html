@@ -6,6 +6,11 @@
 
 
 {% macro message() %}
+  <div ng-if="game.is_player && !game.is_valid_session" class="alert alert-danger" role="alert">
+    Your session is invalid<br>
+    You probably logged out or logged in on another browser,
+    so you need to create a new room if you want to play.
+  </div>
   <div ng-if="game.is_error" class="alert alert-danger" role="alert">
     Connection Error<br>
     Please tell an administrator <a href="{{ url('napoleon.contact.views.index') }}">here</a>

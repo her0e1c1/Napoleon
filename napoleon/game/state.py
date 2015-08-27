@@ -118,6 +118,20 @@ class PrivateGameState(object):
         return decode(s, type)
 
     @property
+    def is_valid_session(self):
+        key = get_key("map", self.room_id)
+        user_dict = decode(self.conn.hgetall(key))
+        sid = user_dict.get(str(self.user_id))
+        if sid and sid == self.session_id:
+            return True
+        else:
+            return False
+
+    @property
+    def is_player(self):
+        return self.user_id in self.player_ids
+
+    @property
     def is_napoleon(self):
         return self.napoleon == self.user_id
 
