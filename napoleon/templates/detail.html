@@ -27,7 +27,7 @@
       ナポレオンがカードの交換中...
     </div>
   </div>
-  <div ng-if="game.waiting_next_turn" ng-class="{alert alert-success: game.is_my_turn, alert alert-danger: !game.is_my_turn}">
+  <div ng-if="game.waiting_next_turn" ng-class="{'alert alert-success': game.is_my_turn, 'alert alert-danger': !game.is_my_turn}">
     [[ game.users[game.turn].name ]] [[ game.player_cards[game.turn].str ]] won
   </div>
   <div ng-if="(game.phase == 'first_round' || game.phase == 'rounds') && game.is_my_turn"  class="alert alert-info" role="alert">It's your turn</div>
