@@ -1,3 +1,4 @@
+{% import 'common.html' as cm %}
 <!DOCTYPE html>
 <html lang="ja">
   <head>
@@ -72,7 +73,7 @@
       <div class="content">
         {% block content %}{% endblock %}
         <footer>
-          <p>&copy; NAPOLO</p>
+          {% block footer %}{{ cm.copy_right() }}{% endblock %}
         </footer>
       </div>
   </body>
