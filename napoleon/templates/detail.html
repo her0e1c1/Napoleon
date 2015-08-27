@@ -89,14 +89,13 @@
         <tr id="player">
           <th>Players</th>
           <td ng-repeat="p in game.player_ids track by $index" ng-class="{active: p == game.turn}">
+            <span ng-if="p == game.user_id" class="glyphicon glyphicon-star"></span>
             <strong class="text-info">
               [[ game.users[p].name ]]
               <span ng-if="game.player_faces[p] !== null">([[ game.player_faces[p] ]])</span>
             </strong>
-            {# <span ng-if="p == game.napoleon" class="glyphicon glyphicon-star"></span> #}
             <span ng-if="p == game.napoleon" class="label label-info">N</span>
-            <span ng-if="game.phase == 'declare' && game.pass_ids.indexOf(p) >= 0" class="label">PASS</span>
-            {# <span ng-class="{text-info: p == game.user_id}">  #}
+            <span ng-if="game.phase == 'declare' && game.pass_ids.indexOf(p) >= 0" class="label label-default">PASS</span>
           </td>
         </tr>
         <tr>
