@@ -1,5 +1,5 @@
 var urls = {
-    "state": "/json/state/",  // {room_id}
+    "state": "/state/",  // {room_id}
     "room": "ws://" + location.host + "/ws/"  // {room_id}
 };
 
