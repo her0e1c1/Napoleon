@@ -275,8 +275,9 @@ def possible_cards(board, hand, trump_suit):
         return hand
 
     lead = board[-1]
-    if lead == CLUB3 in hand:
-        return list(Joker)
+    jokers = [j for j in Joker if j in hand]
+    if lead == CLUB3 and jokers:
+        return jokers
 
     cs = []
     for h in hand:
