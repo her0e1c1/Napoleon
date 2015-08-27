@@ -101,3 +101,13 @@ def create(request):
     game = models.Room(label=label, user=request.user)
     game.save()
     return redirect("napoleon.room.views.index")
+
+
+@login_required
+@require_http_methods(["POST"])
+def reset(request, room_id):
+    uid = request.user.id
+    sid = request.COOKIES["sessionid"]
+    state.del_user_id(room_id=room_id, session_id=None, user_id=uid, force=True)
+    state.set_user_id(room_id, session_id=sid, user_id=uid)
+    return redirect("napoleon.room.views.detail", game_id=room_id)

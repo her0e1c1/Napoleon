@@ -10,6 +10,12 @@
     Your session is invalid<br>
     You probably logged out or logged in on another browser,
     so you need to create a new room if you want to play.
+    <br>
+    <form action="{{ url('napoleon.room.views.reset', kwargs={'room_id': game.id}) }}" method="post">
+      {{ csrf_input }}
+      Or you can reset your session on this room.
+      <input type="submit" value="reset">
+    </form>
   </div>
   <div ng-if="game.is_error" class="alert alert-danger" role="alert">
     Connection Error<br>

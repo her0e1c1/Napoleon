@@ -34,8 +34,8 @@ def set_user_id(room_id, session_id, user_id):
     conn.hset(key, user_id, session_id)
 
 
-def del_user_id(room_id, session_id, user_id):
-    if get_user_id(room_id, session_id) == user_id:
+def del_user_id(room_id, session_id, user_id, force=False):
+    if force or get_user_id(room_id, session_id) == user_id:
         conn = get_connection()
         key = get_key("map", room_id)
         conn.hdel(key, user_id)

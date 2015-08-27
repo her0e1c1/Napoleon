@@ -16,5 +16,6 @@ urlpatterns = [
         success_url="/",
     ), name="signup"),
     url(r'^room/(?P<game_id>\d+)$', views.detail),
+    url(r'^room/(?P<room_id>\d+)/reset$', views.reset),
     url(r'^state/(?P<room_id>\d+)$', views.game_state),
 ]
