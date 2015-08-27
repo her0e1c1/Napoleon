@@ -46,73 +46,16 @@ body{
 .wrap{
 	width:100%;
 }
-
-#cost_total li{
-    display: inline-block;
-}
-
-article.underline{
-	margin:0;
-    padding:0;
+article{
+	font-size:14px;
 	color:#565656;
-    position: relative;
-    
 }
-
-.underline .value{
-    position: absolute;
-    right: 15%;
+article,
+article.underline{
+	padding:20px 0;
+	margin-bottom:0;
 }
-
-.underline .surplus {
-    color: blue;
-}
-
-article.underline:hover{
-    opacity: 0.5;
-}
-
-article.underline ul {
-    padding: 0 0 0 3%;
-    margin: 2px 0;
-}
-
-article.underline li {
-    display: inline-block;
-    list-style: none;
-    font-size: 20px;
-}
-
-article.underline li.last {
-    position: absolute;
-    right: 3%;
-    top: 25%;
-}
-
-article li.category {
-    width: 15%;
-    text-align: center;
-    background: linear-gradient(#f9fcf7, #f5f9f0);
-	border-radius:3px;
-	box-shadow:0 0 3px #ccc;
-}
-
-article.underline li.tag {
-	padding:0 5px;
-	background:#ff7c67;
-	color:#333;
-	border-radius:.3em;
-	margin:0 10px 0 0;
-    font-size: 25px;
-	line-height:25px;
-}
-
-article.underline ul li span {
-    display: block;
-}
-
 .underline:last-child{border-bottom:none;}
-
 article img{
 	margin:10px 0;
 	padding:5px;
@@ -217,7 +160,7 @@ ul, ol{
 	padding-left: 40px;	
 }
 ul{
-	list-style-type: none;
+	list-style-type: disc;
 }
 ol{
 	list-style-type: decimal;
@@ -323,7 +266,7 @@ footer p{
 }
 .options li{
 	float:left;
-	background:url('../img/icons.png') no-repeat;
+	background:url('images/options.png') no-repeat;
 	width:60px;
 	height:60px;
 	display:inline-block;
@@ -553,7 +496,6 @@ background: linear-gradient(to bottom,  #ff664d 0%,#fc492d 100%); /* W3C */
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff664d', endColorstr='#fc492d',GradientType=0 ); /* IE6-9 */
 
 }
-
 /*
 	Author Details
 	==============
