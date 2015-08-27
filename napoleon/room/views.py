@@ -17,15 +17,27 @@ def index(request):
     return render(request, "index.html", ctx)
 
 
+def signin(request):
+    pass
+
+
+@require_http_methods(["POST"])
 def login(request):
     from django.contrib.auth import login
-    if request.method == 'POST':
-        username = request.POST["username"]
-        password = request.POST["password"]
-        user = authenticate(username=username, password=password)
-        if user and user.is_active:
-            login(request, user)
-    return render(request, "index.html", {})
+    username = request.POST["username"]
+    password = request.POST["password"]
+    user = authenticate(username=username, password=password)
+    if user and user.is_active:
+        login(request, user)
+    return redirect("napoleon.room.views.index")
+
+
+@require_http_methods(["POST"])
+@login_required
+def logout(request):
+    from django.contrib.auth import logout
+    logout(request)
+    return redirect("napoleon.room.views.index")
 
 
 def _get_private_game_state(request, room_id):

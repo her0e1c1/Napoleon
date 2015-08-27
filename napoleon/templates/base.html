@@ -24,11 +24,44 @@
         <div class="col-md-8 col-xs-6"><h1><a href="/">NAPOLEON</a></h1></div>
         <div class="col-md-4 col-xs-6">
           <ul class="list-inline">
-            <li><a class="btn btn-primary">新規登録</a></li>
-            <li><a class="btn btn-default">ログイン</a></li>
+            {% if request.user. is_authenticated() %}
+              <form action="{{ url('napoleon.room.views.logout') }}" method="post">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <li><button type="submit" class="btn btn-default">Logout</button></li>
+              </form>
+            {% else %}
+              <li><a class="btn btn-primary">Signin</a></li>
+              <li><a class="btn btn-default" data-toggle="modal" data-target="#login">Login</a></li>
+            {% endif %}
           </ul>
         </div>
       </header>
+
+      <div class="modal fade" id="login" role="dialog" aria-labelledby="loginModalLabel">
+        <form action="{{ url('napoleon.room.views.login') }}" method="post">
+          <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+          <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="loginModalLabel">Login To Napoleon</h4>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <input type="text" name="username" class="form-control" id="username" placeholder="Name">
+                </div> 
+                <div class="form-group">
+                  <input type="password" name="password" class="form-control" id="password" placeholder="Password">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <!-- <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> -->
+                <button type="submit" class="btn btn-primary">Login</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
 
       <div class="content">
         {% block content %}{% endblock %}
