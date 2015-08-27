@@ -118,6 +118,10 @@ class PrivateGameState(object):
         return decode(s, type)
 
     @property
+    def is_napoleon(self):
+        return self.napoleon == self.user_id
+
+    @property
     def is_joined(self):
         try:
             get_user_id(self.room_id, self.session_id)
@@ -243,7 +247,11 @@ class PrivateGameState(object):
 
     @property
     def role(self):
-        return self._get("role")
+        return self._get("role", type=int)
+
+    @role.setter
+    def role(self, value):
+        return self._set("role", value)
 
     @property
     def adjutant(self):
@@ -365,6 +373,13 @@ class PrivateGameState(object):
         if self.turn != self.user_id:
             logger.debug("{} is not in turn".format(self.user_id))
             return
+
+        board = self.board
+        if not board and card.from_int(selected) == card.CLUB10 and not self.is_napoleon:
+            if self.role == 1:
+                self.role = 2
+            else:
+                self.role = 1
 
         self.conn.lrem(self.key("hand"), selected, 0)
         self.board = selected

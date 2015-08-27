@@ -95,7 +95,7 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
             pgs.phase = "discard"
         elif pgs.phase == "discard":
             pgs.discard(json["unused"])
-            pgs.select(json["selected"])
+            pgs.select(int(json["selected"]))
             pgs.next()
             pgs.phase = "first_round"
         elif pgs.phase == "first_round":
