@@ -5,7 +5,7 @@ from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, redirect, get_object_or_404
 
 from napoleon import card
-from napoleon import state
+from napoleon.game import state
 from . import models
 
 

@@ -7,7 +7,7 @@ from tornado.wsgi import WSGIContainer
 from tornado.web import Application
 from tornado.web import FallbackHandler
 
-from napoleon.handlers.game import GameHandler
+from napoleon.game.handler import GameHandler
 
 
 def main():

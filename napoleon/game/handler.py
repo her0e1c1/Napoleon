@@ -9,7 +9,7 @@ from tornado.websocket import WebSocketHandler
 import tornado.escape
 from collections import defaultdict
 from napoleon import card
-from napoleon import state
+from . import state
 
 logger = logging.getLogger(__name__)
 
