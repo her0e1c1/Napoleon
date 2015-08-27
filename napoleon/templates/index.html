@@ -20,7 +20,11 @@
         <tr>
           <td>{{ g.id }}</td>
           <td>
-            <a href="{{ url('napoleon.room.views.detail', kwargs={'game_id': g.id}) }}">{{ g.label }}</a>
+            {% if request.user.is_authenticated() %}
+              <a href="{{ url('napoleon.room.views.detail', kwargs={'game_id': g.id}) }}">{{ g.label }}</a>
+            {% else %}
+              {{ g.label }}
+            {% endif %}
           </td>
         </tr>
       {% endfor %}
