@@ -322,7 +322,12 @@ class PrivateGameState(object):
             else:
                 self.turn = pids[0]
         else:
-            winner = card.winner(board, self.player_cards, self.declaration.suit)
+            winner = card.winner(
+                board=board,
+                player_cards=self.player_cards,
+                trump_suit=self.declaration.suit,
+                is_first_round=self.phase == "first_round",
+            )
             cards = self.board
             if self.phase == "first_round":
                 cards += self.unused

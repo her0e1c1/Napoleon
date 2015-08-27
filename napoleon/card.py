@@ -242,26 +242,28 @@ def decide(cards, trump_suit, is_first_round=False, rule=None):
         return cjack
 
     # same two
-    if is_first_round:  # ignore first round
+    if is_first_round:
         two = Plain(2, lead.suit)
         if two in cards and all([c.suit == lead.suit for c in cards]):
             return two
 
     trumps = [c for c in cards if c.suit == trump_suit]
     if trumps:
-        return max(trumps)
-    # return max(trumps, key=lambda c: c.strong(trump_suit))
+        ace = Plain(1, trump_suit)
+        return ace if ace in trumps else max(trumps)
 
-    return max([c for c in cards if c.suit == lead.suit])
+    cards = [c for c in cards if c.suit == lead.suit]
+    ace = Plain(1, lead.suit)
+    return ace if ace in trumps else max(cards)
 
 
-def winner(board, player_cards, trump_suit, rule=None):
+def winner(board, player_cards, trump_suit, is_first_round=False, rule=None):
     """
     Decide which player wins at one round.
     :return: user id
     """
     pc = player_cards
-    strongest = decide(board, trump_suit, rule)
+    strongest = decide(board, trump_suit, is_first_round, rule)
     return {int(v): k for k, v in pc.items()}[int(strongest)]
 
 
