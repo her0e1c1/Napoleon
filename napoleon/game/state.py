@@ -154,7 +154,7 @@ class PrivateGameState(object):
         if not self.declaration:
             return False
         n, _ = self._each_side_face_cards
-        if n == card.NUMBER_OF_CARDS:
+        if n == card.NUMBER_OF_FACE_CARDS:
             return False
         return n >= self.declaration.pip
 
