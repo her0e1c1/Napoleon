@@ -441,6 +441,7 @@ class PrivateGameState(object):
     @property
     def possible_cards(self):
         d = self.declaration
+        # wait for the next turn before playing a lead card
         if len(self.board) == len(self.player_ids):
             return self.hand
         elif d:
