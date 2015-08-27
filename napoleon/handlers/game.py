@@ -91,7 +91,7 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
                 pgs.phase = None
         elif mode == "adjutant":
             pgs.adjutant = json["adjutant"]
-            pgs.set_role(json["adjutant"])
+            pgs.set_role(int(json["adjutant"]))
             pgs.phase = "discard"
         elif pgs.phase == "discard":
             pgs.discard(json["unused"])
