@@ -81,21 +81,14 @@
        game.declarations={{ declarations }};
        ">
 
-  <table class="table table-bordered row">
-    <colgroup>
-      <col class="col-xs-1">
-      <col class="col-xs-1">
-    </colgroup>
-
-    {# <TR CLASS="COL-XS-1"> #}
+  <table class="table table-condensed">
     <tr>
-      <th class="">Declaration</th>
-      <td class="">[[ game.declaration.str ]]</td>
+      <th class="col-xs-1 info">Declaration</th>
+      <td>[[ game.declaration.str ]]</td>
     </tr>
     <tr>
-    {# <tr class="col-xs-1"> #}
-      <th class="">Adjutant</th>
-      <td class="">[[ game.adjutant.str ]]</td>
+      <th class="col-xs-1 info">Adjutant</th>
+      <td>[[ game.adjutant.str ]]</td>
     </tr>
   </table>
 
