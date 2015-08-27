@@ -15,10 +15,6 @@ def index(request):
     return render(request, "index.html", ctx)
 
 
-# def signup(request):
-#     pass
-
-
 @require_http_methods(["POST"])
 def login(request):
     from django.contrib.auth import login

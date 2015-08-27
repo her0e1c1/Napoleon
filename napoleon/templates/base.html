@@ -25,12 +25,15 @@
         <div class="col-md-4 col-xs-6">
           <ul class="list-inline">
             {% if request.user. is_authenticated() %}
-              <form action="{{ url('napoleon.room.views.logout') }}" method="post">
-                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                <li><button type="submit" class="btn btn-default">Logout</button></li>
-              </form>
+              <li>Hello {{ request.user.get_username() }}</li>
+              <li>
+                <form action="{{ url('napoleon.room.views.logout') }}" method="post">
+                  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                  <button type="submit" class="btn btn-default">Logout</button>
+                </form>
+              </li>
             {% else %}
-              <li><a class="btn btn-primary">Signin</a></li>
+              <li><a href="{{ url('signup') }}" class="btn btn-primary">Signup</a></li>
               <li><a class="btn btn-default" data-toggle="modal" data-target="#login">Login</a></li>
             {% endif %}
           </ul>
@@ -39,7 +42,7 @@
 
       <div class="modal fade" id="login" role="dialog" aria-labelledby="loginModalLabel">
         <form action="{{ url('napoleon.room.views.login') }}" method="post">
-          <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+          {{ csrf_input }}
           <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
               <div class="modal-header">
@@ -49,7 +52,7 @@
               <div class="modal-body">
                 <div class="form-group">
                   <input type="text" name="username" class="form-control" id="username" placeholder="Name">
-                </div> 
+                </div>
                 <div class="form-group">
                   <input type="password" name="password" class="form-control" id="password" placeholder="Password">
                 </div>

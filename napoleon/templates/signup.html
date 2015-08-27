@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+  <div class="row">
+    <div class="col-xs-6 col-xs-offset-3">
+    <h2>Signup</h2>
+    <form action="{{ url('signup') }}" method="post">
+        {{ csrf_input }}
+      <div class="form-group {% if form.errors.username %}has-error{% endif %}">
+        {% if form.errors.username %}
+          <label id="username" class="control-label">{{ form.errors.username }}</label>
+        {% endif %}
+        <input type="text" name="username" class="form-control" id="username" placeholder="Name">
+      </div>
+      <div class="form-group">
+        <input type="password1" name="password1" class="form-control" id="password" placeholder="Password">
+      </div>
+      <div class="form-group">
+        <input type="password2" name="password2" class="form-control" id="password" placeholder="Confirm">
+      </div>
+        <input type="submit" class="btn btn-primary" value="Submit">
+    </form>
+    </div>
+  </div>
+{% endblock %}
