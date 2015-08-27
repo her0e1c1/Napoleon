@@ -8,15 +8,18 @@
 
 <div class="icon-add"></div>
 
-<ul>
-  {% for g in games %}
-  <li>
-    <div>
-      <a href="{{ url('napoleon.room.views.detail', kwargs={'game_id': g.id}) }}">{{ g.label }}</a>
-    </div>
-  </li>
-  {% endfor %}
-</ul>
+<div id="room_list">
+  <h2>ROOM LIST</h2>
+  <ul>
+    {% for g in games %}
+    <li>
+      <div>
+        <a href="{{ url('napoleon.room.views.detail', kwargs={'game_id': g.id}) }}">{{ g.label }}</a>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
 
 {% if request.user %}
    <form id="new_game" class="new_game" action="{{ url('napoleon.room.views.create') }}" method="post">
