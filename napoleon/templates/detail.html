@@ -40,13 +40,6 @@
 
 
 {% macro declaration() %}
-
-  <div ng-if="!game.phase">
-    <button ng-if="game.is_joined" ng-click="game.quit()" class="btn btn-default">Leave</button>
-    <button ng-if="!game.is_joined" ng-click="game.join()" class="btn btn-default">Play</button>
-    <button ng-if="game.is_appropriate_player_number" ng-click="game.start()" class="btn btn-primary">Start</button>
-  </div>
-
   <div ng-if="game.phase == 'declare'">
     <div class="form-inline">
       <div class="form-group">
@@ -63,12 +56,15 @@
   </div>
 
   <div ng-if="game.phase == 'adjutant' && game.is_napoleon">
-    副官
-    <select ng-model="game.adjutant" ng-change="game.determine_adjutant()">
-      <option ng-repeat="d in game.deck" value="[[ d.value ]]">[[ d.str ]]</option>
-    </select>
+    <div class="form-inline">
+      <div class="form-group">
+        <label>Adjutant</label>
+        <select ng-model="game.adjutant" ng-change="game.determine_adjutant()" class="form-control">
+          <option ng-repeat="d in game.deck" value="[[ d.value ]]">[[ d.str ]]</option>
+        </select>
+      </div>
+    </div>
   </div>
-
 {% endmacro %}
 
 
@@ -114,15 +110,14 @@
     </div>
 
     <ul ng-if="game.phase == 'first_round'" class="list-inline">
-      <td>first round face cards</td>
+      <span class="label label-info">Face Cards</span>
       <li ng-repeat="c in game.unused">[[ c.str ]]</li>
     </ul>
 
     <ul ng-if="game.phase == 'discard'" class="list-inline">
-      <td>Selected</td>
-      <li ng-repeat="c in game.unused" ng-click="game.unselect(c)"><button class="btn btn-info">[[ c.str ]]</button></li>
+      <span class="label label-default">Selected</span>
+      <li ng-repeat="c in game.unused" ng-click="game.unselect(c)"><button class="btn btn-default">[[ c.str ]]</button></li>
     </ul>
-
 
     {{ message() }}
 
@@ -133,6 +128,12 @@
           <button ng-click="game.select_or_discard(c)" class="btn btn-default">[[ c.str ]]</button>
       </li></ul>
     </div>
+
+  <div ng-if="!game.phase">
+    <button ng-if="game.is_joined" ng-click="game.quit()" class="btn btn-default">Leave</button>
+    <button ng-if="!game.is_joined" ng-click="game.join()" class="btn btn-default">Play</button>
+    <button ng-if="game.is_appropriate_player_number" ng-click="game.start()" class="btn btn-primary">Start</button>
+  </div>
 
   </div>
 {% endblock %}
