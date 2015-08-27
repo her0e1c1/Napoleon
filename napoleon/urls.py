@@ -18,5 +18,6 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^', include('napoleon.room.urls')),
+    url(r'^contact/', include('napoleon.contact.urls')),
     url(r'^admin/', include(admin.site.urls)),
 ]

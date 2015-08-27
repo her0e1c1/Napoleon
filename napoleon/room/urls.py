@@ -6,7 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.index),
+    url(r'^$', views.index, name="top"),
     url(r'^create$', views.create),
     url(r'^login$', views.login),
     url(r'^logout$', views.logout),

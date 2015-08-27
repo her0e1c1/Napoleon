@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'gunicorn',
     'napoleon.room',
+    'napoleon.contact',
 )
 
 MIDDLEWARE_CLASSES = (

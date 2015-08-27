@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+  <div class="row">
+    <div class="col-xs-6 col-xs-offset-3">
+      <h2>Contact</h2>
+      <p>If you have any questions, feel free contact us</p>
+      <form action="{{ url('napoleon.contact.views.index') }}" method="post">
+        {{ csrf_input }}
+        <div class="form-group">
+          <textarea name="content" class="form-control" id="content" rows="5"></textarea>
+        </div>
+        <input type="submit" class="btn btn-primary" value="Submit">
+      </form>
+    </div>
+  </div>
+{% endblock %}
