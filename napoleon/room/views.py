@@ -1,7 +1,6 @@
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
-from django.template.context_processors import csrf
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -13,12 +12,11 @@ from . import models
 def index(request):
     games = models.Room.objects.filter(finished=False).all()
     ctx = {"games": games}
-    ctx.update(csrf(request))
     return render(request, "index.html", ctx)
 
 
-def signin(request):
-    pass
+# def signup(request):
+#     pass
 
 
 @require_http_methods(["POST"])
