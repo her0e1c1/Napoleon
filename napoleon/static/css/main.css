@@ -1,5 +1,4 @@
 
-
 .icon-add {
     display: inline-block;
     background-image: url(/static/img/icons.png);
@@ -7,4 +6,50 @@
     width: 32px;
     background-position-x: 160px;
     background-position-y: -128px;
+}
+
+#player td span.me {
+    font-weight: bold;
+}
+
+#player_ids td {
+	line-height: normal;
+	margin:1px 10px;
+    text-align: center;
+    font-size: 20px;
+}
+
+#player_ids td span.turn {
+    background: linear-gradient(#ff664d, #fc492d);
+}
+
+
+#hand ul li {
+    display: inline-block;
+    width: 20%;
+    height: 5%:
+	line-height: normal;
+	margin:1px -1px 2px -1px;
+    text-align: center;
+    font-size: 20px;
+}
+
+#hand ul li span {
+    display: block;
+    height: 5%:
+	color:#767676;
+    background: linear-gradient(#f9fcf7, #f5f9f0);
+	border-radius:3px;
+	box-shadow:0 0 3px #ccc;
+}
+
+#hand ul li span:hover {
+    background: linear-gradient(#ff664d, #fc492d);
+}
+
+
+.cost form input {
+    height: 30px;
+    font-size: 20px;
+    padding: 0;
 }
