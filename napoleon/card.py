@@ -6,7 +6,7 @@ def from_int(i):
     for j in Joker:
         if j.value == i:
             return j
-    return Card.from_int(i)
+    return Plain.from_int(i)
 
 
 def from_list(ints):
@@ -14,27 +14,6 @@ def from_list(ints):
     for i in ints:
         ls.append(from_int(i))
     return ls
-
-
-def opposite_suit(suit):
-    if suit == Suit.club:
-        return Suit.spade
-    elif suit == Suit.diamond:
-        return Suit.heart
-    elif suit == Suit.heart:
-        return Suit.diamond
-    elif suit == Suit.spade:
-        return Suit.club
-
-    raise ValueError("No suit")
-
-
-def right_jack(trump_suit):
-    return Card(11, trump_suit)
-
-
-def counter_jack(trump_suit):
-    return Card(11, opposite_suit(trump_suit))
 
 
 class Suit(enum.Enum):
@@ -48,6 +27,27 @@ class Suit(enum.Enum):
 
     def is_black(self):
         return not self.is_red
+
+    @property
+    def opposite(self):
+        if self == Suit.club:
+            return Suit.spade
+        elif self == Suit.diamond:
+            return Suit.heart
+        elif self == Suit.heart:
+            return Suit.diamond
+        elif self == Suit.spade:
+            return Suit.club
+        raise ValueError("No suit")
+
+    @property
+    def right_jack(self):
+        return Plain(11, self)
+
+    @property
+    def counter_jack(self):
+        return Plain(11, self.opposite)
+
 
     def __str__(self):
         if self.value == 1:
@@ -81,7 +81,7 @@ class Mixin(object):
     __repr__ = lambda self: self.__str__()
 
 
-class Card(Mixin):
+class Plain(Mixin):
 
     def __init__(self, pip, suit):
         self.pip = pip
@@ -159,14 +159,14 @@ class Joker(Mixin, enum.Enum):
 
 
 # special cards
-ALMIGHTY = Card(1, Suit.spade)
-QUEEN = Card(12, Suit.heart)
-CLUB10 = Card(10, Suit.club)
-CLUB3 = Card(3, Suit.club)
+ALMIGHTY = Plain(1, Suit.spade)
+QUEEN = Plain(12, Suit.heart)
+CLUB10 = Plain(10, Suit.club)
+CLUB3 = Plain(3, Suit.club)
 
 
 deck = [
-    Card(p, s)
+    Plain(p, s)
     for s in list(Suit)
     for p in range(1, 13 + 1)
 ] + list(Joker)
@@ -199,7 +199,7 @@ def deal(number_of_players=5):
     return hands, rest
 
 
-class Declaration(Card):
+class Declaration(Plain):
 
     @property
     def over(self):
@@ -233,17 +233,17 @@ def decide(cards, trump_suit, is_first_round=False, rule=None):
     elif Joker.red in cards:
         return Joker.red
 
-    rjack = right_jack(trump_suit)
+    rjack = trump_suit.right_jack
     if rjack in cards:
         return rjack
 
-    cjack = counter_jack(trump_suit)
+    cjack = trump_suit.counter_jack
     if cjack in cards:
         return cjack
 
     # same two
     if is_first_round:  # ignore first round
-        two = Card(2, lead.suit)
+        two = Plain(2, lead.suit)
         if two in cards and all([c.suit == lead.suit for c in cards]):
             return two
 
@@ -287,4 +287,4 @@ def possible_cards(board, hand, trump_suit):
 
 
 def always_cards(trump_suit):
-    return list(Joker) + [counter_jack(trump_suit)]
+    return list(Joker) + [trump_suit.counter_jack]

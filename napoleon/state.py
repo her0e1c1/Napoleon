@@ -245,7 +245,7 @@ class PrivateGameState(object):
     def adjutant(self):
         d = self._get("adjutant")
         if d:
-            return card.Card.from_int(int(d))
+            return card.from_int(int(d))
 
     @adjutant.setter
     def adjutant(self, value):
