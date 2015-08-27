@@ -1,4 +1,7 @@
 
+Napoleon
+========
+
 - カード枚数の上限変更
 - 最低宣言数
 - ランダムルール
@@ -11,3 +14,8 @@
 - うらぎり
 - JOKER請求
 - ランキング
+
+
+Bug
+===
+- show a debug tool bar (The toolbar isn’t displayed)
