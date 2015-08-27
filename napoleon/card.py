@@ -242,7 +242,7 @@ def decide(cards, trump_suit, is_first_round=False, rule=None):
         return cjack
 
     # same two
-    if is_first_round:
+    if not is_first_round:
         two = Plain(2, lead.suit)
         if two in cards and all([c.suit == lead.suit for c in cards]):
             return two
