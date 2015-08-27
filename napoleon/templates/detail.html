@@ -27,7 +27,9 @@
       ナポレオンがカードの交換中...
     </div>
   </div>
-  <div ng-if="game.waiting_next_turn">[[ game.users[game.turn].name ]] [[ game.player_cards[game.turn].str ]]の勝ち</div>
+  <div ng-if="game.waiting_next_turn" ng-class="{alert alert-success: game.is_my_turn, alert alert-danger: !game.is_my_turn}">
+    [[ game.users[game.turn].name ]] [[ game.player_cards[game.turn].str ]]の勝ち
+  </div>
   <div ng-if="(game.phase == 'first_round' || game.phase == 'rounds') && game.is_my_turn"  class="alert alert-info" role="alert">あなたの番です</div>
   <p ng-if="game.impossible_card" class="alert alert-warning" role="alert">[[ game.impossible_card.str]]は選べません</p>
   <div ng-if="game.phase == 'finished'">
@@ -88,7 +90,8 @@
           <th>Players</th>
           <td ng-repeat="p in game.player_ids track by $index" ng-class="{active: p == game.turn}">
             <strong class="text-info">
-              [[ game.users[p].name ]] ([[ game.player_faces[p] ]])
+              [[ game.users[p].name ]]
+              <span ng-if="game.player_faces[p] !== null">([[ game.player_faces[p] ]])</span>
             </strong>
             {# <span ng-if="p == game.napoleon" class="glyphicon glyphicon-star"></span> #}
             <span ng-if="p == game.napoleon" class="label label-info">N</span>
