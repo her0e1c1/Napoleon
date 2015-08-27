@@ -30,7 +30,7 @@
   </table>
 </div>
 
-{% if request.user %}
+{% if request.user.is_authenticated() %}
   <h2>A NEW ROOM</h2>
    <form id="new_game" class="form-inline" action="{{ url('napoleon.room.views.create') }}" method="post" class="label-top">
      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
