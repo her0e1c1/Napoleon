@@ -22,7 +22,7 @@ FreeBSD::
    make reinstall clean
 
    # project root
-   python manage.py makemigrations game
+   python manage.py migrate
 
 
 Heroku
@@ -40,6 +40,10 @@ login ::
 
     heroku auth:login --app napolo
 
+info ::
+
+   heroku apps:info --app napolo
+
 log ::
 
     heroku logs --app napolo --tail
@@ -53,6 +57,17 @@ When using django, you need to migrate and create a super user ::
 connect to postgres ::
 
     heroku pg:psql --app napolo
+
+
+Redis
+-----
+
+conect to a remote server on cli ::
+
+    redis-cli -h HOST -p PORT -a PASSWORD
+    # if you need url do the command below
+    heroku config --app napolo
+
 
 Automatical Deploy
 ------------------
