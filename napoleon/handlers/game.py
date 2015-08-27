@@ -11,10 +11,6 @@ from collections import defaultdict
 from napoleon import card
 from napoleon import state
 
-args = sys.argv
-tornado.options.parse_command_line(args)
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -127,6 +123,7 @@ def make_app():
 
 
 if __name__ == "__main__":
+    tornado.options.parse_command_line(sys.args)
     app = make_app()
     app.listen(8888)
     tornado.ioloop.IOLoop.current().start()

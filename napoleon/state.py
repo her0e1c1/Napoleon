@@ -1,6 +1,5 @@
 import os
 import logging
-from urllib.parse import urlparse
 import redis
 from napoleon import card
 logger = logging.getLogger(__name__)
