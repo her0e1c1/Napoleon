@@ -1,4 +1,3 @@
-import sys
 import logging
 
 import tornado.ioloop
@@ -114,16 +113,3 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
                 pgs.phase = "finished"
 
         self.write_on_same_room({"update": True})
-
-
-def make_app():
-    return tornado.web.Application([
-        (r"/room/(?P<room_id>\d+)", GameHandler),
-    ])
-
-
-if __name__ == "__main__":
-    tornado.options.parse_command_line(sys.args)
-    app = make_app()
-    app.listen(8888)
-    tornado.ioloop.IOLoop.current().start()
