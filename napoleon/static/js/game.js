@@ -13,8 +13,8 @@ app.config(function($interpolateProvider) {
 app.controller("GameController", ["$scope", function($scope){
     var wsGame;
     var self = this;
-    var sid = $.cookie("sessionid");
-    self.sid = sid;
+    self.is_error = false;
+    self.is_close = false;
     self.unused = [];
 
     this.update = function(){
@@ -38,10 +38,16 @@ app.controller("GameController", ["$scope", function($scope){
             if (json.update)
                 self.update();  // 本来はAjaxでなくWebSocketで更新すべき
         };
+        wsGame.onerror = function(err){  // when is this called?
+            self.is_error = true;
+        };
+        wsGame.onclose = function(evt){
+            self.is_close = true;
+        };
     });
 
     this.send = function (json){
-        json["session_id"] = sid;
+        json["session_id"] = $.cookie("sessionid");
         wsGame.send(JSON.stringify(json));
     };
 

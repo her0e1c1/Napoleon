@@ -6,6 +6,14 @@
 
 
 {% macro message() %}
+  <div ng-if="game.is_error" class="alert alert-danger" role="alert">
+    Connection Error<br>
+    Please tell an administrator <a href="{{ url('napoleon.contact.views.index') }}">here</a>
+  </div>
+  <div ng-if="game.is_close" class="alert alert-warning" role="alert">
+    Connection Closed<br>
+    Please reload again
+  </div>
   <div ng-if="!game.phase" ng-switch="!game.is_joined">
     <span ng-switch-when="true">Do you want to paly Napoleon?</span>
     <span ng-switch-when="false">Waiting for other players to join ...</span>
