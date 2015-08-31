@@ -13,3 +13,11 @@ ALLOWED_HOSTS = ['*']
 DATABASES['default'] = dj_database_url.config()
 
 STATIC_ROOT = 'staticfiles'
+
+CSRF_COOKIE_SECURE = True
+
+SESSION_COOKIE_SECURE = True
+
+MIDDLEWARE_CLASSES += [
+    'sslify.middleware.SSLifyMiddleware',
+]

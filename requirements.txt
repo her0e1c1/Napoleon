@@ -13,6 +13,7 @@ gunicorn
 PyYAML
 tornado
 redis
+django-sslify>=0.2.0
 
 #static
 #wsgiref
