@@ -1,27 +1,32 @@
 from django.test import TestCase
-import state
+from napoleon.game import state
 
 
 class StateTestCase(TestCase):
 
     def setUp(self):
-        self.pgs = state.PrivateGameState(session_id="test_id", room_id="test_id")
+        rid = sid = uid = self.id = "12345"
+        # rid = sid = uid = self.id = int("12345")
+        state.set_user_id(rid, sid, uid)
+        self.pgs = state.PrivateGameState(session_id=sid, room_id=rid)
 
     def tearDown(self):
         for k in self.pgs.conn.keys("*"):
-            if k.startswith(b"test_id"):
+            if k.startswith(b"12345"):
                 self.pgs.conn.delete(k)
 
     def test_join_and_quit(self):
         pgs = self.pgs
-        user_id = 12345
-        pgs.user_id = user_id
-        assert pgs.conn.hget("test_id_map", "test_id") == b"12345"
-        assert pgs.user_id == user_id
+        rid = uid = int(self.id)
+
+        key = state.get_key("map", rid)
+        assert pgs.conn.hget(key, uid) == b"12345"
+        assert pgs.user_id == uid
+
         pgs.join()
-        assert pgs.conn.zscore("test_id_player_ids", user_id) == 0
-        assert pgs.players == [user_id]
+        key = state.get_key("player_ids", rid)
+        assert pgs.player_ids == [uid]
 
         pgs.quit()
-        assert pgs.conn.zscore("test_id_player_ids", user_id) is None
-        assert pgs.players == []
+        key = state.get_key("player_ids", rid)
+        assert pgs.player_ids == []
