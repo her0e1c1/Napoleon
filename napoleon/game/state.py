@@ -481,3 +481,9 @@ class PrivateGameState(object):
             return card.possible_cards(self.board, self.hand, d.suit)
         else:
             return []
+
+
+class Player(object):
+    def __init__(self, user_id, session_id):
+        self.user_id = user_id
+        self.session_id = session_id
