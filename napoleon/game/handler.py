@@ -62,7 +62,7 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         myself = state.Myself(session_id=json["session_id"], state=s)
 
         if s.waiting_next_turn:
-            s.phase.next_round()
+            p.next_round()
 
         if not s.phase:
             s.start()

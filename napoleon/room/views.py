@@ -50,50 +50,64 @@ def _get_user_state(request, room_id):
     return state.User(user_id=uid, session_id=sid, state=st)
 
 
+def _get_myself(request, room_id):
+    sid = request.COOKIES["sessionid"]
+    st = state.GameState(room_id)
+    try:
+        return state.Myself(session_id=sid, state=st)
+    except:
+        return None
+
+
 @require_http_methods(["GET"])
 @login_required
 def game_state(request, room_id):
-    st = _get_private_game_state(request, room_id)
-    d = st.declaration
-    a = st.adjutant
     from django.db.models import Q
     q = Q(id=request.user.id)
-    for p in st.player_ids:
-        q |= Q(id=p)
+    s = state.GameState(room_id)
+    for p in s.players:
+        q |= Q(id=p.user_id)
     users = models.User.objects.filter(q).all()
-    return JsonResponse({
-        "is_valid_session": st.is_valid_session,
-        "is_player": st.is_player,
-        "player_cards": {k: v and v.to_json() for k, v in st.player_cards.items()},
-        "player_faces": {k: v for k, v in st.player_faces.items()},
-        "did_napoleon_win": st.did_napoleon_win,
-        "did_napoleon_lose": st.did_napoleon_lose,
+    d = s.declaration
+    a = s.adjutant
+    cxt = {
+        # "is_valid_session": st.is_valid_session,
+        # "is_player": st.is_player,
+        "player_cards": {k: v and v.to_json() for k, v in s.player_cards.items()},
+        # "player_faces": {k: v for k, v in st.player_faces.items()},
+        # "did_napoleon_win": st.did_napoleon_win,
+        # "did_napoleon_lose": st.did_napoleon_lose,
         "users": {u.id: {"name": u.get_username()} for u in users},
-        "phase": st.phase,
-        "is_finished": st.is_finished,
-        "is_joined": st.is_joined,
-        "is_appropriate_player_number": st.is_appropriate_player_number,
-        "waiting_next_turn": st.waiting_next_turn,
-        "turn": st.turn,
-        "board": [c.to_json() for c in st.board],
-        "player_ids": st.player_ids,
-        "pass_ids": st.pass_ids,
-        "napoleon": st.napoleon,
+        "phase": s.phase,
+        # "is_finished": st.is_finished,
+        # "is_joined": st.is_joined,
+        "is_appropriate_player_number": s.is_appropriate_player_number,
+        "waiting_next_turn": s.waiting_next_turn,
+        "turn": s.turn.user_id,
+        "board": [c.to_json() for c in s.board],
+        "player_ids": [p.user_id for p in s.players],
+        "pass_ids": [p.user_id for p in s.passed_players],
+        "napoleon": s.napoleon,
         "adjutant": a and a.to_json(),
-        "unused": [c.to_json() for c in st.unused],
+        "unused": [c.to_json() for c in s.unused],
         "declaration": d and d.to_json(),
-        "hand": [h.to_json() for h in st.hand],
-        "possible_cards": [int(c) for c in st.possible_cards],
-        "role": st.role,
-        "rest": [r.to_json() for r in st.rest],
-    })
+        "rest": [r.to_json() for r in s.rest],
+    }
+
+    myself = _get_myself(request, room_id)
+    if myself:
+        cxt.update({
+            "hand": [c.to_json() for c in myself.hand],
+            "role": myself.role and myself.role.value,
+            "possible_cards": [int(c) for c in myself.possible_cards],
+        })
+
+    return JsonResponse(cxt)
 
 
 @login_required
 def detail(request, game_id):
     room = get_object_or_404(models.Room, pk=game_id)
-    session_id = request.COOKIES["sessionid"]
-    state.reset_session_id_if_changed(game_id, session_id, request.user.id)
     return render(request, "detail.html", {
         "game": room,
         "room": room,
