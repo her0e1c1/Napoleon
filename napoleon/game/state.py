@@ -483,7 +483,45 @@ class PrivateGameState(object):
             return []
 
 
-class Player(object):
-    def __init__(self, user_id, session_id):
+class Room(object):
+    def add(self, player):
+        pass
+
+
+class User(object):
+
+    def __init__(self, user_id, session_id, state):
         self.user_id = user_id
         self.session_id = session_id
+        self.state = state
+
+    def join(self):
+        # check duplicated join
+        key = get_key("player_ids", self.state.room_id)
+        self.state.conn.lpush(key, self.user_id)
+        key = get_key("map", self.state.room_id)
+        self.state.conn.hset(key, self.user_id, self.session_id)
+
+    def quit(self, force=False):
+        if force or (get_user_id(self.state.room_id, self.session_id)) == self.user_id:
+            self.state._rem_list("player_ids", self.user_id)
+            key = get_key("map", self.state.room_id)
+            self.state.conn.hdel(key, self.user_id)
+
+    def reset(self):
+        self.quit(force=True)
+        self.join()
+
+
+class Player(object):
+
+    def __init__(self, session_id, state):
+        self.session_id = session_id
+        # self.user_id = user_id
+        self.state = state
+
+    def is_valid_session(self):
+        pass
+
+    def select(self, selected):
+        pass

@@ -57,15 +57,8 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
             return
 
         mode = json.get("mode")
-        if mode == "join":
-            state.set_user_id(self.room_id, json["session_id"], json["user_id"])
-
         pgs = state.PrivateGameState(session_id=json["session_id"], room_id=self.room_id)
-        if mode == "join":
-            pgs.join()
-        elif mode == "quit":
-            pgs.quit()
-        elif not pgs.phase:
+        if not pgs.phase:
             pgs = state.PrivateGameState(room_id=self.room_id)
             players = pgs.player_ids
             number_of_players = len(players)

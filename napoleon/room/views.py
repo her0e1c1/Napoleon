@@ -43,6 +43,13 @@ def _get_private_game_state(request, room_id):
     )
 
 
+def _get_user_state(request, room_id):
+    uid = request.user.id
+    sid = request.COOKIES["sessionid"]
+    st = _get_private_game_state(request, room_id)
+    return state.User(user_id=uid, session_id=sid, state=st)
+
+
 @require_http_methods(["GET"])
 @login_required
 def game_state(request, room_id):
@@ -103,11 +110,23 @@ def create(request):
     return redirect("napoleon.room.views.index")
 
 
+# Ajax better
+@login_required
+@require_http_methods(["POST"])
+def join(request, room_id):
+    _get_user_state(request, room_id).join()
+    return redirect("napoleon.room.views.detail", game_id=room_id)
+
+
+@login_required
+@require_http_methods(["POST"])
+def quit(request, room_id):
+    _get_user_state(request, room_id).quit()
+    return redirect("napoleon.room.views.detail", game_id=room_id)
+
+
 @login_required
 @require_http_methods(["POST"])
 def reset(request, room_id):
-    uid = request.user.id
-    sid = request.COOKIES["sessionid"]
-    state.del_user_id(room_id=room_id, session_id=None, user_id=uid, force=True)
-    state.set_user_id(room_id, session_id=sid, user_id=uid)
+    _get_user_state(request, room_id).reset()
     return redirect("napoleon.room.views.detail", game_id=room_id)
