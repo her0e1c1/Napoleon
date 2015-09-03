@@ -76,12 +76,16 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
             elif s.are_all_players_passed:
                 pgs.phase = None
         elif mode == "adjutant":
-            pgs.adjutant = json["adjutant"]
-            pgs.set_role(int(json["adjutant"]))
+            # check turn
+            myself = state.Myself(session_id=json["session_id"], state=s)
+            myself.decide(card.from_int(int(json["adjutant"])))
+            s.set_role(card.from_int(int(json["adjutant"])))
             pgs.phase = "discard"
         elif pgs.phase == "discard":
-            pgs.discard(json["unused"])
-            pgs.select(int(json["selected"]))
+            # check turn
+            myself = state.Myself(session_id=json["session_id"], state=s)
+            myself.discard(card.from_list(json["unused"]))
+            myself.select(card.from_int(int(json["selected"])))
             pgs.next()
             pgs.phase = "first_round"
         elif pgs.phase == "first_round":
