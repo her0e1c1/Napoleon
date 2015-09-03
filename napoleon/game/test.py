@@ -60,7 +60,7 @@ class State1TestCase(TestCase):
     def tearDown(self):
         self.state.flush()
 
-    def test_start(self):
+    def _test_start(self):
         for c in self.players:
             assert c.post(self.url_join).status_code == 302
         self.state.start()
@@ -69,8 +69,8 @@ class State1TestCase(TestCase):
         n = sum(len(h) for h in hands) + len(rest)
         assert n == card.NUMBER_OF_CARDS
 
-    def test_declare(self):
-        self.test_start()
+    def _test_declare(self):
+        self._test_start()
         players = list(self.state.players)
         for p in players[1:]:
             p.pass_()
@@ -81,9 +81,19 @@ class State1TestCase(TestCase):
         assert self.state.declaration == declaration
         assert p.is_napoleon
 
-    def test_adjutant(self):
-        self.test_declare()
+    def _test_adjutant(self):
+        self._test_declare()
         p = list(self.state.players)[0]
         adjutant = card.from_int(1)
         p.decide(adjutant)
         assert self.state.adjutant == adjutant
+
+    def test_discard(self):
+        self._test_adjutant()
+        p = list(self.state.players)[0]
+        num = 6
+        unused = p.hand[:num]
+        hand = p.hand[num:] + self.state.rest
+        p.discard(unused)
+        assert unused == self.state.unused
+        assert sorted(hand) == sorted(p.hand)
