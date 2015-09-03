@@ -37,3 +37,16 @@
     username: test1
   model: auth.user
   pk: 3
+- fields:
+    email: ''
+    first_name: ''
+    groups: []
+    is_active: true
+    is_staff: false
+    is_superuser: false
+    last_name: ''
+    password: pbkdf2_sha256$20000$VkQrf3ID1k4h$57dQxlekntNsgTGzAe5FnMZ4dAXiH3jK3x1IzoTJqZE=
+    user_permissions: []
+    username: test2
+  model: auth.user
+  pk: 4
