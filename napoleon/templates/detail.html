@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 
 {% block javascript %}
+ <script type="text/javascript">
+   var urls = {
+     "state": "/state/",  // {room_id}
+     "room": "ws://" + location.host + "/ws/",
+     "join": "{{ url('napoleon.room.views.join', kwargs={'room_id': room.id}) }}",
+     "quit": "{{ url('napoleon.room.views.quit', kwargs={'room_id': room.id}) }}",
+   };
+   var csrf_token = "{{ csrf_token }}";
+ </script>
  <script type="text/javascript" src="{{ static('js/game.js') }}"></script>
 {% endblock %}
 

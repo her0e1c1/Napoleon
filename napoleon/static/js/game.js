@@ -1,8 +1,3 @@
-var urls = {
-    "state": "/state/",  // {room_id}
-    "room": "ws://" + location.host + "/ws/"  // {room_id}
-};
-
 var app = angular.module("GameApp", []);
 
 app.config(function($interpolateProvider) {
@@ -103,12 +98,16 @@ app.controller("GameController", ["$scope", function($scope){
         self.send({"mode": "start"});
     };
 
+    this.post = function(url){
+        $.post(url, {"csrfmiddlewaretoken": csrf_token}, self.update);
+    };
+
     this.join = function(){
-        self.send({"mode": "join", user_id: self.user_id});
+        self.post(urls.join);
     };
 
     this.quit = function(){
-        self.send({"mode": "quit"});
+        self.post(urls.quit);
     };
 
     // utility
