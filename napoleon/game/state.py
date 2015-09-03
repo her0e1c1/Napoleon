@@ -1,3 +1,4 @@
+import enum
 import os
 import logging
 import redis
@@ -7,6 +8,11 @@ logger = logging.getLogger(__name__)
 
 class InvalidSession(Exception):
     pass
+
+
+class Role(enum.Enum):
+    napoleon_forces = 1
+    allied_forces = 2
 
 
 def get_connection(host="localhost", port=6379, db=0):
@@ -503,7 +509,11 @@ class User(object):
         self.state.conn.hset(key, self.user_id, self.session_id)
 
     def quit(self, force=False):
-        if force or (get_user_id(self.state.room_id, self.session_id)) == self.user_id:
+        """
+        Make sure user id is valid when using the option of force as True.
+        """
+        # if force or (get_user_id(self.state.room_id, self.session_id)) == self.user_id:
+        if force:
             self.state._rem_list("player_ids", self.user_id)
             key = get_key("map", self.state.room_id)
             self.state.conn.hdel(key, self.user_id)
@@ -515,13 +525,155 @@ class User(object):
 
 class Player(object):
 
+    # set/get any info
+    def __init__(self, user_id, state):
+        self.user_id = user_id
+        self.state = state
+
+    @property
+    def is_napoleon(self):
+        return self.napoleon == self.user_id
+
+    def select(self, selected):
+        s = card.from_int(selected)
+
+        if s == card.CLUB10 and self.can_betray:
+            if self.role == Role.napoleon_forces:
+                self.role = Role.allied_forces
+            else:
+                self.role = Role.napoleon_forces
+
+        self.conn.lrem(self.key("hand"), selected, 0)
+        self.board = selected
+        self.player_cards = selected
+
+    def discard(self, unused):
+        hand = self.hand + self.rest
+        for u in card.from_list(unused):
+            try:
+                hand.remove(u)
+            except ValueError:  # malice request
+                return
+
+        self.hand = hand
+        self.unused = unused
+
+    @property
+    def can_betray(self):
+        return False
+        # s = card.from_int(selected) == card.CLUB10
+        board = self.state.board
+        len(self.state.napoleon_forces) > 1
+        return not board and s and not self.is_napoleon
+
+    @property
+    def hand(self):
+        ints = self.state._get_list("hand", type=int)
+        return card.from_list(ints)
+
+    @hand.setter
+    def hand(self, hand):
+        l = sorted(int(i) for i in hand)
+        self.state._set_list("hand", l)
+
+    @property
+    def face(self):
+        return self._get("face")
+
+    @face.setter
+    def face(self, value):
+        self._set("face", value)
+
+    @property
+    def role(self):
+        return self._get("role", type=int)
+
+    @role.setter
+    def role(self, value):
+        return self._set("role", value)
+
+
+# Secure
+class MyPlayer(object):
+
     def __init__(self, session_id, state):
         self.session_id = session_id
         # self.user_id = user_id
         self.state = state
+        # self.player = player
+
+    # def __init__(self, session_id, state):
+    #     self.session_id = session_id
+    #     # self.user_id = user_id
+    #     self.state = state
 
     def is_valid_session(self):
         pass
 
-    def select(self, selected):
+    @property
+    def is_joined(self):
+        try:
+            get_user_id(self.room_id, self.session_id)
+        except InvalidSession:
+            return False
+        else:
+            return True
+
+    # def discard(self, unused):
+    #     if self.user_id != self.napoleon:
+    #         logger.debug("{} is not in turn".format(self.user_id))
+    #         return
+
+    # def select():
+        # if self.turn != self.user_id:
+        #     logger.debug("{} is not in turn".format(self.user_id))
+        #     return
+
+
+class RedisAdaptor(object):
+
+    def __init__(self):
+        self.conn = get_connection()
+
+    def _get_list(self, key, type=None):
+        return decode(self.conn.lrange(self.key(key), 0, -1), type=type)
+
+    def _set_list(self, key, iterable):
+        key = self.key(key)
+        self.conn.delete(key)
+        for i in iterable:
+            self.conn.lpush(key, i)
+
+    def _rem_list(self, key, value):
+        self.conn.lrem(self.key(key), value, 0)
+
+    def _get(self, key, type=None):
+        return decode(self.conn.get(self.key(key)), type=type)
+
+    def _set(self, key, value):
+        self.conn.set(self.key(key), value)
+
+
+def GameState(object):
+
+    def __init__(self, room_id):
+        self.conn = get_connection()
+
+    @property
+    def player(self):
         pass
+
+    def initialize(self):
+        pgs = state.PrivateGameState(room_id=self.room_id)
+        players = pgs.player_ids
+        number_of_players = len(players)
+        if number_of_players <= 2:
+            raise ValueError
+
+        hands, rest = card.deal(number_of_players)
+        pgs.rest = rest
+        for (p, h) in zip(players, hands):
+            st = state.PrivateGameState(user_id=p, room_id=self.room_id)
+            st.hand = h
+            st.face = 0
+        pgs.phase = "declare"

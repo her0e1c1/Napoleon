@@ -2,7 +2,6 @@ from django.test import TestCase, Client
 from django.core.urlresolvers import reverse
 from napoleon.game import state
 from napoleon.room.models import Room
-from django.contrib.auth.models import User
 
 
 class StateTestCase(TestCase):
@@ -20,8 +19,8 @@ class StateTestCase(TestCase):
         self.pgs = state.PrivateGameState(user_id=self.user_id, session_id=sid, room_id=self.room.id)
 
     def tearDown(self):
+        prefix = ("%s_" % self.room.id).encode("utf-8")
         for k in self.pgs.conn.keys("*"):
-            # if k.startswith(b"12345"):
             if k.startswith(b"1_"):
                 self.pgs.conn.delete(k)
         self.c.logout
