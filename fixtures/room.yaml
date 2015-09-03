@@ -1,0 +1,4 @@
+- fields: {created_at: !!timestamp '2015-08-26 23:52:33.996839+00:00', finished: false,
+    label: test, user: 1, waiting: true}
+  model: room.room
+  pk: 1

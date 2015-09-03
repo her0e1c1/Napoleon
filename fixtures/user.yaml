@@ -1,0 +1,39 @@
+- fields:
+    email: ''
+    first_name: ''
+    groups: []
+    is_active: true
+    is_staff: true
+    is_superuser: true
+    last_name: ''
+    password: pbkdf2_sha256$20000$GbZZ4PmqOwos$Eo8rFecZcPKaeVEBl5+ddHuUTAWFhsEz1Lv1XfjKRsI=
+    user_permissions: []
+    username: root
+  model: auth.user
+  pk: 1
+- fields:
+    email: ''
+    first_name: 'First Name'
+    groups: []
+    is_active: true
+    is_staff: true
+    is_superuser: false
+    last_name: 'Last Name'
+    password: pbkdf2_sha256$20000$8Dvg16U5aAk9$g39DI3HJ9I96QrC23lD2i3vQorsJITQy4GW++LVVPwg=
+    user_permissions: []
+    username: test
+  model: auth.user
+  pk: 2
+- fields:
+    email: ''
+    first_name: ''
+    groups: []
+    is_active: true
+    is_staff: true
+    is_superuser: false
+    last_name: ''
+    password: pbkdf2_sha256$20000$sYGuXqctmEId$UejsMM1VXLl+rcjbSJpx2IDdJeIVmGfTtrMOUghwqmQ=
+    user_permissions: []
+    username: test1
+  model: auth.user
+  pk: 3
