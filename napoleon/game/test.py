@@ -80,3 +80,10 @@ class State1TestCase(TestCase):
         p.declare(declaration)
         assert self.state.declaration == declaration
         assert p.is_napoleon
+
+    def test_adjutant(self):
+        self.test_declare()
+        p = list(self.state.players)[0]
+        adjutant = card.from_int(1)
+        p.decide(adjutant)
+        assert self.state.adjutant == adjutant
