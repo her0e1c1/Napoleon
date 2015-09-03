@@ -68,3 +68,15 @@ class State1TestCase(TestCase):
         rest = self.state.rest
         n = sum(len(h) for h in hands) + len(rest)
         assert n == card.NUMBER_OF_CARDS
+
+    def test_declare(self):
+        self.test_start()
+        players = list(self.state.players)
+        for p in players[1:]:
+            p.pass_()
+        assert len(list(self.state.passed_players)) == len(players) - 1
+        declaration = card.from_int(1)
+        p = players[0]
+        p.declare(declaration)
+        assert self.state.declaration == declaration
+        assert p.is_napoleon
