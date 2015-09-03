@@ -71,6 +71,7 @@ app.controller("GameController", ["$scope", function($scope){
             self.unused.push(card);
             remove(self.hand, card);
         }
+        $scope.$apply();
     };
 
     self.unselect = function(card){

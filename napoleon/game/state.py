@@ -261,7 +261,7 @@ class Player(object):
 
     @property
     def is_player(self):
-        return self.user_id in [p.user_id for p in self.state.players]
+        return self in self.state.players
 
     def select(self, c):
         """
@@ -379,6 +379,24 @@ class Phase(object):
 
     def __init__(self, state):
         self.state = state
+        self.adaptor = state.adaptor
+
+    @property
+    def current(self):
+        return self.adaptor.get("phase")
+
+    @current.setter
+    def current(self, value):
+        self.adaptor.set("phase", value)
+
+    @property
+    def waiting_next_turn(self):
+        return bool(self.adaptor.get("waiting_next_turn", type=int))
+
+    @waiting_next_turn.setter
+    def waiting_next_turn(self, value):
+        value = 1 if value else 0
+        return self.adaptor.set("waiting_next_turn", value)
 
     @property
     def is_appropriate_player_number(self):
@@ -393,9 +411,9 @@ class Phase(object):
         return len(self.state.passed_players) == len(self.state.players)
 
     def next_phase(self):
-        next = self._(self.state.phase)
+        next = self._(self.current)
         if next != "still":
-            self.state.phase = next
+            self.current = next
 
     def _(self, phase):
         if not phase:
@@ -411,14 +429,15 @@ class Phase(object):
         elif phase == "discard":
             return "first_round"
         elif phase == "first_round":
-            return "rounds"
+            if self.waiting_next_turn:
+                return "rounds"
         elif phase == "rounds":
             # if self.is_finished:
             pass
         return "still"
 
     def next(self):
-        phase = self.state.phase
+        phase = self.current
         if phase in ["discard", "first_round", "rounds"]:
             self.next_turn()
         self.next_phase()
@@ -432,9 +451,9 @@ class Phase(object):
         if 0 <= len(board) < len(players):
             # board is not full
             if 0 <= index < len(players) - 1:
-                self.state.turn = players[index + 1].user_id
+                self.state.turn = players[index + 1]
             else:
-                self.state.turn = players[0].user_id
+                self.state.turn = players[0]
         else:
             winner_id = card.winner(
                 board=board,
@@ -449,12 +468,12 @@ class Phase(object):
             faces = [c for c in cards if c.is_faced]
             winner.face = len(faces) + len(winner.face)
             self.state.turn = winner
-            self.state.waiting_next_turn = True
+            self.waiting_next_turn = True
 
     def next_round(self):
         del self.state.board
         del self.state.player_cards
-        self.state.waiting_next_turn = False
+        self.waiting_next_turn = False
 
 
 class GameState(object):
@@ -462,38 +481,20 @@ class GameState(object):
     def __init__(self, room_id):
         self.adaptor = RedisAdaptor(room_id=room_id)
         self.room_id = room_id
+        self._phase = Phase(self)
 
     @property
-    def is_appropriate_player_number(self):
-        return len(self.players) in card.RANGE_OF_PLAYERS
+    def phase(self):
+        return self._phase.current
 
-    @property
-    def is_napoleon_determined(self):
-        return bool(self.napoleon) and len(self.passed_players) >= len(self.players) - 1
-
-    @property
-    def are_all_players_passed(self):
-        return len(self.passed_players) == len(self.players)
+    def next(self):
+        return self._phase.next()
 
     def flush(self):
         """
         Delete all data about this room.
         """
         self.adaptor.flush()
-
-    @property
-    def players(self):
-        l = []
-        for pid in self.adaptor.get_list("player_ids", type=int):
-            l.append(Player(user_id=pid, state=self))
-        return l
-
-    @property
-    def passed_players(self):
-        l = []
-        for pid in self.adaptor.get_list("pass_ids", type=int):
-            l.append(Player(user_id=pid, state=self))
-        return l
 
     def start(self):
         """
@@ -509,6 +510,34 @@ class GameState(object):
         for (p, h) in zip(players, hands):
             p.hand = h
             p.face = 0
+
+    def set_role(self, adjutant=None):
+        """
+        After deciding an adjutant, the role of each player is set
+        """
+        for p in self.players:
+            if p.is_napoleon:
+                role = Role.napoleon_forces
+            else:
+                if self.adjutant in p.hand:
+                    role = Role.napoleon_forces
+                else:
+                    role = Role.allied_forces
+            p.role = role
+
+    @property
+    def players(self):
+        l = []
+        for pid in self.adaptor.get_list("player_ids", type=int):
+            l.append(Player(user_id=pid, state=self))
+        return l
+
+    @property
+    def passed_players(self):
+        l = []
+        for pid in self.adaptor.get_list("pass_ids", type=int):
+            l.append(Player(user_id=pid, state=self))
+        return l
 
     @property
     def rest(self):
@@ -538,23 +567,6 @@ class GameState(object):
         return self.adaptor.set("napoleon", user_id)
 
     @property
-    def phase(self):
-        return self.adaptor.get("phase")
-
-    @phase.setter
-    def phase(self, value):
-        self.adaptor.set("phase", value)
-
-    @property
-    def waiting_next_turn(self):
-        return bool(self.adaptor.get("waiting_next_turn", type=int))
-
-    @waiting_next_turn.setter
-    def waiting_next_turn(self, value):
-        value = 1 if value else 0
-        return self.adaptor.set("waiting_next_turn", value)
-
-    @property
     def turn(self):
         user_id = self.adaptor.get("turn", type=int)
         return Player(user_id, state=self)
@@ -574,20 +586,6 @@ class GameState(object):
     @adjutant.setter
     def adjutant(self, adjutant):
         return self.adaptor.set("adjutant", int(adjutant))
-
-    def set_role(self, adjutant=None):
-        """
-        After deciding an adjutant, the role of each player is set
-        """
-        for p in self.players:
-            if p.is_napoleon:
-                role = Role.napoleon_forces
-            else:
-                if self.adjutant in p.hand:
-                    role = Role.napoleon_forces
-                else:
-                    role = Role.allied_forces
-            p.role = role
 
     @property
     def unused(self):

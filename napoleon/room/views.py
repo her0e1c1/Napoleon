@@ -34,20 +34,11 @@ def logout(request):
     return redirect("napoleon.room.views.index")
 
 
-def _get_private_game_state(request, room_id):
-    session_id = request.COOKIES["sessionid"]
-    return state.PrivateGameState(
-        user_id=request.user.id,
-        session_id=session_id,
-        room_id=room_id,
-    )
-
-
 def _get_user_state(request, room_id):
     uid = request.user.id
     sid = request.COOKIES["sessionid"]
-    st = _get_private_game_state(request, room_id)
-    return state.User(user_id=uid, session_id=sid, state=st)
+    sta = state.GameState(room_id)
+    return state.User(user_id=uid, session_id=sid, state=sta)
 
 
 def _get_myself(request, room_id):
@@ -81,8 +72,8 @@ def game_state(request, room_id):
         "phase": s.phase,
         # "is_finished": st.is_finished,
         # "is_joined": st.is_joined,
-        "is_appropriate_player_number": s.is_appropriate_player_number,
-        "waiting_next_turn": s.waiting_next_turn,
+        "is_appropriate_player_number": s._phase.is_appropriate_player_number,
+        "waiting_next_turn": s._phase.waiting_next_turn,
         "turn": s.turn.user_id,
         "board": [c.to_json() for c in s.board],
         "player_ids": [p.user_id for p in s.players],
@@ -91,7 +82,6 @@ def game_state(request, room_id):
         "adjutant": a and a.to_json(),
         "unused": [c.to_json() for c in s.unused],
         "declaration": d and d.to_json(),
-        "rest": [r.to_json() for r in s.rest],
     }
 
     myself = _get_myself(request, room_id)
@@ -100,6 +90,7 @@ def game_state(request, room_id):
             "hand": [c.to_json() for c in myself.hand],
             "role": myself.role and myself.role.value,
             "possible_cards": [int(c) for c in myself.possible_cards],
+            "rest": [r.to_json() for r in s.rest],
         })
 
     return JsonResponse(cxt)

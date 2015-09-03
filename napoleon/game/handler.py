@@ -73,7 +73,7 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         elif s.phase == "discard":
             myself.discard(card.from_list(json["unused"]))
             myself.select(card.from_int(int(json["selected"])))
-        elif s.phase == ["first_round", "rounds"]:
+        elif s.phase in ["first_round", "rounds"]:
             if s._phase.waiting_next_turn:
                 s._phase.next_round()
             myself.select(card.from_int(int(json["selected"])))
