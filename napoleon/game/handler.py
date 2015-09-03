@@ -67,29 +67,21 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         elif s.phase == "declare" and action == "declare":
             declaration = card.from_int(int(json["declaration"]))
             myself.declare(declaration)
-            if s.is_napoleon_determined:
-                s.phase = "adjutant"
         elif s.phase == "declare" and action == "pass":
             myself.pass_()
-            if s.is_napoleon_determined:
-                s.phase = "adjutant"
-            elif s.are_all_players_passed:
-                s.phase = None
         elif s.phase == "adjutant":
             # check turn
             myself.decide(card.from_int(int(json["adjutant"])))
             s.set_role(card.from_int(int(json["adjutant"])))
-            s.phase = "discard"
         elif s.phase == "discard":
             # check turn
             myself.discard(card.from_list(json["unused"]))
             myself.select(card.from_int(int(json["selected"])))
             p.next()
-            s.phase = "first_round"
         elif s.phase == "first_round":
             if s.waiting_next_turn:
                 s.next_round()
-                s.phase = "rounds"
+                # s.phase = "rounds"
             myself.select(json["selected"])
             p.next()
         elif s.phase == "rounds":
@@ -100,5 +92,5 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
             # if pgs.is_finished:
             #     s.phase = "finished"
                 # record
-
+        p.next_phase()
         self.write_on_same_room({"update": True})
