@@ -96,6 +96,7 @@ def detail(request, game_id):
     state.reset_session_id_if_changed(game_id, session_id, request.user.id)
     return render(request, "detail.html", {
         "game": room,
+        "room": room,
         "deck": [c.to_json() for c in card.deck],
         "declarations": [d.to_json() for d in card.declarations],
     })
