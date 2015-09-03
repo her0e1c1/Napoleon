@@ -58,18 +58,9 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
 
         mode = json.get("mode")
         pgs = state.PrivateGameState(session_id=json["session_id"], room_id=self.room_id)
+        s = state.GameState(self.room_id)
         if not pgs.phase:
-            pgs = state.PrivateGameState(room_id=self.room_id)
-            players = pgs.player_ids
-            number_of_players = len(players)
-            if number_of_players <= 2:
-                return  # Ignore
-            hands, rest = card.deal(number_of_players)
-            pgs.rest = rest
-            for (p, h) in zip(players, hands):
-                st = state.PrivateGameState(user_id=p, room_id=self.room_id)
-                st.hand = h
-                st.face = 0
+            s.start()
             pgs.phase = "declare"
         elif mode == "declare":
             pgs.declaration = json["declaration"]
