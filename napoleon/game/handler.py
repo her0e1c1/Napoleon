@@ -61,9 +61,11 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         p = state.Phase(s)
         myself = state.Myself(session_id=json["session_id"], state=s)
 
+        if s.waiting_next_turn:
+            s.phase.next_round()
+
         if not s.phase:
             s.start()
-            s.phase = "declare"
         elif s.phase == "declare" and action == "declare":
             declaration = card.from_int(int(json["declaration"]))
             myself.declare(declaration)
@@ -79,18 +81,12 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
             myself.select(card.from_int(int(json["selected"])))
             p.next()
         elif s.phase == "first_round":
-            if s.waiting_next_turn:
-                s.next_round()
-                # s.phase = "rounds"
             myself.select(json["selected"])
             p.next()
         elif s.phase == "rounds":
-            if s.waiting_next_turn:
-                s.next_round()
             myself.select(json["selected"])
             p.next()
-            # if pgs.is_finished:
-            #     s.phase = "finished"
-                # record
+        # record
+        # elif pgs.is_finished:
         p.next_phase()
         self.write_on_same_room({"update": True})
