@@ -57,52 +57,52 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
             return
 
         mode = json.get("mode")
-        pgs = state.PrivateGameState(session_id=json["session_id"], room_id=self.room_id)
         s = state.GameState(self.room_id)
-        if not pgs.phase:
+        p = state.Phase(s)
+        if not s.phase:
             s.start()
-            pgs.phase = "declare"
+            s.phase = "declare"
         elif mode == "declare":
             myself = state.Myself(session_id=json["session_id"], state=s)
             declaration = card.from_int(int(json["declaration"]))
             myself.declare(declaration)
             if s.is_napoleon_determined:
-                pgs.phase = "adjutant"
+                s.phase = "adjutant"
         elif mode == "pass":
             myself = state.Myself(session_id=json["session_id"], state=s)
             myself.pass_()
             if s.is_napoleon_determined:
-                pgs.phase = "adjutant"
+                s.phase = "adjutant"
             elif s.are_all_players_passed:
-                pgs.phase = None
+                s.phase = None
         elif mode == "adjutant":
             # check turn
             myself = state.Myself(session_id=json["session_id"], state=s)
             myself.decide(card.from_int(int(json["adjutant"])))
             s.set_role(card.from_int(int(json["adjutant"])))
-            pgs.phase = "discard"
-        elif pgs.phase == "discard":
+            s.phase = "discard"
+        elif s.phase == "discard":
             # check turn
             myself = state.Myself(session_id=json["session_id"], state=s)
             myself.discard(card.from_list(json["unused"]))
             myself.select(card.from_int(int(json["selected"])))
-            pgs.next()
-            pgs.phase = "first_round"
-        elif pgs.phase == "first_round":
-            if pgs.waiting_next_turn:
-                pgs.next_round()
-                pgs.phase = "rounds"
+            p.next()
+            s.phase = "first_round"
+        elif s.phase == "first_round":
+            if s.waiting_next_turn:
+                s.next_round()
+                s.phase = "rounds"
             myself = state.Myself(session_id=json["session_id"], state=s)
             myself.select(json["selected"])
-            pgs.next()
-        elif pgs.phase == "rounds":
-            if pgs.waiting_next_turn:
-                pgs.next_round()
+            p.next()
+        elif s.phase == "rounds":
+            if s.waiting_next_turn:
+                s.next_round()
             myself = state.Myself(session_id=json["session_id"], state=s)
             myself.select(json["selected"])
-            pgs.next()
-            if pgs.is_finished:
+            p.next()
+            # if pgs.is_finished:
+            #     s.phase = "finished"
                 # record
-                pgs.phase = "finished"
 
         self.write_on_same_room({"update": True})
