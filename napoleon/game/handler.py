@@ -92,12 +92,14 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
             if pgs.waiting_next_turn:
                 pgs.next_round()
                 pgs.phase = "rounds"
-            pgs.select(json["selected"])
+            myself = state.Myself(session_id=json["session_id"], state=s)
+            myself.select(json["selected"])
             pgs.next()
         elif pgs.phase == "rounds":
             if pgs.waiting_next_turn:
                 pgs.next_round()
-            pgs.select(json["selected"])
+            myself = state.Myself(session_id=json["session_id"], state=s)
+            myself.select(json["selected"])
             pgs.next()
             if pgs.is_finished:
                 # record
