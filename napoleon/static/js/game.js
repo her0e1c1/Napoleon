@@ -42,12 +42,14 @@ app.controller("GameController", ["$scope", function($scope){
     });
 
     this.send = function (json){
+        if (json === undefined)
+            json = {};
         json["session_id"] = $.cookie("sessionid");
         wsGame.send(JSON.stringify(json));
     };
 
     this.pass = function(){
-        self.send({"mode": "pass"});
+        self.send({"action": "pass"});
     };
 
     self.is_unused_careds_selected = function(){
@@ -83,19 +85,19 @@ app.controller("GameController", ["$scope", function($scope){
             self.impossible_card = card;
             return;
         }
-        self.send({"mode": "select", "selected": card.value});
+        self.send({"selected": card.value});
     };
 
     self.determine_adjutant = function(){
-        self.send({"mode": "adjutant", "adjutant": self.adjutant});
+        self.send({"adjutant": self.adjutant});
     };
 
     this.declare = function(){
-        self.send({"mode": "declare", "declaration": self.declaration});
+        self.send({"action": "declare", "declaration": self.declaration});
     };
 
     this.start = function(){
-        self.send({"mode": "start"});
+        self.send();
     };
 
     this.post = function(url){

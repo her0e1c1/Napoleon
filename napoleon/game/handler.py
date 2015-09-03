@@ -56,26 +56,26 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         except ValueError:
             return
 
-        mode = json.get("mode")
+        action = json.get("action")
         s = state.GameState(self.room_id)
         p = state.Phase(s)
         if not s.phase:
             s.start()
             s.phase = "declare"
-        elif mode == "declare":
+        elif s.phase == "declare" and action == "declare":
             myself = state.Myself(session_id=json["session_id"], state=s)
             declaration = card.from_int(int(json["declaration"]))
             myself.declare(declaration)
             if s.is_napoleon_determined:
                 s.phase = "adjutant"
-        elif mode == "pass":
+        elif s.phase == "declare" and action == "pass":
             myself = state.Myself(session_id=json["session_id"], state=s)
             myself.pass_()
             if s.is_napoleon_determined:
                 s.phase = "adjutant"
             elif s.are_all_players_passed:
                 s.phase = None
-        elif mode == "adjutant":
+        elif s.phase == "adjutant":
             # check turn
             myself = state.Myself(session_id=json["session_id"], state=s)
             myself.decide(card.from_int(int(json["adjutant"])))
