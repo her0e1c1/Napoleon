@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from django.core.urlresolvers import reverse
 from napoleon.game import state
 from napoleon.room.models import Room
+from napoleon import card
 
 
 class StateTestCase(TestCase):
@@ -35,3 +36,35 @@ class StateTestCase(TestCase):
         response = self.c.post(self.url_quit)
         assert response.status_code == 302
         assert pgs.player_ids == []
+
+
+class State1TestCase(TestCase):
+    fixtures = ["user.yaml", "room.yaml"]
+
+    def setUp(self):
+        users = [
+            {"username": "test", "password": "test"},
+            {"username": "test1", "password": "test"},
+            {"username": "test2", "password": "test"},
+        ]
+        self.players = []
+        for d in users:
+            c = Client(enforce_csrf_checks=False)
+            assert c.login(**d)
+            self.players.append(c)
+
+        self.room = Room.objects.get(pk=1)
+        self.state = state.GameState(self.room.id)
+        self.url_join = reverse("napoleon.room.views.join", kwargs={"room_id": self.room.id})
+
+    def tearDown(self):
+        self.state.flush()
+
+    def test_start(self):
+        for c in self.players:
+            assert c.post(self.url_join).status_code == 302
+        self.state.start()
+        hands = [p.hand for p in self.state.players]
+        rest = self.state.rest
+        n = sum(len(h) for h in hands) + len(rest)
+        assert n == card.NUMBER_OF_CARDS
