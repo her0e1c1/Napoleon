@@ -63,14 +63,17 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
             s.start()
             pgs.phase = "declare"
         elif mode == "declare":
-            pgs.declaration = json["declaration"]
-            if pgs.is_napoleon_determined:
+            myself = state.Myself(session_id=json["session_id"], state=s)
+            declaration = card.from_int(int(json["declaration"]))
+            myself.declare(declaration)
+            if s.is_napoleon_determined:
                 pgs.phase = "adjutant"
         elif mode == "pass":
-            pgs.set_pass_ids()
-            if pgs.is_napoleon_determined:
+            myself = state.Myself(session_id=json["session_id"], state=s)
+            myself.pass_()
+            if s.is_napoleon_determined:
                 pgs.phase = "adjutant"
-            elif pgs.are_all_players_passed:
+            elif s.are_all_players_passed:
                 pgs.phase = None
         elif mode == "adjutant":
             pgs.adjutant = json["adjutant"]
