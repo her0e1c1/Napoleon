@@ -21,7 +21,7 @@ class StateTestCase(TestCase):
     def tearDown(self):
         prefix = ("%s_" % self.room.id).encode("utf-8")
         for k in self.pgs.conn.keys("*"):
-            if k.startswith(b"1_"):
+            if k.startswith(prefix):
                 self.pgs.conn.delete(k)
         self.c.logout
 
