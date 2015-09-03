@@ -72,21 +72,17 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         elif s.phase == "declare" and action == "pass":
             myself.pass_()
         elif s.phase == "adjutant":
-            # check turn
             myself.decide(card.from_int(int(json["adjutant"])))
             s.set_role(card.from_int(int(json["adjutant"])))
         elif s.phase == "discard":
-            # check turn
             myself.discard(card.from_list(json["unused"]))
             myself.select(card.from_int(int(json["selected"])))
-            p.next()
         elif s.phase == "first_round":
             myself.select(json["selected"])
-            p.next()
         elif s.phase == "rounds":
             myself.select(json["selected"])
-            p.next()
         # record
         # elif pgs.is_finished:
-        p.next_phase()
+
+        p.next()
         self.write_on_same_room({"update": True})
