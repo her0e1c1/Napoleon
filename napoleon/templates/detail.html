@@ -152,7 +152,7 @@
     {{ declaration() }}
 
     <div id="hand">
-      <ul class="list-inline"><li ng-repeat="c in game.hand.concat(game.rest) | orderBy:'order_by_suit' track by $index">
+      <ul class="list-inline"><li ng-repeat="c in game.hand | orderBy:'order_by_suit' track by $index">
           <button ng-click="game.select_or_discard(c)" class="btn btn-default">[[ c.str ]]</button>
       </li></ul>
     </div>
