@@ -58,30 +58,15 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         except ValueError:
             return
 
-        action = json.pop("action", "")
+        action_name = json.pop("action", "")
         sid = json.pop("session_id")
-        s = state.GameState(self.room_id)
-        myself = state.Myself(session_id=sid, state=s)
+        myself = state.Myself(session_id=sid, state=state.GameState(self.room_id))
 
-        p = phase.get_action(s.phase, action)
-        if p is None:
+        a = phase.get_action(myself.state.phase, action_name)
+        if a is None:
             return
-
-        if not s.phase:
-            p(**json).act(myself)
-        elif s.phase == "declare" and action == "declare":
-            p(**json).act(myself)
-        elif s.phase == "declare" and action == "pass":
-            p(**json).act(myself)
-        elif s.phase == "adjutant":
-            p(**json).act(myself)
-        elif s.phase == "discard":
-            p(**json).act(myself)
-        elif s.phase in ["first_round", "rounds"]:
-            if s._phase.waiting_next_turn:
-                s._phase.next_round()
-            myself.select(card.from_int(int(json["selected"])))
-        s.next()
-        # p.next()
+        action = a(myself)
+        action.act(**json)
+        action.next()
 
         self.write_on_same_room({"update": True})

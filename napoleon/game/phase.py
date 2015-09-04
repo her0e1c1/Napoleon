@@ -2,8 +2,10 @@ from napoleon import card
 
 
 def get_action(phase, action=None):
-    action_list = [StartAction, DeclareAction, PassAction, AdjutantAction, DiscardAction]
-    actions = [cls for cls in action_list if cls.phase == phase]
+    action_list = [StartAction, DeclareAction, PassAction, AdjutantAction, DiscardAction,
+                   SelectAction
+    ]
+    actions = [cls for cls in action_list if cls.phase == phase or phase in cls.phase]
 
     if len(actions) == 1:
         return actions[0]
@@ -19,77 +21,60 @@ def get_action(phase, action=None):
 
 class Action(object):
 
-    def act(self, player, **kw):
+    def __init__(self, player):
+        self.player = player
+
+    def act(self, **kw):
         raise NotImplemented
 
     def validate(self, **kw):
-        pass
+        raise NotImplemented
 
-    def next(self, player):
-        player.state.next()
+    def next(self):
+        self.player.state.next()
 
 
 class StartAction(Action):
     phase = ""
 
-    def act(self, player):
-        player.state.start()
-
-    def validate(self, **kw):
-        pass
-
-    def next(self, **kw):
-        pass
+    def act(self):
+        self.player.state.start()
 
 
 class DeclareAction(Action):
     phase = "declare"
 
-    def __init__(self, declaration):
-        self.declaration = declaration
-
-    def act(self, player):
-        declaration = card.from_int(int(self.declaration))
-        player.declare(declaration)
-
-    def validate(self, **kw):
-        pass
-
-    def next(self, **kw):
-        pass
+    def act(self, declaration):
+        self.player.declare(card.from_int(int(declaration)))
 
 
 class PassAction(Action):
     phase = "declare"
 
-    def act(self, player):
-        player.pass_()
+    def act(self):
+        self.player.pass_()
 
 
 class AdjutantAction(Action):
     phase = "adjutant"
 
-    def __init__(self, adjutant):
-        self.adjutant = adjutant
-
-    def act(self, player):
-        player.decide(card.from_int(int(self.adjutant)))
-        player.state.set_role(card.from_int(int(self.adjutant)))
-
-    def validate(self, **kw):
-        pass
-
-    def next(self, **kw):
-        pass
+    def act(self, adjutant):
+        self.player.decide(card.from_int(int(adjutant)))
+        self.player.state.set_role(card.from_int(int(adjutant)))
 
 
 class DiscardAction(Action):
     phase = "discard"
 
-    def __init__(self, unused, selected):
-        self.unused = unused
-        self.selected = selected
+    def act(self, unused, selected):
+        self.player.discard(card.from_list(unused))
+        self.player.select(card.from_int(int(selected)))
 
-    def act(self, player):
-        player.discard(card.from_list(self.unused))
-        player.select(card.from_int(int(self.selected)))
+
+class SelectAction(Action):
+    phase = ["first_round", "rounds"]
+
+    def act(self, selected):
+        if self.player.state._phase.waiting_next_turn:
+            self.player.state._phase.next_round()
+        self.player.select(card.from_int(int(selected)))
