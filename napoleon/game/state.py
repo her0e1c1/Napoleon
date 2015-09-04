@@ -1,6 +1,6 @@
 import enum
 import logging
-from napoleon import card
+from napoleon.game import card
 from napoleon.game.adaptor import RedisAdaptor
 
 

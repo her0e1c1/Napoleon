@@ -1,4 +1,4 @@
-from napoleon import card
+from napoleon.game import card
 
 
 def get_action(phase, action=None):

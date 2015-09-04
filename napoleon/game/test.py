@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.core.urlresolvers import reverse
 from napoleon.game import state
 from napoleon.room.models import Room
-from napoleon import card
+from napoleon.game import card
 
 
 # class StateTestCase(TestCase):

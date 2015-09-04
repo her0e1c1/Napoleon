@@ -22,9 +22,11 @@ class Suit(enum.Enum):
     heart = 3
     spade = 4
 
+    @property
     def is_red(self):
         return self.value in [2, 3]
 
+    @property
     def is_black(self):
         return not self.is_red
 
@@ -171,7 +173,6 @@ deck = [
     for p in range(1, 13 + 1)
 ] + list(Joker)
 
-number_of_cards = len(deck)  # 54
 NUMBER_OF_CARDS = len(deck)  # 54
 NUMBER_OF_FACE_CARDS = len([c for c in deck if c.is_faced])  # 20
 
@@ -254,7 +255,7 @@ def decide(cards, trump_suit, is_first_round=False, rule=None):
 
     cards = [c for c in cards if c.suit == lead.suit]
     ace = Plain(1, lead.suit)
-    return ace if ace in trumps else max(cards)
+    return ace if ace in cards else max(cards)
 
 
 def winner(board, player_cards, trump_suit, is_first_round=False, rule=None):
@@ -262,9 +263,10 @@ def winner(board, player_cards, trump_suit, is_first_round=False, rule=None):
     Decide which player wins at one round.
     :return: user id
     """
-    pc = player_cards
+    if sorted(board) != sorted(player_cards.values()):
+        raise ValueError("The cards on a board is not the same as the player's cards")
     strongest = decide(board, trump_suit, is_first_round, rule)
-    return {int(v): k for k, v in pc.items()}[int(strongest)]
+    return {int(v): k for k, v in player_cards.items()}[int(strongest)]
 
 
 def possible_cards(board, hand, trump_suit):
