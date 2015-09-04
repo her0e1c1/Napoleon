@@ -64,14 +64,13 @@ app.controller("GameController", ["$scope", function($scope){
     };
 
     self.discard = function(card){
-        var unused = self.unused.map(function(i){ return i.value;});
-        if (self.is_unused_careds_selected())
-            self.send({"selected": card.value, "unused": unused});
-        else if (!elem(self.unused, card)){
+        if (!elem(self.unused, card)){
             self.unused.push(card);
             remove(self.hand, card);
         }
-        $scope.$apply();
+        var unused = self.unused.map(function(i){ return i.value;});
+        if (self.is_unused_careds_selected())
+            self.send({"unused": unused});
     };
 
     self.unselect = function(card){
