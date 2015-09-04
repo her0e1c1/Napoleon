@@ -9,6 +9,8 @@ import tornado.escape
 from collections import defaultdict
 from napoleon import card
 from . import state
+from . import phase
+
 
 logger = logging.getLogger(__name__)
 
@@ -56,27 +58,30 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         except ValueError:
             return
 
-        action = json.get("action")
+        action = json.pop("action", "")
+        sid = json.pop("session_id")
         s = state.GameState(self.room_id)
-        myself = state.Myself(session_id=json["session_id"], state=s)
+        myself = state.Myself(session_id=sid, state=s)
+
+        p = phase.get_action(s.phase, action)
+        if p is None:
+            return
 
         if not s.phase:
-            s.start()
+            p(**json).act(myself)
         elif s.phase == "declare" and action == "declare":
-            declaration = card.from_int(int(json["declaration"]))
-            myself.declare(declaration)
+            p(**json).act(myself)
         elif s.phase == "declare" and action == "pass":
-            myself.pass_()
+            p(**json).act(myself)
         elif s.phase == "adjutant":
-            myself.decide(card.from_int(int(json["adjutant"])))
-            s.set_role(card.from_int(int(json["adjutant"])))
+            p(**json).act(myself)
         elif s.phase == "discard":
-            myself.discard(card.from_list(json["unused"]))
-            myself.select(card.from_int(int(json["selected"])))
+            p(**json).act(myself)
         elif s.phase in ["first_round", "rounds"]:
             if s._phase.waiting_next_turn:
                 s._phase.next_round()
             myself.select(card.from_int(int(json["selected"])))
         s.next()
+        # p.next()
 
         self.write_on_same_room({"update": True})
