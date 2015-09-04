@@ -1,13 +1,87 @@
 import enum
-import os
 import logging
-import redis
 from napoleon import card
+from napoleon.game.adaptor import RedisAdaptor
+
+
 logger = logging.getLogger(__name__)
+
+
+class GameStateWithSession(object):
+
+    def __init__(self, room_id, user_id, session_id):
+        self.state = GameState(room_id)
+        self.privilege = Privilege(Myself(user_id=user_id, session_id=session_id, state=self.state))
+
+    def __getattr__(self, name):
+        if getattr(self.privilege, name, None) is not False:
+            return getattr(self.state, name)
+
+
+class Privilege(object):
+
+    def __init__(self, player):
+        self.player = player
+
+    # for a game state instance
+    @property
+    def rest(self):
+        return self.player.is_napoleon
+
+    # for a player instance
+    @property
+    def role(self):
+        if self.state.phase == "finished" or self.is_valid:
+            return True
+        else:
+            return False
+
+
+class Myself(object):
+
+    def __init__(self, state, session_id, user_id=None):
+        if user_id is None:
+            user_id = get_user_id(state.room_id, session_id)
+        self.player = Player(user_id, state)
+        self.session_id = session_id
+        self.privilege = Privilege(self.player)
+
+    def __getattr__(self, name):
+        if getattr(self.privilege, name, None) is not False:
+            return getattr(self.player, name)
+
+    @property
+    def is_valid(self):
+        try:
+            get_user_id(self.player.state.room_id, self.session_id)
+        except InvalidSession:
+            return False
+        else:
+            return True
 
 
 class InvalidSession(Exception):
     pass
+
+
+class JsonMixin(object):
+    attrs = []
+    def to_json(self):
+        for a in self.attrs:
+            pass
+        return {}
+
+
+def to_json(obj):
+    if isinstance(obj, list):
+        return [to_json(o) for o in obj]
+    elif isinstance(obj, dict):
+        return {k: to_json(v) for k, v in obj.items()}
+    elif hasattr(obj, "to_json"):
+        return obj.to_json()
+    else:
+        return obj
+        # raise ValueError("You can't convert %s to json" % obj)
 
 
 class Role(enum.Enum):
@@ -15,204 +89,14 @@ class Role(enum.Enum):
     allied_forces = 2
 
 
-def get_connection(host="localhost", port=6379, db=0):
-    uri = os.environ.get("REDISTOGO_URL")
-    if not uri:
-        return redis.Redis(host, port=port, db=db)
-    else:
-        return redis.from_url(uri)
-
-
 def get_user_id(room_id, session_id):
-    conn = get_connection()
-    key = get_key("map", room_id)
-    user_dict = conn.hgetall(key)
-    inv = {decode(v): k for k, v in user_dict.items()}
+    adaptor = RedisAdaptor(room_id)
+    user_dict = adaptor.get_dict("map")
+    inv = {v: k for k, v in user_dict.items()}
     user_id = inv.get(session_id)
     if not user_id:
         raise InvalidSession("Session is invalid")
     return int(user_id)
-
-
-def get_key(key, room_id, user_id=None):
-    fmt = {
-        # public
-        "phase": "{room_id}_phase",  # value
-        "napoleon": "{room_id}_napoleon",  # value
-        "player_ids": "{room_id}_player_ids",  # sorted set
-        "pass_ids": "{room_id}_pass_ids",  # set
-        "declaration": "{room_id}_declaration",  # int (winning_number, trump suit)
-        "turn": "{room_id}_turn",  # value
-        "board": "{room_id}_board",  # list
-        "adjutant": "{room_id}_adjutant",  # hash
-        "unused": "{room_id}_unused",  # list
-        "face": "{room_id}_{user_id}_face",  # value
-        "player_cards": "{room_id}_player_cards",  # hash (int: int)
-        "waiting_next_turn": "{room_id}_waiting_next_turn",  # bool
-
-        # private
-        "role": "{room_id}_{user_id}_role",  # value (0: napo, 1:rengo)
-        "rest": "{room_id}_rest",  # list
-        "hand": "{room_id}_{user_id}_hand",  # list
-        "map": "{room_id}_map",  # hash
-    }
-    if key in ["role", "hand"] and user_id is None:
-        raise ValueError("You must take user_id as an argument when key is role or hand.")
-
-    return fmt[key].format(**locals())
-
-
-def decode(s, type=None):
-    if s is None:
-        return None
-
-    if isinstance(s, (dict,)):
-        if type:
-            return {k.decode("utf-8"): type(v.decode("utf-8")) for k, v in s.items()}
-        else:
-            return {k.decode("utf-8"): v.decode("utf-8") for k, v in s.items()}
-
-    if isinstance(s, (list, set)):
-        if type:
-            return [type(i.decode("utf-8")) for i in s]
-        else:
-            return [i.decode("utf-8") for i in s]
-    if type:
-        return type(s.decode("utf-8"))
-    else:
-        return s.decode("utf-8")
-
-
-class RedisAdaptor(object):
-
-    def __init__(self, room_id, user_id=None):
-        self.conn = get_connection()
-        self.room_id = room_id
-        self.user_id = user_id
-
-    def key(self, k):
-        return get_key(k, room_id=self.room_id, user_id=self.user_id)
-
-    def get_list(self, key, type=None):
-        return decode(self.conn.lrange(self.key(key), 0, -1), type=type)
-
-    def set_list(self, key, iterable, delete=True):
-        key = self.key(key)
-        if delete:
-            self.conn.delete(key)
-        if not isinstance(iterable, (list, tuple, set)):
-            iterable = [iterable]
-        for i in iterable:
-            self.conn.lpush(key, i)
-
-    def rem_list(self, key, value):
-        self.conn.lrem(self.key(key), value, 0)
-
-    def get(self, key, type=None):
-        return decode(self.conn.get(self.key(key)), type=type)
-
-    def set(self, key, value):
-        self.conn.set(self.key(key), value)
-
-    def get_dict(self, key, type=None):
-        return decode(self.conn.hgetall(self.key(key)), type=type)
-
-    def set_dict(self, key, k, v):
-        self.conn.hset(self.key(key), k, v)
-
-    def delete(self, key):
-        self.conn.delete(self.key(key))
-
-    def flush(self):
-        prefix = ("%s_" % self.room_id).encode("utf-8")
-        for k in self.conn.keys("*"):
-            if k.startswith(prefix):
-                self.conn.delete(k)
-
-
-class PrivateGameState(object):
-
-    def __init__(self, room_id, user_id=None, session_id=None, **kw):
-
-        self.conn = get_connection()
-        self.room_id = room_id
-        self.session_id = session_id
-
-        if not user_id and session_id:
-            user_id = get_user_id(self.room_id, session_id)
-
-        if user_id:
-            self.user_id = int(user_id)
-        else:
-            self.user_id = None
-
-    def key(self, key):
-        return get_key(key, room_id=self.room_id, user_id=self.user_id)
-
-    def decode(self, s, type=None):
-        return decode(s, type)
-
-    @property
-    def is_valid_session(self):
-        key = get_key("map", self.room_id)
-        user_dict = decode(self.conn.hgetall(key))
-        sid = user_dict.get(str(self.user_id))
-        if sid and sid == self.session_id:
-            return True
-        else:
-            return False
-
-    @property
-    def is_finished(self):
-        if self.phase != "rounds":
-            return False
-        n = 0
-        for pid in self.player_ids:
-            key = get_key("hand", self.room_id, pid)
-            ints = decode(self.conn.lrange(key, 0, -1), type=int)
-            n += len(ints)
-        return n == 0
-
-    @property
-    def did_napoleon_win(self):
-        if not self.declaration:
-            return False
-        n, _ = self._each_side_face_cards
-        if n == card.NUMBER_OF_FACE_CARDS:
-            return False
-        return n >= self.declaration.pip
-
-    @property
-    def did_napoleon_lose(self):
-        if not self.declaration:
-            return False
-        _, n = self._each_side_face_cards
-        if n == 0:
-            return True
-        return n > card.NUMBER_OF_FACE_CARDS - self.declaration.pip
-
-    @property
-    def _each_side_face_cards(self):
-        napo = 0
-        allies = 0
-        for pid in self.player_ids:
-            key = get_key("role", self.room_id, pid)
-            role = decode(self.conn.get(key), type=int)
-            key = get_key("face", self.room_id, pid)
-            num = decode(self.conn.get(key), type=int)
-            if role == 1:  # napo
-                napo += num
-            else:
-                allies += num
-        return napo, allies
-
-    @property
-    def player_faces(self):
-        f = {}
-        for pid in self.player_ids:
-            key = get_key("face", self.room_id, pid)
-            f[pid] = decode(self.conn.get(key), type=int)
-        return f
 
 
 class User(object):
@@ -221,23 +105,18 @@ class User(object):
         """
         Make sure user id is valid.
         """
-        # self.adaptor = RedisAdaptor(room_id=state.room_id, user_id=user_id)
+        self.adaptor = RedisAdaptor(room_id=state.room_id, user_id=user_id)
         self.user_id = user_id
         self.session_id = session_id
         self.state = state
 
     def join(self):
-        # check duplicated join
-        key = get_key("player_ids", self.state.room_id)
-        self.state.conn.lpush(key, self.user_id)
-        key = get_key("map", self.state.room_id)
-        self.state.conn.hset(key, self.user_id, self.session_id)
+        self.adaptor.set_list("player_ids", self.user_id, delete=False)
+        self.adaptor.set_dict("map", self.user_id, self.session_id)
 
     def quit(self, force=False):
-        # if force or (get_user_id(self.state.room_id, self.session_id)) == self.user_id:
-        self.state._rem_list("player_ids", self.user_id)
-        key = get_key("map", self.state.room_id)
-        self.state.conn.hdel(key, self.user_id)
+        self.adaptor.rem_list("player_ids", self.user_id, delete=True)
+        self.adaptor.rem_dict("map", self.user_id)
 
     def reset(self):
         self.quit(force=True)
@@ -246,7 +125,6 @@ class User(object):
 
 class Player(object):
 
-    # set/get any info
     def __init__(self, user_id, state):
         self.adaptor = RedisAdaptor(room_id=state.room_id, user_id=user_id)
         self.user_id = user_id
@@ -263,27 +141,34 @@ class Player(object):
     def is_player(self):
         return self in self.state.players
 
-    def select(self, c):
+    @property
+    def is_my_turn(self):
+        return self == self.state.turn
+
+    def select(self, card):
         """
         A player selects a card
         """
-        if c == card.CLUB10 and self.can_betray:
+        if self.can_betray(card):
             if self.role == Role.napoleon_forces:
                 self.role = Role.allied_forces
             else:
                 self.role = Role.napoleon_forces
 
-        self.adaptor.rem_list("hand", int(c))
-        self.state.board = c
-        self.state.player_cards = (self.user_id, c)
+        self.adaptor.rem_list("hand", int(card))
+        self.state.board = card
+        self.state.player_cards = (self.user_id, card)
 
-    @property
-    def can_betray(self):
-        return False
-        # s = card.from_int(selected) == card.CLUB10
-        board = self.state.board
-        len(self.state.napoleon_forces) > 1
-        return not board and s and not self.is_napoleon
+    def can_betray(self, c):
+        if (c == card.CLUB10
+            and not self.state.board
+            and not self.is_napoleon
+            and len(self.state.allied_forces) > 1
+            # and len(self.state.napoleon_forces) > 1
+        ):
+            return True
+        else:
+            return False
 
     def pass_(self):
         self.adaptor.set_list("pass_ids", self.user_id, delete=False)
@@ -302,8 +187,7 @@ class Player(object):
         self.state.adjutant = adjutant
 
     def discard(self, unused):
-        # if self.user_id != self.napoleon:
-        hand = self.hand + self.state.rest
+        hand = self.hand
         for u in unused:
             try:
                 hand.remove(u)
@@ -313,6 +197,13 @@ class Player(object):
 
         self.hand = hand
         self.state.unused = unused
+
+    def add_rest_to_hand(self):
+        self.hand = self.hand + self.state.rest
+
+    @property
+    def number_of_hand(self):
+        return len(self.hand)
 
     @property
     def hand(self):
@@ -334,7 +225,7 @@ class Player(object):
 
     @property
     def role(self):
-        d = (self.adaptor.get("role", type=int))
+        d = self.adaptor.get("role", type=int)
         if d:
             return Role(d)
 
@@ -344,35 +235,23 @@ class Player(object):
 
     @property
     def possible_cards(self):
-        d = self.state.declaration
         # wait for the next turn before playing a lead card
         if len(self.state.board) == len(self.state.players):
             return self.hand
-        elif d:
+        d = self.state.declaration
+        if d:
             return card.possible_cards(self.state.board, self.hand, d.suit)
         else:
             return []
 
-
-# Secure
-class Myself(Player):
-
-    def __init__(self, session_id, state):
-        self.session_id = session_id
-        user_id = get_user_id(state.room_id, self.session_id)
-        super().__init__(user_id, state)
-
-    def is_valid_session(self):
-        pass
-
-    @property
-    def is_joined(self):
-        try:
-            get_user_id(self.room_id, self.session_id)
-        except InvalidSession:
-            return False
-        else:
-            return True
+    def to_json(self):
+        d = {}
+        return {"p": 1}
+        # for key in dir(self):
+        #     attr = getattr(self, key)
+        #     if not key.startswith("_") and not callable(attr):
+        #         d[key] = to_json(attr)
+        # return d
 
 
 class Phase(object):
@@ -410,70 +289,49 @@ class Phase(object):
     def are_all_players_passed(self):
         return len(self.state.passed_players) == len(self.state.players)
 
-    def next_phase(self):
-        next = self._(self.current)
-        if next != "still":
-            self.current = next
+#     @property
+#     def is_finished(self):
+#         if self.phase != "rounds":
+#             return False
+#         n = 0
+#         for pid in self.player_ids:
+#             key = get_key("hand", self.room_id, pid)
+#             ints = decode(self.conn.lrange(key, 0, -1), type=int)
+#             n += len(ints)
+#         return n == 0
 
-    def _(self, phase):
-        if not phase:
-            return "declare"
-        elif phase == "declare":
-            if self.is_napoleon_determined:
-                return "adjutant"
-            elif self.are_all_players_passed:
-                return "restart"
-                # return None
-        elif phase == "adjutant":
-            return "discard"
-        elif phase == "discard":
-            return "first_round"
-        elif phase == "first_round":
-            if self.waiting_next_turn:
-                return "rounds"
-        elif phase == "rounds":
-            # if self.is_finished:
-            pass
-        return "still"
+#     @property
+#     def did_napoleon_win(self):
+#         if not self.declaration:
+#             return False
+#         n, _ = self._each_side_face_cards
+#         if n == card.NUMBER_OF_FACE_CARDS:
+#             return False
+#         return n >= self.declaration.pip
 
-    def next(self):
-        phase = self.current
-        if phase in ["discard", "first_round", "rounds"]:
-            self.next_turn()
-        self.next_phase()
+#     @property
+#     def did_napoleon_lose(self):
+#         if not self.declaration:
+#             return False
+#         _, n = self._each_side_face_cards
+#         if n == 0:
+#             return True
+#         return n > card.NUMBER_OF_FACE_CARDS - self.declaration.pip
 
-    # next turn
-    def next_turn(self):
-        players = self.state.players
-        index = players.index(self.state.turn)
-        board = self.state.board
-
-        if 0 <= len(board) < len(players):
-            # board is not full
-            if 0 <= index < len(players) - 1:
-                self.state.turn = players[index + 1]
-            else:
-                self.state.turn = players[0]
-        else:
-            winner_id = card.winner(
-                board=board,
-                player_cards=self.state.player_cards,
-                trump_suit=self.state.declaration.suit,
-                is_first_round=self.state.phase == "first_round",
-            )
-            winner = Player(winner_id, self.state)
-            cards = list(board)
-            if self.state.phase == "first_round":
-                cards += self.state.unused
-            faces = [c for c in cards if c.is_faced]
-            winner.face = len(faces) + len(winner.face)
-            self.state.turn = winner
-            self.waiting_next_turn = True
-
-    def next_round(self):
-        del self.state.board
-        del self.state.player_cards
-        self.waiting_next_turn = False
+#     @property
+#     def _each_side_face_cards(self):
+#         napo = 0
+#         allies = 0
+#         for pid in self.player_ids:
+#             key = get_key("role", self.room_id, pid)
+#             role = decode(self.conn.get(key), type=int)
+#             key = get_key("face", self.room_id, pid)
+#             num = decode(self.conn.get(key), type=int)
+#             if role == 1:  # napo
+#                 napo += num
+#             else:
+#                 allies += num
+#         return napo, allies
 
 
 class GameState(object):
@@ -483,12 +341,20 @@ class GameState(object):
         self.room_id = room_id
         self._phase = Phase(self)
 
+    def to_json(self):
+        d = {}
+        for key in dir(self):
+            attr = getattr(self, key)
+            if not key.startswith("_") and not callable(attr):
+                d[key] = to_json(attr)
+        return d
+
+    def create_player(self, user_id):
+        return Player(user_id, self)
+
     @property
     def phase(self):
         return self._phase.current
-
-    def next(self):
-        return self._phase.next()
 
     def flush(self):
         """
@@ -540,9 +406,12 @@ class GameState(object):
         return l
 
     @property
+    def allied_forces(self):
+        return [p for p in self.players if p.role == Role.allied_forces]
+
+    @property
     def rest(self):
-        ints = self.adaptor.get_list("rest", type=int)
-        return card.from_list(ints)
+        return card.from_list(self.adaptor.get_list("rest", type=int))
 
     @rest.setter
     def rest(self, rest):
@@ -568,8 +437,7 @@ class GameState(object):
 
     @property
     def turn(self):
-        user_id = self.adaptor.get("turn", type=int)
-        return Player(user_id, state=self)
+        return self.create_player(self.adaptor.get("turn", type=int))
 
     @turn.setter
     def turn(self, user_id):
@@ -628,3 +496,11 @@ class GameState(object):
     @player_cards.deleter
     def player_cards(self):
         self.adaptor.delete("player_cards")
+
+    @property
+    def player_faces(self):
+        return {p.user_id: p.face for p in self.players}
+
+    @property
+    def number_of_player_hand(self):
+        return {p.user_id: p.number_of_hand for p in self.players}

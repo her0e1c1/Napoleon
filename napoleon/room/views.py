@@ -34,6 +34,12 @@ def logout(request):
     return redirect("napoleon.room.views.index")
 
 
+def _get_game_state(request, room_id):
+    uid = request.user.id
+    sid = request.COOKIES["sessionid"]
+    return state.GameStateWithSession(room_id=room_id, user_id=uid, session_id=sid)
+
+
 def _get_user_state(request, room_id):
     uid = request.user.id
     sid = request.COOKIES["sessionid"]
@@ -55,17 +61,19 @@ def _get_myself(request, room_id):
 def game_state(request, room_id):
     from django.db.models import Q
     q = Q(id=request.user.id)
-    s = state.GameState(room_id)
+    s = _get_game_state(request, room_id)
     for p in s.players:
         q |= Q(id=p.user_id)
     users = models.User.objects.filter(q).all()
     d = s.declaration
     a = s.adjutant
+    jj = s.to_json()
     cxt = {
         # "is_valid_session": st.is_valid_session,
         # "is_player": st.is_player,
         "player_cards": {k: v and v.to_json() for k, v in s.player_cards.items()},
-        # "player_faces": {k: v for k, v in st.player_faces.items()},
+        "number_of_player_hand": s.number_of_player_hand,
+        "player_faces": s.player_faces,
         # "did_napoleon_win": st.did_napoleon_win,
         # "did_napoleon_lose": st.did_napoleon_lose,
         "users": {u.id: {"name": u.get_username()} for u in users},
@@ -80,7 +88,7 @@ def game_state(request, room_id):
         "pass_ids": [p.user_id for p in s.passed_players],
         "napoleon": s.napoleon,
         "adjutant": a and a.to_json(),
-        "unused": [c.to_json() for c in s.unused],
+        "unused": [c.to_json() for c in s.unused_faces],
         "declaration": d and d.to_json(),
     }
 
@@ -90,7 +98,7 @@ def game_state(request, room_id):
             "hand": [c.to_json() for c in myself.hand],
             "role": myself.role and myself.role.value,
             "possible_cards": [int(c) for c in myself.possible_cards],
-            "rest": [r.to_json() for r in s.rest],
+            "rest": s.rest and [r.to_json() for r in s.rest],
         })
 
     return JsonResponse(cxt)

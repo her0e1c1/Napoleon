@@ -72,11 +72,16 @@ class RedisAdaptor(object):
     def get_list(self, key, type=None):
         return decode(self.conn.lrange(self.key(key), 0, -1), type=type)
 
-    def set_list(self, key, iterable, delete=True):
+    def set_list(self, key, iterable, delete=True, unique=True):
+        bak = key
         key = self.key(key)
         if delete:
             self.conn.delete(key)
         if not isinstance(iterable, (list, tuple, set)):
+            # use a list as a unique container
+            # this code is not always perfect
+            if unique and str(iterable) in self.get_list(bak):
+                return
             iterable = [iterable]
         for i in iterable:
             self.conn.lpush(key, i)

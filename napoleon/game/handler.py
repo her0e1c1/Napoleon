@@ -7,7 +7,6 @@ import tornado.websocket
 from tornado.websocket import WebSocketHandler
 import tornado.escape
 from collections import defaultdict
-from napoleon import card
 from . import state
 from . import phase
 
@@ -65,8 +64,10 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         a = phase.get_action(myself.state.phase, action_name)
         if a is None:
             return
+
         action = a(myself)
-        action.act(**json)
-        action.next()
+        if action.can_next:
+            action.act(**json)
+            action.next()
 
         self.write_on_same_room({"update": True})
