@@ -38,6 +38,14 @@ class Privilege(object):
     def possible_cards(self, value):
         return value if self.is_valid else None
 
+    def is_valid(self, value):
+        try:
+            get_user_id(self.player.state.room_id, self.session_id)
+        except InvalidSession:
+            return False
+        else:
+            return True
+
 
 class Myself(object):
 
@@ -55,15 +63,6 @@ class Myself(object):
             return meth(value)
         else:
             return value
-
-    @property
-    def is_valid(self):
-        try:
-            get_user_id(self.player.state.room_id, self.session_id)
-        except InvalidSession:
-            return False
-        else:
-            return True
 
 
 class InvalidSession(Exception):
@@ -145,6 +144,11 @@ class Player(object):
         return self.user_id == other.user_id
 
     @property
+    def is_valid(self):
+        # A player without a session is not valid
+        return False
+
+    @property
     def is_napoleon(self):
         return self.state.napoleon == self.user_id
 
@@ -162,6 +166,28 @@ class Player(object):
             return self == self.state.turn
         else:
             return False
+
+    @property
+    def is_winner(self):
+        if self.state.phase.current != "finished":
+            return None
+        if self.state.phase.did_napoleon_forces_win is True:
+            return True if self.is_napoleon_forces else False
+        if self.state.phase.did_allied_forces_win is True:
+            return True if self.is_allied_forces else False
+        return None  # a game is being played
+
+    @property
+    def is_napoleon_forces(self):
+        return self.role == Role.napoleon_forces
+
+    @property
+    def is_allied_forces(self):
+        return self.role == Role.allied_forces
+
+    @property
+    def current_card(self):
+        return self.state.player_cards.get(str(self.user_id))
 
     def select(self, card):
         """

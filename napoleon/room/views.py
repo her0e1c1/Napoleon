@@ -69,13 +69,11 @@ def game_state(request, room_id):
         myself = _get_myself(request, room_id)
     except state.InvalidSession:
         myself = state.Player(user_id=request.user.id, state=state.GameState(room_id))
-        myself.is_valid = False
 
     cxt = {
         "users": {u.id: {"name": u.get_username()} for u in users},
     }
     cxt["myself"] = myself.to_json()
-    cxt["myself"]["is_valid"] = myself.is_valid
     cxt["state"] = myself.state.to_json()
     return JsonResponse(cxt)
 
