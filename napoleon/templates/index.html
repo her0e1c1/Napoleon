@@ -3,6 +3,13 @@
 
 {% block content %}
 
+<div>
+  <h2 class="text-primary">Napoleon is an exciting card game!</h2>
+  {% if not request.user.is_authenticated() %}
+    <p class="text-muted">If you want to play, you need to signup <a href="{{ url('signup') }}">here</a>.</p>
+  {% endif %}
+<div>
+
 <div id="room_list">
   <h2>ROOM LIST</h2>
   <table class="table table-hover table-striped table-condensed table-bordered">
