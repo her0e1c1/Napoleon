@@ -43,7 +43,7 @@ def _get_game_state(request, room_id):
 def _get_user_state(request, room_id):
     uid = request.user.id
     sid = request.COOKIES["sessionid"]
-    sta = state.GameState(room_id)
+    sta = _get_game_state(request, room_id)
     return state.User(user_id=uid, session_id=sid, state=sta)
 
 

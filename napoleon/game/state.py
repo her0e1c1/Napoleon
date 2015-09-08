@@ -345,7 +345,13 @@ class GameState(object):
         return d
 
     def create_player(self, user_id):
+        if user_id is None:
+            raise ValueError("user_id must not be None")
         return Player(user_id, self)
+
+    @property
+    def phases(self):
+        return self._phase
 
     @property
     def phase(self):
@@ -432,7 +438,9 @@ class GameState(object):
 
     @property
     def turn(self):
-        return self.create_player(self.adaptor.get("turn", type=int))
+        user_id = self.adaptor.get("turn", type=int)
+        if user_id:
+            return self.create_player(user_id)
 
     @turn.setter
     def turn(self, user_id):
@@ -464,8 +472,7 @@ class GameState(object):
 
     @property
     def board(self):
-        ints = self.adaptor.get_list("board", type=int)
-        return card.from_list(ints)
+        return card.from_list(self.adaptor.get_list("board", type=int))
 
     @board.setter
     def board(self, card):
@@ -499,3 +506,11 @@ class GameState(object):
     @property
     def number_of_player_hand(self):
         return {p.user_id: p.number_of_hand for p in self.players}
+
+    @property
+    def number_of_face_cards_of_napoleon_forces(self):
+        return sum([p.face for p in self.players if p.role == Role.napoleon_forces])
+
+    @property
+    def number_of_face_cards_of_allied_forces(self):
+        return sum([p.face for p in self.players if p.role == Role.allied_forces])
