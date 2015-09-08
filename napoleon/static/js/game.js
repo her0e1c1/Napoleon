@@ -98,7 +98,7 @@ app.controller("GameController", ["$scope", function($scope){
 
     this.post = function(url){
         $.post(url, {"csrfmiddlewaretoken": csrf_token}, function(){
-            self.send({"action": "update"});
+            self.send();  // just update on all the player's browsers
         });
     };
 
