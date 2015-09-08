@@ -14,8 +14,12 @@ class GameStateWithSession(object):
         self.privilege = Privilege(Myself(user_id=user_id, session_id=session_id, state=self.state))
 
     def __getattr__(self, name):
-        if getattr(self.privilege, name, None) is not False:
-            return getattr(self.state, name)
+        meth = getattr(self.privilege, name, None)
+        value = getattr(self.state, name)
+        if meth:
+            return meth(value)
+        else:
+            return value
 
 
 class Privilege(object):
@@ -24,17 +28,15 @@ class Privilege(object):
         self.player = player
 
     # for a game state instance
-    @property
-    def rest(self):
-        return self.player.is_napoleon
+    def rest(self, value):
+        return value if self.player.is_napoleon else []
 
     # for a player instance
-    @property
-    def role(self):
-        if self.state.phase == "finished" or self.is_valid:
-            return True
-        else:
-            return False
+    def role(self, value):
+        return value if self.state.phase == "finished" or self.is_valid else None
+
+    def possible_cards(self, value):
+        return value if self.is_valid else None
 
 
 class Myself(object):
@@ -47,8 +49,12 @@ class Myself(object):
         self.privilege = Privilege(self.player)
 
     def __getattr__(self, name):
-        if getattr(self.privilege, name, None) is not False:
-            return getattr(self.player, name)
+        meth = getattr(self.privilege, name, None)
+        value = getattr(self.player, name)
+        if meth:
+            return meth(value)
+        else:
+            return value
 
     @property
     def is_valid(self):
