@@ -72,38 +72,11 @@ def game_state(request, room_id):
         myself.is_valid = False
 
     cxt = {
-        # "is_valid_session": st.is_valid_session,
-        # "is_player": st.is_player,
-        "player_cards": {k: v and v.to_json() for k, v in s.player_cards.items()},
-        "number_of_player_hand": s.number_of_player_hand,
-        "player_faces": s.player_faces,
-        # "did_napoleon_win": st.did_napoleon_win,
-        # "did_napoleon_lose": st.did_napoleon_lose,
         "users": {u.id: {"name": u.get_username()} for u in users},
-        "phase": s.phase,
-        # "is_finished": st.is_finished,
-        # "is_joined": st.is_joined,
-        "is_appropriate_player_number": s._phase.is_appropriate_player_number,
-        "waiting_next_turn": s._phase.waiting_next_turn,
-        "turn": s.turn.user_id,
-        "board": [c.to_json() for c in s.board],
-        "player_ids": [p.user_id for p in s.players],
-        "pass_ids": [p.user_id for p in s.passed_players],
-        "napoleon": s.napoleon,
-        "adjutant": a and a.to_json(),
-        "unused": [c.to_json() for c in s.unused_faces],
-        "declaration": d and d.to_json(),
     }
-
-    myself = _get_myself(request, room_id)
-    if myself:
-        cxt.update({
-            "hand": [c.to_json() for c in myself.hand],
-            "role": myself.role and myself.role.value,
-            "possible_cards": [int(c) for c in myself.possible_cards],
-            "rest": s.rest and [r.to_json() for r in s.rest],
-        })
-
+    cxt["myself"] = myself.to_json()
+    cxt["myself"]["is_valid"] = myself.is_valid
+    cxt["state"] = myself.state.to_json()
     return JsonResponse(cxt)
 
 
