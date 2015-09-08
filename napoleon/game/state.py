@@ -70,23 +70,18 @@ class InvalidSession(Exception):
     pass
 
 
-class JsonMixin(object):
-    attrs = []
-    def to_json(self):
-        for a in self.attrs:
-            pass
-        return {}
-
-
 def to_json(obj):
-    if isinstance(obj, list):
+    if isinstance(obj, (int, str)):
+        return obj
+    elif isinstance(obj, list):
         return [to_json(o) for o in obj]
     elif isinstance(obj, dict):
-        return {k: to_json(v) for k, v in obj.items()}
+        return {k: to_json(v) for k, v in obj.items()
+                if not str(k).startswith("_") and not callable(v)}
     elif hasattr(obj, "to_json"):
         return obj.to_json()
     else:
-        return obj
+        return None
         # raise ValueError("You can't convert %s to json" % obj)
 
 
@@ -138,6 +133,10 @@ class Player(object):
         self.user_id = user_id
         self.state = state
 
+    def to_json(self):
+        # GameState has a players attribute.
+        # so state must be ignored here so as not to be recurcively called
+        return to_json({key: getattr(self, key) for key in dir(self) if key != "state"})
 
     def __repr__(self):
         return "Player {self.user_id}".format(self=self)
@@ -263,21 +262,15 @@ class Player(object):
         else:
             return []
 
-    def to_json(self):
-        d = {}
-        return {"p": 1}
-        # for key in dir(self):
-        #     attr = getattr(self, key)
-        #     if not key.startswith("_") and not callable(attr):
-        #         d[key] = to_json(attr)
-        # return d
-
 
 class Phase(object):
 
     def __init__(self, state):
         self.state = state
         self.adaptor = state.adaptor
+
+    def to_json(self):
+        return to_json({key: getattr(self, key) for key in dir(self) if key != "state"})
 
     @property
     def current(self):
@@ -343,12 +336,7 @@ class GameState(object):
         self._phase = Phase(self)
 
     def to_json(self):
-        d = {}
-        for key in dir(self):
-            attr = getattr(self, key)
-            if not key.startswith("_") and not callable(attr):
-                d[key] = to_json(attr)
-        return d
+        return to_json({key: getattr(self, key) for key in dir(self)})
 
     def create_player(self, user_id):
         if user_id is None:
