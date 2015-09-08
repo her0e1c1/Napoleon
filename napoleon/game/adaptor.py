@@ -1,8 +1,13 @@
+import logging
 import os
 import redis
 
 
+logger = logging.getLogger(__name__)
+
+
 def get_connection(host="localhost", port=6379, db=0):
+    logger.info("Get a redis connection")
     uri = os.environ.get("REDISTOGO_URL")
     if not uri:
         return redis.Redis(host, port=port, db=db)
