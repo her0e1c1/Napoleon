@@ -23,7 +23,7 @@ def get_key(key, room_id, user_id=None):
         "adjutant": "{room_id}_adjutant",  # hash
         "unused": "{room_id}_unused",  # list
         "face": "{room_id}_{user_id}_face",  # value
-        "player_cards": "{room_id}_player_cards",  # hash (int: int)
+        "player_cards": "{room_id}_player_cards",  # hash (int user_id: int card.value)
         "waiting_next_turn": "{room_id}_waiting_next_turn",  # bool
 
         # private
@@ -102,7 +102,7 @@ class RedisAdaptor(object):
         self.conn.hset(self.key(key), k, v)
 
     def rem_dict(self, key, k):
-        self.state.conn.hdel(self.key(key), k)
+        self.conn.hdel(self.key(key), k)
 
     def delete(self, key):
         self.conn.delete(self.key(key))
