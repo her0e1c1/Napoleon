@@ -59,15 +59,18 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
 
         action_name = json.pop("action", "")
         sid = json.pop("session_id")
-        myself = state.Myself(session_id=sid, state=state.GameState(self.room_id))
 
-        a = phase.get_action(myself.state.phase, action_name)
-        if a is None:
-            return
+        try:
+            myself = state.Myself(session_id=sid, state=state.GameState(self.room_id))
+        except state.InvalidSession:
+            return self.write_on_same_room({"update": True})
 
-        action = a(myself)
+        action_class = phase.get_action(myself.state.phase, action_name)
+        if not action_class:
+            return self.write_on_same_room({"update": True})
+
+        action = action_class(myself)
         if action.can_next:
             action.act(**json)
             action.next()
-
         self.write_on_same_room({"update": True})

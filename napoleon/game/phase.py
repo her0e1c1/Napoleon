@@ -2,24 +2,13 @@ from napoleon import card
 
 
 def get_action(phase, action=None):
-    if phase is None:
-        return StartAction
-
-    action_list = [StartAction, DeclareAction, PassAction, AdjutantAction, DiscardAction,
-                   SelectAction
-    ]
-    actions = [cls for cls in action_list if cls.phase == phase or phase in cls.phase]
-
-    if len(actions) == 1:
-        return actions[0]
-
-    if action is None:
+    name = "%sAction" % action.title()
+    action_class = globals().get(name)
+    if action_class is None:
         return None
 
-    for a in actions:
-        name = "%sAction" % action.title()
-        if a.__name__ == name:
-            return a
+    if phase == action_class.phase or phase in action_class.phase:
+        return action_class
 
 
 class Action(object):
@@ -44,7 +33,7 @@ class Action(object):
 
 
 class StartAction(Action):
-    phase = ""
+    phase = None
     next_phase = "declare"
 
     def act(self):
@@ -142,7 +131,7 @@ class SelectAction(Action):
             if self.state.phase == "first_round":
                 cards += self.state.unused
             faces = [c for c in cards if c.is_faced]
-            winner.face = len(faces) + len(winner.face)
+            winner.face = len(faces) + winner.face
             self.state.turn = winner
             self.state._phase.waiting_next_turn = True
 

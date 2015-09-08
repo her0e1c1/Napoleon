@@ -57,9 +57,9 @@ app.controller("GameController", ["$scope", function($scope){
     };
 
     self.select_or_discard = function(card){
-        if (self.phase == 'discard' && self.is_napoleon)
+        if (self.phase == 'discard')
             self.discard(card);
-        else if (self.is_my_turn && (self.phase == 'first_round' || self.phase == 'rounds'))
+        else if (self.phase == 'first_round' || self.phase == 'rounds')
             self.select(card);
     };
 
@@ -70,7 +70,7 @@ app.controller("GameController", ["$scope", function($scope){
         }
         var unused = self.unused.map(function(i){ return i.value;});
         if (self.is_unused_careds_selected())
-            self.send({"unused": unused});
+            self.send({"action": "discard", "unused": unused});
     };
 
     self.unselect = function(card){
@@ -79,17 +79,16 @@ app.controller("GameController", ["$scope", function($scope){
     };
 
     self.select = function(card){
-        if (!self.is_my_turn)
-            return;
-        else if (!elem(self.possible_cards, card.value)){
+        var values = self.myself.possible_cards.map(function(i){ return i.value;});
+        if (!elem(values, card.value)){
             self.impossible_card = card;
             return;
         }
-        self.send({"selected": card.value});
+        self.send({"action": "select", "selected": card.value});
     };
 
     self.determine_adjutant = function(){
-        self.send({"adjutant": self.adjutant});
+        self.send({"action": "adjutant", "adjutant": self.adjutant});
     };
 
     this.declare = function(){
@@ -97,11 +96,13 @@ app.controller("GameController", ["$scope", function($scope){
     };
 
     this.start = function(){
-        self.send();
+        self.send({"action": "start"});
     };
 
     this.post = function(url){
-        $.post(url, {"csrfmiddlewaretoken": csrf_token}, self.update);
+        $.post(url, {"csrfmiddlewaretoken": csrf_token}, function(){
+            self.send({"action": "update"});
+        });
     };
 
     this.join = function(){

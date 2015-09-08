@@ -302,49 +302,31 @@ class Phase(object):
     def are_all_players_passed(self):
         return len(self.state.passed_players) == len(self.state.players)
 
-#     @property
-#     def is_finished(self):
-#         if self.phase != "rounds":
-#             return False
-#         n = 0
-#         for pid in self.player_ids:
-#             key = get_key("hand", self.room_id, pid)
-#             ints = decode(self.conn.lrange(key, 0, -1), type=int)
-#             n += len(ints)
-#         return n == 0
+    @property
+    def is_finished(self):
+        if self.did_napoleon_forces_win or self.did_allied_forces_win:
+            return True
+        return sum([len(p.hand) for p in self.state.players]) == 0
 
-#     @property
-#     def did_napoleon_win(self):
-#         if not self.declaration:
-#             return False
-#         n, _ = self._each_side_face_cards
-#         if n == card.NUMBER_OF_FACE_CARDS:
-#             return False
-#         return n >= self.declaration.pip
+    @property
+    def did_napoleon_forces_win(self):
+        n = self.state.number_of_face_cards_of_napoleon_forces
+        if n == card.NUMBER_OF_FACE_CARDS:
+            return False
+        if self.state.declaration:
+            return n >= self.state.declaration.pip
+        else:
+            return False
 
-#     @property
-#     def did_napoleon_lose(self):
-#         if not self.declaration:
-#             return False
-#         _, n = self._each_side_face_cards
-#         if n == 0:
-#             return True
-#         return n > card.NUMBER_OF_FACE_CARDS - self.declaration.pip
-
-#     @property
-#     def _each_side_face_cards(self):
-#         napo = 0
-#         allies = 0
-#         for pid in self.player_ids:
-#             key = get_key("role", self.room_id, pid)
-#             role = decode(self.conn.get(key), type=int)
-#             key = get_key("face", self.room_id, pid)
-#             num = decode(self.conn.get(key), type=int)
-#             if role == 1:  # napo
-#                 napo += num
-#             else:
-#                 allies += num
-#         return napo, allies
+    @property
+    def did_allied_forces_win(self):
+        n = self.state.number_of_face_cards_of_allied_forces
+        if n == 0:
+            return True
+        if self.state.declaration:
+            return n > card.NUMBER_OF_FACE_CARDS - self.state.declaration.pip
+        else:
+            return False
 
 
 class GameState(object):
