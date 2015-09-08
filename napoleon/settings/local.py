@@ -20,3 +20,5 @@ DATABASES = {
 INTERNAL_IPS = ['127.0.0.1', '0.0.0.0', '192.168.56.1']
 
 FIXTURE_DIRS = [os.path.join(BASE_DIR, 'fixtures')]
+
+WEBSOCKET_PROTOCOL = "ws"
