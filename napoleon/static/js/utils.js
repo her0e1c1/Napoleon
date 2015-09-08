@@ -1,5 +1,6 @@
 
-function toggleFullScreen() {
+function toggleFullScreen(this_) {
+    var self = $(this_);
     if (!document.fullscreenElement &&    // alternative standard method
         !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
             if (document.documentElement.requestFullscreen) {
@@ -11,6 +12,8 @@ function toggleFullScreen() {
             } else if (document.documentElement.webkitRequestFullscreen) {
                 document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
             }
+            self.addClass("glyphicon-resize-small");
+            self.removeClass("glyphicon-fullscreen");
         } else {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
@@ -21,5 +24,7 @@ function toggleFullScreen() {
             } else if (document.webkitExitFullscreen) {
                 document.webkitExitFullscreen();
             }
+            self.removeClass("glyphicon-resize-small");
+            self.addClass("glyphicon-fullscreen");
         }
 }
