@@ -33,7 +33,7 @@ class Privilege(object):
 
     # for a player instance
     def role(self, value):
-        return value if self.state.phase == "finished" or self.is_valid else None
+        return value if self.state.phases.current == "finished" or self.is_valid else None
 
     def possible_cards(self, value):
         return value if self.is_valid else None
@@ -345,11 +345,13 @@ class Phase(object):
 
     @property
     def did_allied_forces_win(self):
-        n = self.state.number_of_face_cards_of_allied_forces
-        if n == 0:
-            return True
+        n = self.state.number_of_face_cards_of_napoleon_forces
+        a = self.state.number_of_face_cards_of_allied_forces
         if self.state.declaration:
-            return n > card.NUMBER_OF_FACE_CARDS - self.state.declaration.pip
+            if n == card.NUMBER_OF_CARDS:
+                return True
+            else:
+                return a > card.NUMBER_OF_FACE_CARDS - self.state.declaration.pip
         else:
             return False
 
@@ -359,7 +361,7 @@ class GameState(object):
     def __init__(self, room_id):
         self.adaptor = RedisAdaptor(room_id=room_id)
         self.room_id = room_id
-        self._phase = Phase(self)
+        self.phase = Phase(self)
 
     def to_json(self):
         return to_json({key: getattr(self, key) for key in dir(self)})
@@ -368,14 +370,6 @@ class GameState(object):
         if user_id is None:
             raise ValueError("user_id must not be None")
         return Player(user_id, self)
-
-    @property
-    def phases(self):
-        return self._phase
-
-    @property
-    def phase(self):
-        return self._phase.current
 
     def flush(self):
         """

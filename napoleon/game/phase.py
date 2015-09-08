@@ -4,21 +4,22 @@ from napoleon.game import card
 def get_action(phase, action=None):
     name = "%sAction" % action.title()
     action_class = globals().get(name)
-    if action_class is None:
+
+    if not (action and action_class):
         return None
 
-    if phase == action_class.phase or phase in action_class.phase:
+    if phase in action_class.phases:
         return action_class
 
 
 class Action(object):
-    phase = ""
+    phases = []
     next_phase = ""
     can_next = True
 
     def __init__(self, player):
         self.player = player
-        self._phase = player.state._phase
+        self.phase = player.state.phase
         self.state = player.state
 
     def act(self, **kw):
@@ -29,11 +30,11 @@ class Action(object):
 
     def next(self):
         if self.next_phase:
-            self.player.state._phase.current = self.next_phase
+            self.player.state.phase.current = self.next_phase
 
 
 class StartAction(Action):
-    phase = None
+    phases = [None]
     next_phase = "declare"
 
     def act(self):
@@ -41,11 +42,11 @@ class StartAction(Action):
 
 
 class DeclareAction(Action):
-    phase = "declare"
+    phases = ["declare"]
 
     @property
     def next_phase(self):
-        if self._phase.is_napoleon_determined:
+        if self.phase.is_napoleon_determined:
             return "adjutant"
 
     def act(self, declaration):
@@ -53,21 +54,21 @@ class DeclareAction(Action):
 
 
 class PassAction(Action):
-    phase = "declare"
+    phases = ["declare"]
 
     @property
     def next_phase(self):
-        if self._phase.is_napoleon_determined:
+        if self.phase.is_napoleon_determined:
             return "adjutant"
-        elif self._phase.are_all_players_passed:
-            return "restart"
 
     def act(self):
         self.player.pass_()
+        if self.phase.are_all_players_passed:
+            self.player.state.start(restart=True)
 
 
 class AdjutantAction(Action):
-    phase = "adjutant"
+    phases = ["adjutant"]
     next_phase = "discard"
 
     def act(self, adjutant):
@@ -77,7 +78,7 @@ class AdjutantAction(Action):
 
 
 class DiscardAction(Action):
-    phase = "discard"
+    phases = ["discard"]
     next_phase = "first_round"
 
     def act(self, unused):
@@ -85,12 +86,14 @@ class DiscardAction(Action):
 
 
 class SelectAction(Action):
-    phase = ["first_round", "rounds"]
+    phases = ["first_round", "rounds"]
 
     @property
     def next_phase(self):
-        if self._phase.current == "first_round" and self._phase.waiting_next_turn:
+        if self.phase.current == "first_round" and self.phase.waiting_next_turn:
             return "rounds"
+        elif self.phase.is_finished:
+            return "finished"
 
     @property
     def can_next(self):
@@ -98,7 +101,7 @@ class SelectAction(Action):
 
     def act(self, selected):
         # check turn user
-        if self.player.state._phase.waiting_next_turn:
+        if self.player.state.phase.waiting_next_turn:
             self.next_round()
         self.player.select(card.from_int(int(selected)))
 
@@ -106,7 +109,7 @@ class SelectAction(Action):
         self.next_turn()
         if self.next_phase:
             st = self.player.state
-            st._phase.current = self.next_phase
+            st.phase.current = self.next_phase
 
     def next_turn(self):
         players = self.state.players
@@ -124,18 +127,18 @@ class SelectAction(Action):
                 board=board,
                 player_cards=self.state.player_cards,
                 trump_suit=self.state.declaration.suit,
-                is_first_round=self.state.phase == "first_round",
+                is_first_round=self.state.phase.current == "first_round",
             )
             winner = self.state.create_player(winner_id)
             cards = list(board)
-            if self.state.phase == "first_round":
+            if self.state.phase.current == "first_round":
                 cards += self.state.unused
             faces = [c for c in cards if c.is_faced]
             winner.face = len(faces) + winner.face
             self.state.turn = winner
-            self.state._phase.waiting_next_turn = True
+            self.state.phase.waiting_next_turn = True
 
     def next_round(self):
         del self.state.board
         del self.state.player_cards
-        self.state._phase.waiting_next_turn = False
+        self.state.phase.waiting_next_turn = False

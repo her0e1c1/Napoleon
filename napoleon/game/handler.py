@@ -65,7 +65,7 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         except state.InvalidSession:
             return self.write_on_same_room({"update": True})
 
-        action_class = phase.get_action(myself.state.phase, action_name)
+        action_class = phase.get_action(myself.state.phase.current, action_name)
         if not action_class:
             return self.write_on_same_room({"update": True})
 

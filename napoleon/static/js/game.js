@@ -54,9 +54,9 @@ app.controller("GameController", ["$scope", function($scope){
     };
 
     self.select_or_discard = function(card){
-        if (self.phase == 'discard')
+        if (self.state.phase.current == 'discard')
             self.discard(card);
-        else if (self.phase == 'first_round' || self.phase == 'rounds')
+        else if (self.state.phase.current == 'first_round' || self.state.phase.current == 'rounds')
             self.select(card);
     };
 

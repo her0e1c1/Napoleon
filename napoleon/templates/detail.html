@@ -35,47 +35,47 @@
     Connection Closed<br>
     Please reload again
   </div>
-  <div ng-if="!game.phase" ng-switch="!game.myself.is_joined">
+  <div ng-if="!game.state.phase.current" ng-switch="!game.myself.is_joined">
     <span ng-switch-when="true">Do you want to paly Napoleon?</span>
     <span ng-switch-when="false">Waiting for other players to join ...</span>
   </div>
-  <div ng-if="game.phase == 'declare'" ng-switch="!game.myself.is_passed">
+  <div ng-if="game.state.phase.current == 'declare'" ng-switch="!game.myself.is_passed">
     <span ng-switch-when="true">Do you declare as Napoleon?</span>
     <span ng-switch-when="false">passed</span>
   </div>
-  <div ng-if="game.phase == 'adjutant'" ng-switch="game.myself.is_napoleon">
+  <div ng-if="game.state.phase.current == 'adjutant'" ng-switch="game.myself.is_napoleon">
     <span ng-switch-when="true">Decide an adjutant</span>
     <span ng-switch-when="false">Napoleon is deciding an adjutant...</span>
   </div>
-  <div ng-if="game.phase == 'discard'">
+  <div ng-if="game.state.phase.current == 'discard'">
     <div ng-if="game.myself.is_napoleon">
-      <span ng-if="!game.phases.is_unused_careds_selected()">Select unnecessary cards</span>
+      <span ng-if="!game.state.phase.is_unused_careds_selected()">Select unnecessary cards</span>
     </div>
     <div ng-if="!game.myself.is_napoleon">
       Napoleon is exchanging the cards ...
     </div>
   </div>
-  <div ng-if="game.phases.waiting_next_turn" ng-class="{'alert alert-success': game.myself.is_my_turn, 'alert alert-danger': !game.myself.is_my_turn}">
+  <div ng-if="game.state.phase.waiting_next_turn" ng-class="{'alert alert-success': game.myself.is_my_turn, 'alert alert-danger': !game.myself.is_my_turn}">
     [[ game.users[game.turn.user_id].name ]] [[ game.player_cards[game.turn.user_id].str ]] won
   </div>
-  <div ng-if="(game.phase == 'first_round' || game.phase == 'rounds') && game.myself.is_my_turn"  class="alert alert-info" role="alert">It's your turn</div>
+  <div ng-if="(game.state.phase.current == 'first_round' || game.state.phase.current == 'rounds') && game.myself.is_my_turn"  class="alert alert-info" role="alert">It's your turn</div>
   <p ng-if="game.impossible_card" class="alert alert-warning" role="alert">You can't select [[ game.impossible_card.str]]</p>
-  <div ng-if="game.phase == 'finished'">
-      <div ng-if="game.phases.did_napoleon_forces_win" ng-class="{'alert alert-success': game.role == 1, 'alert alert-danger': game.role != 1}">Napoleon won!</div>
-      <div ng-if="game.phases.did_allied_forces_win" ng-class="{'alert alert-success': game.role != 1, 'alert alert-danger': game.role == 1}" >Allied forces won!</div>
+  <div ng-if="game.state.phase.current == 'finished'">
+      <div ng-if="game.state.phase.did_napoleon_forces_win" ng-class="{'alert alert-success': game.role == 1, 'alert alert-danger': game.role != 1}">Napoleon won!</div>
+      <div ng-if="game.state.phase.did_allied_forces_win" ng-class="{'alert alert-success': game.role != 1, 'alert alert-danger': game.role == 1}" >Allied forces won!</div>
   </div>
 {% endmacro %}
 
 {% macro start() %}
-  <div ng-if="!game.state.phase">
+  <div ng-if="!game.state.phase.current">
     <button ng-if="game.myself.is_joined" ng-click="game.quit()" class="btn btn-default">Leave</button>
     <button ng-if="!game.myself.is_joined" ng-click="game.join()" class="btn btn-default">Play</button>
-    <button ng-if="game.state.phases.is_appropriate_player_number" ng-click="game.start()" class="btn btn-primary">Start</button>
+    <button ng-if="game.state.phase.is_appropriate_player_number" ng-click="game.start()" class="btn btn-primary">Start</button>
   </div>
 {% endmacro %}
 
 {% macro declaration() %}
-  <div ng-if="game.state.phase == 'declare'">
+  <div ng-if="game.state.phase.current == 'declare'">
     <div class="form-inline">
       <div class="form-group">
         <label>Declaration</label>
@@ -89,8 +89,10 @@
       </div>
     </div>
   </div>
+{% endmacro %}
 
-  <div ng-if="game.state.phase == 'adjutant' && game.myself.is_napoleon">
+{% macro adjutant() %}
+  <div ng-if="game.state.phase.current == 'adjutant' && game.myself.is_napoleon">
     <div class="form-inline">
       <div class="form-group">
         <label>Adjutant</label>
@@ -129,7 +131,7 @@
               C([[p.number_of_hand ]])
             </strong>
             <span ng-if="p.is_napoleon" class="label label-info">N</span>
-            <span ng-if="game.state.phases.current == 'declare' && p.is_passed" class="label label-default">PASS</span>
+            <span ng-if="game.state.phase.current == 'declare' && p.is_passed" class="label label-default">PASS</span>
           </td>
         </tr>
         <tr>
@@ -139,12 +141,12 @@
       </table>
     </div>
 
-    <ul ng-if="game.phase == 'first_round'" class="list-inline">
+    <ul ng-if="game.state.phase.current == 'first_round'" class="list-inline">
       <span class="label label-info">Face Cards</span>
       <li ng-repeat="c in game.state.unused_faces">[[ c.str ]]</li>
     </ul>
 
-    <ul ng-if="game.phase == 'discard'" class="list-inline">
+    <ul ng-if="game.state.phase.current == 'discard'" class="list-inline">
       <span class="label label-default">Selected</span>
       <li ng-repeat="c in game.unused" ng-click="game.unselect(c)"><button class="btn btn-default">[[ c.str ]]</button></li>
     </ul>
