@@ -115,12 +115,12 @@ class User(object):
         self.adaptor.set_list("player_ids", self.user_id, delete=False)
         self.adaptor.set_dict("map", self.user_id, self.session_id)
 
-    def quit(self, force=False):
+    def quit(self):
         self.adaptor.rem_list("player_ids", self.user_id)
         self.adaptor.rem_dict("map", self.user_id)
 
     def reset(self):
-        self.quit(force=True)
+        self.quit()
         self.join()
 
 
