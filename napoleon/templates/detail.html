@@ -79,13 +79,13 @@
     <div class="form-inline">
       <div class="form-group">
         <label>Declaration</label>
-        <select ng-model="game.declaration" ng-disabled="game.myself.is_napoleon || game.myself.is_passed" ng-change="game.declare()" class="form-control">
+        <select ng-model="game.declaration" ng-disabled="game.myself.is_napoleon || game.myself.is_passed || game.disabled" ng-change="game.declare()" class="form-control">
           <option ng-repeat="d in {{ declarations }}" ng-if="!game.state.declaration || d.value > game.state.declaration.value" value="[[ d.value ]]">[[ d.str ]]</option>
         </select>
       </div>
       <div class="form-group">
         <label class="sr-only">Pass</label>
-        <button ng-if="!game.myself.is_napoleon" ng-disabled="game.myself.is_passed" ng-click="game.pass()" class="btn btn-default form-control">Pass</button>
+        <button ng-if="!game.myself.is_napoleon" ng-disabled="game.myself.is_passed || game.disabled" ng-click="game.pass()" class="btn btn-default form-control">Pass</button>
       </div>
     </div>
   </div>
@@ -96,7 +96,7 @@
     <div class="form-inline">
       <div class="form-group">
         <label>Adjutant</label>
-        <select ng-model="game.adjutant" ng-change="game.determine_adjutant()" class="form-control">
+        <select ng-model="game.adjutant" ng-change="game.determine_adjutant()" ng-disabled="game.disabled" class="form-control">
           <option ng-repeat="d in {{ deck }}" value="[[ d.value ]]">[[ d.str ]]</option>
         </select>
       </div>
@@ -107,7 +107,7 @@
 {% macro hand() %}
   <div id="hand">
     <ul class="list-inline"><li ng-repeat="c in game.myself.hand | orderBy:'order_by_suit' track by $index">
-        <button ng-click="game.select_or_discard(c)" ng-disabled="!game.myself.is_my_turn" class="btn btn-default">[[ c.str ]]</button>
+        <button ng-click="game.select_or_discard(c)" ng-disabled="!game.myself.is_my_turn || game.disabled" class="btn btn-default">[[ c.str ]]</button>
     </li></ul>
   </div>
 {% endmacro %}
