@@ -9,8 +9,8 @@ logger = logging.getLogger(__name__)
 
 class GameStateWithSession(object):
 
-    def __init__(self, room_id, user_id, session_id):
-        self.state = GameState(room_id)
+    def __init__(self, adaptor, user_id, session_id):
+        self.state = GameState(adaptor)
         self.privilege = Privilege(Myself(user_id=user_id, session_id=session_id, state=self.state))
 
     def __getattr__(self, name):
@@ -43,7 +43,7 @@ class Myself(object):
 
     def __init__(self, state, session_id, user_id=None):
         if user_id is None:
-            user_id = get_user_id(state.room_id, session_id)
+            user_id = get_user_id(state.adaptor, session_id)
         self.player = Player(user_id, state)
         self.session_id = session_id
         self.privilege = Privilege(self.player)
@@ -92,8 +92,7 @@ class Role(enum.Enum):
     allied_forces = 2
 
 
-def get_user_id(room_id, session_id):
-    adaptor = RedisAdaptor(room_id)
+def get_user_id(adaptor, session_id):
     user_dict = adaptor.get_dict("map")
     inv = {v: k for k, v in user_dict.items()}
     user_id = inv.get(session_id)
@@ -108,7 +107,7 @@ class User(object):
         """
         Make sure user id is valid.
         """
-        self.adaptor = RedisAdaptor(room_id=state.room_id, user_id=user_id)
+        self.adaptor = state.adaptor
         self.user_id = user_id
         self.session_id = session_id
         self.state = state
@@ -131,7 +130,7 @@ class Player(object):
     def __init__(self, user_id, state):
         if user_id is None:
             raise ValueError("user_id must not be None")
-        self.adaptor = RedisAdaptor(room_id=state.room_id, user_id=user_id)
+        self.adaptor = RedisAdaptor(state.room_id, user_id, state.adaptor.conn)
         self.user_id = user_id
         self.state = state
 
@@ -366,9 +365,9 @@ class Phase(object):
 
 class GameState(object):
 
-    def __init__(self, room_id):
-        self.adaptor = RedisAdaptor(room_id=room_id)
-        self.room_id = room_id
+    def __init__(self, adaptor):
+        self.adaptor = adaptor
+        self.room_id = adaptor.room_id
         self.phase = Phase(self)
 
     def to_json(self):

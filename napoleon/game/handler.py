@@ -9,6 +9,7 @@ import tornado.escape
 from collections import defaultdict
 from . import state
 from . import phase
+from . adaptor import RedisAdaptor
 
 
 logger = logging.getLogger(__name__)
@@ -60,8 +61,9 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         action_name = json.pop("action", "")
         sid = json.pop("session_id")
 
+        adaptor = RedisAdaptor(self.room_id)
         try:
-            myself = state.Myself(session_id=sid, state=state.GameState(self.room_id))
+            myself = state.Myself(session_id=sid, state=state.GameState(adaptor))
         except state.InvalidSession:
             return self.write_on_same_room({"update": True})
 

@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from napoleon.game import state
 from napoleon.room.models import Room
 from napoleon.game import card
+from napoleon.game.adaptor import RedisAdaptor
 
 
 class DecideTestCase(TestCase):
@@ -67,7 +68,7 @@ class StateTestCase(TestCase):
             self.player_clients.append(c)
 
         self.room = Room.objects.get(pk=1)
-        self.state = state.GameState(self.room.id)
+        self.state = state.GameState(RedisAdaptor(self.room.id))
         self.url_join = reverse("napoleon.room.views.join", kwargs={"room_id": self.room.id})
         self.url_quit = reverse("napoleon.room.views.quit", kwargs={"room_id": self.room.id})
 
