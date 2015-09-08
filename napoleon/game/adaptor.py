@@ -1,18 +1,8 @@
 import logging
-import os
-import redis
+from django.conf import settings
 
 
 logger = logging.getLogger(__name__)
-
-
-def get_connection(host="localhost", port=6379, db=0):
-    logger.info("Get a redis connection")
-    uri = os.environ.get("REDISTOGO_URL")
-    if not uri:
-        return redis.Redis(host, port=port, db=db)
-    else:
-        return redis.from_url(uri)
 
 
 def get_key(key, room_id, user_id=None):
@@ -64,7 +54,7 @@ def decode(s, type=None):
 class RedisAdaptor(object):
 
     def __init__(self, room_id, user_id=None, conn=None):
-        self.conn = conn or get_connection()
+        self.conn = conn or settings.REDIS_CONNECTION
         self.room_id = room_id
         self.user_id = user_id
 

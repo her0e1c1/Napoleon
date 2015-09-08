@@ -110,3 +110,17 @@ STATICFILES_DIRS = [
 ]
 
 SESSION_COOKIE_HTTPONLY = False
+
+
+def get_connection(host="localhost", port=6379, db=0):
+    import redis
+    # logger.info("Get a redis connection")
+    uri = os.environ.get("REDISTOGO_URL")
+    if not uri:
+        return redis.Redis(host, port=port, db=db)
+    else:
+        return redis.from_url(uri)
+# On heroku the number of connections is limited.
+# For now, use only one redes connection.
+# What problems happend?
+REDIS_CONNECTION = get_connection()
