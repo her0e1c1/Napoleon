@@ -61,3 +61,5 @@ LOGGING = {
         },
     }
 }
+
+WEBSOCKET_PROTOCOL = "wss"
