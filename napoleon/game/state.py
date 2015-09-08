@@ -193,6 +193,9 @@ class Player(object):
         """
         A player selects a card
         """
+        if len(self.state.board) >= len(self.state.players):
+            raise ValueError("A player can't select a card because the board is full.")
+
         if self.can_betray(card):
             if self.role == Role.napoleon_forces:
                 self.role = Role.allied_forces
@@ -377,10 +380,13 @@ class GameState(object):
         """
         self.adaptor.flush()
 
-    def start(self):
+    def start(self, restart=False):
         """
         Distribute cards to each player and leave the rest of cards which napoleon can change
         """
+        if restart:
+            del self.passed_players
+
         players = list(self.players)
         number_of_players = len(players)
         if number_of_players <= 2:
@@ -419,6 +425,10 @@ class GameState(object):
         for pid in self.adaptor.get_list("pass_ids", type=int):
             l.append(Player(user_id=pid, state=self))
         return l
+
+    @passed_players.deleter
+    def passed_players(self):
+        self.adaptor.delete("pass_ids")
 
     @property
     def allied_forces(self):
@@ -506,25 +516,17 @@ class GameState(object):
 
     @player_cards.setter
     def player_cards(self, value):
-        k, v = value
-        self.adaptor.set_dict("player_cards", k, int(v))
+        user_id, card = value
+        self.adaptor.set_dict("player_cards", user_id, int(card))
 
     @player_cards.deleter
     def player_cards(self):
         self.adaptor.delete("player_cards")
 
     @property
-    def player_faces(self):
-        return {p.user_id: p.face for p in self.players}
-
-    @property
-    def number_of_player_hand(self):
-        return {p.user_id: p.number_of_hand for p in self.players}
-
-    @property
     def number_of_face_cards_of_napoleon_forces(self):
-        return sum([p.face for p in self.players if p.role == Role.napoleon_forces])
+        return sum([p.face for p in self.players if p.is_napoleon_forces])
 
     @property
     def number_of_face_cards_of_allied_forces(self):
-        return sum([p.face for p in self.players if p.role == Role.allied_forces])
+        return sum([p.face for p in self.players if p.is_allied_forces])
