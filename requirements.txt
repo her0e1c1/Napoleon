@@ -14,6 +14,7 @@ PyYAML
 tornado
 redis
 django-sslify>=0.2.0
+raven
 
 #static
 #wsgiref
