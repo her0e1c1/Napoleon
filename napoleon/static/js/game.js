@@ -6,40 +6,37 @@ app.config(function($interpolateProvider) {
 });
 
 app.controller("GameController", ["$scope", function($scope){
-    var wsGame;
+    var wsGame = new WebSocket(urls.room);
     var self = this;
     self.is_error = false;
     self.is_close = false;
+    self.declaration = null;
     self.unused = [];
 
+    // When a player selects a card which can't be on a board, warn the card
+    self.impossible_card = null;
+
     this.update = function(){
-        $.get(urls.state + self.game_id, {}, function(data){
+        $.get(urls.state, {}, function(data){
             $.extend(self, data);
-
             self.impossible_card = null;
-            self.is_my_turn = self.user_id == data.turn;
-            self.is_napoleon = self.user_id == data.napoleon;
-            self.is_passed = elem(self.pass_ids, self.user_id);
-
             $scope.$apply();
         });
     };
+    self.update();  // shoud update at init
 
-    $scope.$watch("game.game_id", function(){
-        self.update();
-        wsGame = new WebSocket(urls.room + self.game_id);
-        wsGame.onmessage = function (evt) {
-            var json = JSON.parse(evt.data);
-            if (json.update)
-                self.update();  // 本来はAjaxでなくWebSocketで更新すべき
-        };
-        wsGame.onerror = function(err){  // when is this called?
-            self.is_error = true;
-        };
-        wsGame.onclose = function(evt){
-            self.is_close = true;
-        };
-    });
+    wsGame = new WebSocket(urls.room);
+    wsGame.onmessage = function (evt) {
+        var json = JSON.parse(evt.data);
+        if (json.update)
+            self.update();  // 本来はAjaxでなくWebSocketで更新すべき
+    };
+    wsGame.onerror = function(err){  // when is this called?
+        self.is_error = true;
+    };
+    wsGame.onclose = function(evt){
+        self.is_close = true;
+    };
 
     this.send = function (json){
         if (json === undefined)

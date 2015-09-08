@@ -2,13 +2,14 @@
 
 {% block javascript %}
  <script type="text/javascript">
+   var csrf_token = "{{ csrf_token }}";
+   var user_id={{ request.user.id }};
    var urls = {
-     "state": "/state/",  // {room_id}
-     "room": "ws://" + location.host + "/ws/",
+     "state": "{{ url('napoleon.room.views.game_state', kwargs={'room_id': room.id})  }}",
      "join": "{{ url('napoleon.room.views.join', kwargs={'room_id': room.id}) }}",
      "quit": "{{ url('napoleon.room.views.quit', kwargs={'room_id': room.id}) }}",
+     "room": "ws://" + location.host + "/ws/{{ room.id }}",
    };
-   var csrf_token = "{{ csrf_token }}";
  </script>
  <script type="text/javascript" src="{{ static('js/game.js') }}"></script>
 {% endblock %}
@@ -20,7 +21,7 @@
     You probably logged out or logged in on another browser,
     so you need to create a new room if you want to play.
     <br>
-    <form action="{{ url('napoleon.room.views.reset', kwargs={'room_id': game.id}) }}" method="post">
+    <form action="{{ url('napoleon.room.views.reset', kwargs={'room_id': room.id}) }}" method="post">
       {{ csrf_input }}
       Or you can reset your session on this room.
       <input type="submit" value="reset">
@@ -103,13 +104,7 @@
 
 
 {% block content %}
-  <div ng-controller="GameController as game"
-       ng-init="
-       game.user_id={{ request.user.id }};
-       game.game_id={{ game.id }};
-       game.deck={{ deck }};
-       game.declarations={{ declarations }};
-       ">
+  <div ng-controller="GameController as game">
 
   <table class="table table-condensed">
     <tr>
