@@ -38,14 +38,6 @@ class Privilege(object):
     def possible_cards(self, value):
         return value if self.is_valid else None
 
-    def is_valid(self, value):
-        try:
-            get_user_id(self.player.state.room_id, self.session_id)
-        except InvalidSession:
-            return False
-        else:
-            return True
-
 
 class Myself(object):
 
@@ -63,6 +55,16 @@ class Myself(object):
             return meth(value)
         else:
             return value
+
+    @property
+    def is_valid(self):
+        try:
+            get_user_id(self.state.adaptor, self.session_id)
+        except InvalidSession:
+            return False
+        else:
+            return True
+
 
 
 class InvalidSession(Exception):
