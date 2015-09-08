@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from napoleon.game import card
 from napoleon.game import state
+from napoleon.game.adaptor import RedisAdaptor
 from . import models
 
 
@@ -34,32 +35,33 @@ def logout(request):
     return redirect("napoleon.room.views.index")
 
 
-def _get_game_state(request, room_id):
+def _get_game_state(request, adaptor):
     uid = request.user.id
     sid = request.COOKIES["sessionid"]
-    return state.GameStateWithSession(room_id=room_id, user_id=uid, session_id=sid)
+    return state.GameStateWithSession(adaptor, user_id=uid, session_id=sid)
 
 
-def _get_user_state(request, room_id):
+def _get_user_state(request, adaptor):
     uid = request.user.id
     sid = request.COOKIES["sessionid"]
-    sta = _get_game_state(request, room_id)
+    sta = _get_game_state(request, adaptor)
     return state.User(user_id=uid, session_id=sid, state=sta)
 
 
-def _get_myself(request, room_id):
+def _get_myself(request, adaptor):
     sid = request.COOKIES["sessionid"]
-    st = state.GameState(room_id)
+    st = state.GameState(adaptor)
     return state.Myself(session_id=sid, state=st)
 
 
 @require_http_methods(["GET"])
 @login_required
 def game_state(request, room_id):
+    adaptor = RedisAdaptor(room_id)
     try:
-        myself = _get_myself(request, room_id)
+        myself = _get_myself(request, adaptor)
     except state.InvalidSession:
-        myself = state.Player(user_id=request.user.id, state=state.GameState(room_id))
+        myself = state.Player(user_id=request.user.id, state=state.GameState(adaptor))
 
     users = models.get_by_user_id([p.user_id for p in myself.state.players])
     cxt = {
@@ -94,19 +96,22 @@ def create(request):
 @login_required
 @require_http_methods(["POST"])
 def join(request, room_id):
-    _get_user_state(request, room_id).join()
+    adaptor = RedisAdaptor(room_id)
+    _get_user_state(request, adaptor).join()
     return redirect("napoleon.room.views.detail", game_id=room_id)
 
 
 @login_required
 @require_http_methods(["POST"])
 def quit(request, room_id):
-    _get_user_state(request, room_id).quit()
+    adaptor = RedisAdaptor(room_id)
+    _get_user_state(request, adaptor).quit()
     return redirect("napoleon.room.views.detail", game_id=room_id)
 
 
 @login_required
 @require_http_methods(["POST"])
 def reset(request, room_id):
-    _get_user_state(request, room_id).reset()
+    adaptor = RedisAdaptor(room_id)
+    _get_user_state(request, adaptor).reset()
     return redirect("napoleon.room.views.detail", game_id=room_id)
