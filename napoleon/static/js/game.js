@@ -16,6 +16,9 @@ app.controller("GameController", ["$scope", function($scope){
     // When a player selects a card which can't be on a board, warn the card
     self.impossible_card = null;
 
+    // When a player sends data to a server, he can't select any before he gets its response.
+    self.disabled = false;
+
     this.update = function(){
         $.get(urls.state, {}, function(data){
             $.extend(self, data);
@@ -27,6 +30,7 @@ app.controller("GameController", ["$scope", function($scope){
 
     wsGame = new WebSocket(urls.room);
     wsGame.onmessage = function (evt) {
+        self.disabled = false;
         var json = JSON.parse(evt.data);
         if (json.update)
             self.update();  // 本来はAjaxでなくWebSocketで更新すべき
@@ -44,6 +48,7 @@ app.controller("GameController", ["$scope", function($scope){
         json["session_id"] = $.cookie("sessionid");
         // for (var i = 0; i < 10; i++)
         wsGame.send(JSON.stringify(json));
+        self.disabled = true;
     };
 
     this.pass = function(){
