@@ -67,6 +67,7 @@ def game_state(request, room_id):
         "myself": myself.to_json(),
         "state": myself.state.to_json(),
     }
+    cxt["myself"]["is_valid"] = myself.is_valid
     return JsonResponse(cxt)
 
 
