@@ -79,6 +79,8 @@ def to_json(obj):
                 if not str(k).startswith("_") and not callable(v)}
     elif hasattr(obj, "to_json"):
         return obj.to_json()
+    elif isinstance(obj, enum.Enum):
+        return obj.name
     else:
         return None
         # raise ValueError("You can't convert %s to json" % obj)

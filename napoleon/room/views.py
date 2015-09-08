@@ -72,9 +72,9 @@ def game_state(request, room_id):
 
     cxt = {
         "users": {u.id: {"name": u.get_username()} for u in users},
+        "myself": myself.to_json(),
+        "state": myself.state.to_json(),
     }
-    cxt["myself"] = myself.to_json()
-    cxt["state"] = myself.state.to_json()
     return JsonResponse(cxt)
 
 
