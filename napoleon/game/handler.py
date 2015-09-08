@@ -27,9 +27,11 @@ class WSHandlerMixin(object):
 
     def open(self, room_id):
         WSHandlerMixin.connections[room_id].add(self)
+        self.adaptor = RedisAdaptor(room_id)
 
     def on_close(self):
         WSHandlerMixin.connections[self.room_id].remove(self)
+        # self.adaptor.conn.close()  # ???
 
     def to_json(self, message):
         return tornado.escape.json_decode(message)
@@ -61,9 +63,8 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         action_name = json.pop("action", "")
         sid = json.pop("session_id")
 
-        adaptor = RedisAdaptor(self.room_id)
         try:
-            myself = state.Myself(session_id=sid, state=state.GameState(adaptor))
+            myself = state.Myself(session_id=sid, state=state.GameState(self.adaptor))
         except state.InvalidSession:
             return self.write_on_same_room({"update": True})
 
