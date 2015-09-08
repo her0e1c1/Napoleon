@@ -104,6 +104,13 @@
   </div>
 {% endmacro %}
 
+{% macro hand() %}
+  <div id="hand">
+    <ul class="list-inline"><li ng-repeat="c in game.myself.hand | orderBy:'order_by_suit' track by $index">
+        <button ng-click="game.select_or_discard(c)" ng-disabled="!game.myself.is_my_turn" class="btn btn-default">[[ c.str ]]</button>
+    </li></ul>
+  </div>
+{% endmacro %}
 
 {% block content %}
   <div ng-controller="GameController as game">
@@ -154,12 +161,8 @@
     {{ message() }}
     {{ start() }}
     {{ declaration() }}
-
-    <div id="hand">
-      <ul class="list-inline"><li ng-repeat="c in game.myself.hand | orderBy:'order_by_suit' track by $index">
-          <button ng-click="game.select_or_discard(c)" ng-disabled="!game.myself.is_my_turn" class="btn btn-default">[[ c.str ]]</button>
-      </li></ul>
-    </div>
+    {{ adjutant() }}
+    {{ hand() }}
 
   </div>
 {% endblock %}
