@@ -56,20 +56,12 @@ def _get_myself(request, room_id):
 @require_http_methods(["GET"])
 @login_required
 def game_state(request, room_id):
-    from django.db.models import Q
-    q = Q(id=request.user.id)
-    s = _get_game_state(request, room_id)
-    for p in s.players:
-        q |= Q(id=p.user_id)
-    users = models.User.objects.filter(q).all()
-    d = s.declaration
-    a = s.adjutant
-    jj = s.to_json()
     try:
         myself = _get_myself(request, room_id)
     except state.InvalidSession:
         myself = state.Player(user_id=request.user.id, state=state.GameState(room_id))
 
+    users = models.get_by_user_id([p.user_id for p in myself.state.players])
     cxt = {
         "users": {u.id: {"name": u.get_username()} for u in users},
         "myself": myself.to_json(),
