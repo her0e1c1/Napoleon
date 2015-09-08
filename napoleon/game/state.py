@@ -198,6 +198,9 @@ class Player(object):
         if len(self.state.board) >= len(self.state.players):
             raise ValueError("A player can't select a card because the board is full.")
 
+        if card not in self.possible_cards:
+            raise ValueError("A player can't select a card he doesn't have.")
+
         if self.can_betray(card):
             if self.role == Role.napoleon_forces:
                 self.role = Role.allied_forces
@@ -239,9 +242,8 @@ class Player(object):
         for u in unused:
             try:
                 hand.remove(u)
-            except ValueError:  # malice request
-                # logger
-                return
+            except ValueError:
+                raise ValueError("A player can't discard a card he doesn't have.")
 
         self.hand = hand
         self.state.unused = unused
