@@ -117,9 +117,9 @@
     </tr>
   </table>
 
-    <div id="player_ids">
+    <div>
       <table class="table table-bordered">
-        <tr id="player">
+        <tr>
           <th>Players</th>
           <td ng-repeat="p in game.state.players track by $index" ng-class="{active: p.user_id == game.turn.user_id}">
             <span ng-if="p.user_id == game.myself.user_id" class="glyphicon glyphicon-star"></span>

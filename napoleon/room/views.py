@@ -84,7 +84,6 @@ def game_state(request, room_id):
 def detail(request, game_id):
     room = get_object_or_404(models.Room, pk=game_id)
     return render(request, "detail.html", {
-        "game": room,
         "room": room,
         "deck": [c.to_json() for c in card.deck],
         "declarations": [d.to_json() for d in card.declarations],
