@@ -12,7 +12,6 @@ def get_connection(host="localhost", port=6379, db=0):
 
 def get_key(key, room_id, user_id=None):
     fmt = {
-        # public
         "phase": "{room_id}_phase",  # value
         "napoleon": "{room_id}_napoleon",  # value
         "player_ids": "{room_id}_player_ids",  # sorted set
@@ -25,8 +24,6 @@ def get_key(key, room_id, user_id=None):
         "face": "{room_id}_{user_id}_face",  # value
         "player_cards": "{room_id}_player_cards",  # hash (int user_id: int card.value)
         "waiting_next_turn": "{room_id}_waiting_next_turn",  # bool
-
-        # private
         "role": "{room_id}_{user_id}_role",  # value (0: napo, 1:rengo)
         "rest": "{room_id}_rest",  # list
         "hand": "{room_id}_{user_id}_hand",  # list

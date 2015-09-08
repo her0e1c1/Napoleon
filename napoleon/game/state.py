@@ -83,7 +83,6 @@ def to_json(obj):
         return obj.name
     else:
         return None
-        # raise ValueError("You can't convert %s to json" % obj)
 
 
 class Role(enum.Enum):
