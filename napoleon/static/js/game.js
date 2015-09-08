@@ -42,6 +42,7 @@ app.controller("GameController", ["$scope", function($scope){
         if (json === undefined)
             json = {};
         json["session_id"] = $.cookie("sessionid");
+        // for (var i = 0; i < 10; i++)
         wsGame.send(JSON.stringify(json));
     };
 
