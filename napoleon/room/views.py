@@ -50,10 +50,7 @@ def _get_user_state(request, room_id):
 def _get_myself(request, room_id):
     sid = request.COOKIES["sessionid"]
     st = state.GameState(room_id)
-    try:
-        return state.Myself(session_id=sid, state=st)
-    except:
-        return None
+    return state.Myself(session_id=sid, state=st)
 
 
 @require_http_methods(["GET"])
@@ -68,6 +65,12 @@ def game_state(request, room_id):
     d = s.declaration
     a = s.adjutant
     jj = s.to_json()
+    try:
+        myself = _get_myself(request, room_id)
+    except state.InvalidSession:
+        myself = state.Player(user_id=request.user.id, state=state.GameState(room_id))
+        myself.is_valid = False
+
     cxt = {
         # "is_valid_session": st.is_valid_session,
         # "is_player": st.is_player,
