@@ -54,8 +54,8 @@
       Napoleon is exchanging the cards ...
     </div>
   </div>
-  <div ng-if="game.phases.waiting_next_turn" ng-class="{'alert alert-success': game.myself.is_my_turn, 'alert alert-danger': !game.is_my_turn}">
-    [[ game.users[game.turn].name ]] [[ game.player_cards[game.turn].str ]] won
+  <div ng-if="game.phases.waiting_next_turn" ng-class="{'alert alert-success': game.myself.is_my_turn, 'alert alert-danger': !game.myself.is_my_turn}">
+    [[ game.users[game.turn.user_id].name ]] [[ game.player_cards[game.turn.user_id].str ]] won
   </div>
   <div ng-if="(game.phase == 'first_round' || game.phase == 'rounds') && game.myself.is_my_turn"  class="alert alert-info" role="alert">It's your turn</div>
   <p ng-if="game.impossible_card" class="alert alert-warning" role="alert">You can't select [[ game.impossible_card.str]]</p>
@@ -65,9 +65,16 @@
   </div>
 {% endmacro %}
 
+{% macro start() %}
+  <div ng-if="!game.state.phase">
+    <button ng-if="game.myself.is_joined" ng-click="game.quit()" class="btn btn-default">Leave</button>
+    <button ng-if="!game.myself.is_joined" ng-click="game.join()" class="btn btn-default">Play</button>
+    <button ng-if="game.state.phases.is_appropriate_player_number" ng-click="game.start()" class="btn btn-primary">Start</button>
+  </div>
+{% endmacro %}
 
 {% macro declaration() %}
-  <div ng-if="game.phase == 'declare'">
+  <div ng-if="game.state.phase == 'declare'">
     <div class="form-inline">
       <div class="form-group">
         <label>Declaration</label>
@@ -82,7 +89,7 @@
     </div>
   </div>
 
-  <div ng-if="game.phase == 'adjutant' && game.myself.is_napoleon">
+  <div ng-if="game.state.phase == 'adjutant' && game.myself.is_napoleon">
     <div class="form-inline">
       <div class="form-group">
         <label>Adjutant</label>
@@ -122,24 +129,24 @@
           <td ng-repeat="p in game.state.players track by $index" ng-class="{active: p.user_id == game.turn.user_id}">
             <span ng-if="p.user_id == game.myself.user_id" class="glyphicon glyphicon-star"></span>
             <strong class="text-info">
-              [[ game.users[p].name ]]
-              <span ng-if="game.player_faces[p] !== null">([[ game.player_faces[p] ]])</span>
-              C([[ game.number_of_player_hand[p] ]])
+              [[ game.users[p.user_id].name ]]
+              <span ng-if="game.player_faces[p.user_id] !== null">([[ p.face ]])</span>
+              C([[p.number_of_hand ]])
             </strong>
-            <span ng-if="p == game.napoleon" class="label label-info">N</span>
-            <span ng-if="game.phase == 'declare' && game.pass_ids.indexOf(p) >= 0" class="label label-default">PASS</span>
+            <span ng-if="p.is_napoleon" class="label label-info">N</span>
+            <span ng-if="game.state.phases.current == 'declare' && p.is_passed" class="label label-default">PASS</span>
           </td>
         </tr>
         <tr>
           <th>Board</th>
-          <td ng-repeat="pid in game.player_ids track by $index">[[ game.player_cards[pid].str ]]</td>
+          <td ng-repeat="p in game.state.players track by $index">[[ game.state.player_cards[p.user_id].str ]]</td>
         </tr>
       </table>
     </div>
 
     <ul ng-if="game.phase == 'first_round'" class="list-inline">
       <span class="label label-info">Face Cards</span>
-      <li ng-repeat="c in game.unused">[[ c.str ]]</li>
+      <li ng-repeat="c in game.state.unused_faces">[[ c.str ]]</li>
     </ul>
 
     <ul ng-if="game.phase == 'discard'" class="list-inline">
@@ -148,20 +155,14 @@
     </ul>
 
     {{ message() }}
-
+    {{ start() }}
     {{ declaration() }}
 
     <div id="hand">
-      <ul class="list-inline"><li ng-repeat="c in game.hand | orderBy:'order_by_suit' track by $index">
-          <button ng-click="game.select_or_discard(c)" class="btn btn-default">[[ c.str ]]</button>
+      <ul class="list-inline"><li ng-repeat="c in game.myself.hand | orderBy:'order_by_suit' track by $index">
+          <button ng-click="game.select_or_discard(c)" ng-disabled="!game.myself.is_my_turn" class="btn btn-default">[[ c.str ]]</button>
       </li></ul>
     </div>
-
-  <div ng-if="!game.phase">
-    <button ng-if="game.is_joined" ng-click="game.quit()" class="btn btn-default">Leave</button>
-    <button ng-if="!game.is_joined" ng-click="game.join()" class="btn btn-default">Play</button>
-    <button ng-if="game.is_appropriate_player_number" ng-click="game.start()" class="btn btn-primary">Start</button>
-  </div>
 
   </div>
 {% endblock %}

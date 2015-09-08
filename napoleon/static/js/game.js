@@ -53,7 +53,7 @@ app.controller("GameController", ["$scope", function($scope){
     };
 
     self.is_unused_careds_selected = function(){
-        return self.unused.length >= self.rest.length;
+        return self.unused.length >= self.state.rest.length;
     };
 
     self.select_or_discard = function(card){
@@ -66,7 +66,7 @@ app.controller("GameController", ["$scope", function($scope){
     self.discard = function(card){
         if (!elem(self.unused, card)){
             self.unused.push(card);
-            remove(self.hand, card);
+            remove(self.myself.hand, card);
         }
         var unused = self.unused.map(function(i){ return i.value;});
         if (self.is_unused_careds_selected())
@@ -75,7 +75,7 @@ app.controller("GameController", ["$scope", function($scope){
 
     self.unselect = function(card){
         remove(self.unused, card);
-        self.hand.push(card);
+        self.myself.hand.push(card);
     };
 
     self.select = function(card){
