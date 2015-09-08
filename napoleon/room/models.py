@@ -1,15 +1,16 @@
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import User
-from django.contrib.sessions.models import Session
 
 
-def get_user(session_key):
-    try:
-        session = Session.objects.get(session_key=session_key)
-        uid = session.get_decoded().get('_auth_user_id')
-        return User.objects.get(pk=uid)
-    except (Session.DoesNotExist, User.DoesNotExist):
-        return None
+def get_by_user_id(user_ids):
+    if not user_ids:
+        return []
+    first = user_ids[0]
+    q = Q(id=first)
+    for i in user_ids[1:]:
+        q |= Q(id=i)
+    return User.objects.filter(q).all()
 
 
 class Room(models.Model):

@@ -116,7 +116,7 @@ class User(object):
         self.adaptor.set_dict("map", self.user_id, self.session_id)
 
     def quit(self, force=False):
-        self.adaptor.rem_list("player_ids", self.user_id, delete=True)
+        self.adaptor.rem_list("player_ids", self.user_id)
         self.adaptor.rem_dict("map", self.user_id)
 
     def reset(self):
