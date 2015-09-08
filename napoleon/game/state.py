@@ -126,9 +126,15 @@ class User(object):
 class Player(object):
 
     def __init__(self, user_id, state):
+        if user_id is None:
+            raise ValueError("user_id must not be None")
         self.adaptor = RedisAdaptor(room_id=state.room_id, user_id=user_id)
         self.user_id = user_id
         self.state = state
+
+
+    def __repr__(self):
+        return "Player {self.user_id}".format(self=self)
 
     def __eq__(self, other):
         return self.user_id == other.user_id
@@ -138,12 +144,19 @@ class Player(object):
         return self.state.napoleon == self.user_id
 
     @property
-    def is_player(self):
+    def is_joined(self):
         return self in self.state.players
 
     @property
+    def is_passed(self):
+        return self in self.state.passed_players
+
+    @property
     def is_my_turn(self):
-        return self == self.state.turn
+        if self.state.turn:
+            return self == self.state.turn
+        else:
+            return False
 
     def select(self, card):
         """
@@ -164,7 +177,6 @@ class Player(object):
             and not self.state.board
             and not self.is_napoleon
             and len(self.state.allied_forces) > 1
-            # and len(self.state.napoleon_forces) > 1
         ):
             return True
         else:
@@ -199,6 +211,9 @@ class Player(object):
         self.state.unused = unused
 
     def add_rest_to_hand(self):
+        """
+        After napoleon decides an adjutant, he gets cards from the rest.
+        """
         self.hand = self.hand + self.state.rest
 
     @property
@@ -207,9 +222,7 @@ class Player(object):
 
     @property
     def hand(self):
-        # + rest
-        ints = self.adaptor.get_list("hand", type=int)
-        return card.from_list(ints)
+        return card.from_list(self.adaptor.get_list("hand", type=int))
 
     @hand.setter
     def hand(self, hand):
@@ -217,7 +230,7 @@ class Player(object):
 
     @property
     def face(self):
-        return self.adaptor.get("face")
+        return self.adaptor.get("face", type=int)
 
     @face.setter
     def face(self, value):
