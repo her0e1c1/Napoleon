@@ -8,6 +8,7 @@ from tornado.web import Application
 from tornado.web import FallbackHandler
 
 from napoleon.game.handler import GameHandler
+from napoleon.chat.handler import ChatHandler
 
 
 def main():
@@ -17,6 +18,7 @@ def main():
     wsgi_app = WSGIContainer(application)
     app = Application([
         (r"/ws/(?P<room_id>\d+)", GameHandler),
+        (r"/chat/(?P<room_id>\d+)", ChatHandler),
         (r".*", FallbackHandler, {"fallback": wsgi_app}),
     ])
     server = HTTPServer(app)

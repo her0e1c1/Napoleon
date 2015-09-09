@@ -23,6 +23,11 @@ def get_key(key, room_id, user_id=None):
         "rest": "{room_id}_rest",  # list
         "hand": "{room_id}_{user_id}_hand",  # list
         "map": "{room_id}_map",  # hash
+
+        # chat
+        "chat_user_ids": "{room_id}_chat_user_ids",  # list
+        "chat_messages": "{room_id}_chat_messages",  # list
+
     }
     if key in ["role", "hand"] and user_id is None:
         raise ValueError("You must take user_id as an argument when key is role or hand.")
