@@ -66,7 +66,6 @@ class Myself(object):
             return True
 
 
-
 class InvalidSession(Exception):
     pass
 
@@ -107,18 +106,22 @@ class User(object):
         """
         Make sure user id is valid.
         """
-        self.adaptor = state.adaptor
+        self.adaptor = RedisAdaptor(state.room_id, user_id, state.adaptor.conn)
         self.user_id = user_id
         self.session_id = session_id
         self.state = state
 
-    def join(self):
+    def join(self, user):
         self.adaptor.set_list("player_ids", self.user_id, delete=False)
         self.adaptor.set_dict("map", self.user_id, self.session_id)
+        # TODO: define a user dict and reduce a code
+        self.adaptor.set_dict("user", "username", user.get_username())
+        self.adaptor.set_dict("user", "user_id", user.id)
 
     def quit(self):
         self.adaptor.rem_list("player_ids", self.user_id)
         self.adaptor.rem_dict("map", self.user_id)
+        self.adaptor.delete("user")
 
     def reset(self):
         self.quit()

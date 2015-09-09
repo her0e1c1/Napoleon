@@ -24,12 +24,15 @@ def get_key(key, room_id, user_id=None):
         "hand": "{room_id}_{user_id}_hand",  # list
         "map": "{room_id}_map",  # hash
 
+        # user
+        "user": "user_{user_id}",  # hash
+
         # chat
         "chat_user_ids": "{room_id}_chat_user_ids",  # list
         "chat_messages": "{room_id}_chat_messages",  # list
 
     }
-    if key in ["role", "hand"] and user_id is None:
+    if key in ["role", "hand", "user"] and user_id is None:
         raise ValueError("You must take user_id as an argument when key is role or hand.")
 
     return fmt[key].format(**locals())
