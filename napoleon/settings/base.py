@@ -124,3 +124,6 @@ def get_connection(host="localhost", port=6379, db=0):
 # For now, use only one redes connection.
 # What problems happend?
 REDIS_CONNECTION = get_connection()
+
+REDIS_CHAT_EXPRITE_TIME = 60 * 60
+REDIS_CHAT_LENGTH = 10

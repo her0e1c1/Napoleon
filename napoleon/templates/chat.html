@@ -1,0 +1,34 @@
+
+{% macro chat(user_id) %}
+  <div ng-controller="ChatController as chat">
+    <div class="form-inline">
+      <input type="type" ng-model="chat.msg" ng-keydown="chat.handleKeydown($event)" size="50%" class="form-control" placeholder="Message">
+      <button ng-click="chat.chat();" maxlength="30" class="btn btn-default">SEND</button>
+      <button class="btn btn-default" data-toggle="modal" data-target="#emoji">Emoji</button>
+    </div>
+
+    <div class="modal fade" id="emoji" role="dialog" aria-labelledby="loginModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <table id="emoji" class="table">
+              <tr ng-repeat="e_list in chat.emojis">
+                <td ng-repeat="e in e_list" ng-click="chat.select_emoji(e)" ng-bind-html="e"></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <table class="table">
+      <tr ng-repeat="m in chat.messages" ng-class="{active: m.user_id == {{ user_id }} }" >
+        {# This code is xss!!! but so far ignore this ;) #}
+        <td ng-bind-html="m.username"></td>
+        <td ng-bind-html="m.msg"></td>
+      </tr>
+    </table>
+
+  </div>
+{% endmacro %}

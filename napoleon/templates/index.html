@@ -4,7 +4,7 @@
 {% block content %}
 
 <div>
-  <h2 class="text-primary">Napoleon is a exciting card game!</h2>
+  <h2 class="text-primary">Napoleon is an exciting card game!</h2>
   {% if not request.user.is_authenticated() %}
     <p class="text-muted">If you want to play, you need to signup <a href="{{ url('signup') }}">here</a>.</p>
   {% endif %}
@@ -40,7 +40,7 @@
   <h2>A NEW ROOM</h2>
    <form class="form-inline" action="{{ url('napoleon.room.views.create') }}" method="post">
      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-     <input id="title" type="text" autocomplete="off" value="" name="label" maxlength="20" aria-required="true" placeholder="Title" required>
+     <input id="title" type="text" class="form-control" autocomplete="off" name="label" maxlength="20" aria-required="true" placeholder="Title" required>
      <input class="btn btn-default" type="submit" value="CREATE">
    </form>
 {% endif %}

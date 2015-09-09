@@ -23,8 +23,16 @@ def get_key(key, room_id, user_id=None):
         "rest": "{room_id}_rest",  # list
         "hand": "{room_id}_{user_id}_hand",  # list
         "map": "{room_id}_map",  # hash
+
+        # user
+        "user": "user_{user_id}",  # hash
+
+        # chat
+        "chat_user_ids": "{room_id}_chat_user_ids",  # list
+        "chat_messages": "{room_id}_chat_messages",  # list
+
     }
-    if key in ["role", "hand"] and user_id is None:
+    if key in ["role", "hand", "user"] and user_id is None:
         raise ValueError("You must take user_id as an argument when key is role or hand.")
 
     return fmt[key].format(**locals())
@@ -98,6 +106,12 @@ class RedisAdaptor(object):
 
     def delete(self, key):
         self.conn.delete(self.key(key))
+
+    def expire(self, key, sec):
+        if not isinstance(key, (list, set)):
+            key = [key]
+        for k in key:
+            self.conn.expire(self.key(k), sec)
 
     def flush(self):
         prefix = ("%s_" % self.room_id).encode("utf-8")

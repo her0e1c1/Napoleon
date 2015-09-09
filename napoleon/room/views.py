@@ -97,7 +97,7 @@ def create(request):
 @require_http_methods(["POST"])
 def join(request, room_id):
     adaptor = RedisAdaptor(room_id)
-    _get_user_state(request, adaptor).join()
+    _get_user_state(request, adaptor).join(request.user)
     return redirect("napoleon.room.views.detail", game_id=room_id)
 
 

@@ -1,4 +1,4 @@
-var app = angular.module("GameApp", []);
+var app = angular.module("GameApp", ['ngSanitize']);
 
 app.config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
