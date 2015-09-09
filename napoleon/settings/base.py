@@ -125,5 +125,5 @@ def get_connection(host="localhost", port=6379, db=0):
 # What problems happend?
 REDIS_CONNECTION = get_connection()
 
-REDIS_CHAT_EXPRITE_TIME = 60 * 60
+REDIS_CHAT_EXPRITE_TIME = 60 * 10
 REDIS_CHAT_LENGTH = 10
