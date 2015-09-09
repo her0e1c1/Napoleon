@@ -104,6 +104,12 @@ class RedisAdaptor(object):
     def delete(self, key):
         self.conn.delete(self.key(key))
 
+    def expire(self, key, sec):
+        if not isinstance(key, (list, set)):
+            key = [key]
+        for k in key:
+            self.conn.expire(self.key(k), sec)
+
     def flush(self):
         prefix = ("%s_" % self.room_id).encode("utf-8")
         for k in self.conn.keys("*"):
