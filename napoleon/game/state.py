@@ -102,7 +102,7 @@ def get_user_id(adaptor, session_id):
 
 class User(object):
 
-    def __init__(self, user_id, session_id, state):
+    def __init__(self, user_id, session_id, state, user):
         """
         Make sure user id is valid.
         """
@@ -110,13 +110,14 @@ class User(object):
         self.user_id = user_id
         self.session_id = session_id
         self.state = state
+        self.user = user
 
-    def join(self, user):
+    def join(self):
         self.adaptor.set_list("player_ids", self.user_id, delete=False)
         self.adaptor.set_dict("map", self.user_id, self.session_id)
         # TODO: define a user dict and reduce a code
-        self.adaptor.set_dict("user", "username", user.get_username())
-        self.adaptor.set_dict("user", "user_id", user.id)
+        self.adaptor.set_dict("user", "username", self.user.get_username())
+        self.adaptor.set_dict("user", "user_id", self.user.id)
 
     def quit(self):
         self.adaptor.rem_list("player_ids", self.user_id)

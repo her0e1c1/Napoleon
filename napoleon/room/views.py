@@ -45,7 +45,7 @@ def _get_user_state(request, adaptor):
     uid = request.user.id
     sid = request.COOKIES["sessionid"]
     sta = _get_game_state(request, adaptor)
-    return state.User(user_id=uid, session_id=sid, state=sta)
+    return state.User(user_id=uid, session_id=sid, state=sta, user=request.user)
 
 
 def _get_myself(request, adaptor):
@@ -97,7 +97,7 @@ def create(request):
 @require_http_methods(["POST"])
 def join(request, room_id):
     adaptor = RedisAdaptor(room_id)
-    _get_user_state(request, adaptor).join(request.user)
+    _get_user_state(request, adaptor).join()
     return redirect("napoleon.room.views.detail", game_id=room_id)
 
 
