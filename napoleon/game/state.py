@@ -125,8 +125,8 @@ class User(object):
         self.adaptor.delete("user")
 
     def reset(self):
-        self.quit()
-        self.join()
+        self.adaptor.rem_dict("map", self.user_id)
+        self.adaptor.set_dict("map", self.user_id, self.session_id)
 
 
 class Player(object):
