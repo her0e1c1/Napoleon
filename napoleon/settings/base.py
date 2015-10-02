@@ -12,7 +12,9 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 dname = os.path.dirname
 BASE_DIR = dname(dname(dname(os.path.abspath(__file__))))
 
@@ -114,16 +116,21 @@ SESSION_COOKIE_HTTPONLY = False
 
 def get_connection(host="localhost", port=6379, db=0):
     import redis
-    # logger.info("Get a redis connection")
+    logger.info("Start connecting redis server")
+
     uri = os.environ.get("REDISTOGO_URL")
     if not uri:
         return redis.Redis(host, port=port, db=db)
     else:
         return redis.from_url(uri)
+
 # On heroku the number of connections is limited.
 # For now, use only one redes connection.
 # What problems happend?
 REDIS_CONNECTION = get_connection()
 
 REDIS_CHAT_EXPRITE_TIME = 60 * 10
+
 REDIS_CHAT_LENGTH = 10
+
+TORNADO_PORT = 80
