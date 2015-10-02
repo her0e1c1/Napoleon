@@ -19,7 +19,7 @@ How to serve
 On heroku production, you can serve only one web server.
 To serve tornado and django at one time, run this ::
 
-    python main.py --port=8000
+    python main.py
 
 """
 
@@ -30,7 +30,8 @@ if __name__ == "__main__":
     server = HTTPServer(app)
 
     parse()  # after loading wsgi_app
-    server.listen(options.port)
+    # server.listen(options.port)
+    server.listen(80)
 
     logger.info("Start main.py server at port = %s" % options.port)
 
