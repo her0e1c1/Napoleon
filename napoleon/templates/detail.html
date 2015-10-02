@@ -10,8 +10,8 @@
      "state": "{{ url('napoleon.room.views.game_state', kwargs={'room_id': room.id})  }}",
      "join": "{{ url('napoleon.room.views.join', kwargs={'room_id': room.id}) }}",
      "quit": "{{ url('napoleon.room.views.quit', kwargs={'room_id': room.id}) }}",
-     "room": "{{ settings.WEBSOCKET_PROTOCOL }}://" + location.host + "/ws/{{ room.id }}",
-     "chat": "{{ settings.WEBSOCKET_PROTOCOL }}://" + location.host + "/chat/{{ room.id }}",
+     "room": "{{ settings.WEBSOCKET_PROTOCOL }}://" + location.hostname + ":{{ settings.TORNADO_PORT }}/ws/{{ room.id }}",
+     "chat": "{{ settings.WEBSOCKET_PROTOCOL }}://" + location.hostname + ":{{ settings.TORNADO_PORT }}/chat/{{ room.id }}",
    };
  </script>
  <script type="text/javascript" src="{{ static('js/game.js') }}"></script>
