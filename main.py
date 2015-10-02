@@ -25,10 +25,11 @@ To serve tornado and django at one time, run this ::
 
 
 if __name__ == "__main__":
-    parse()
     wsgi_app = WSGIContainer(application)
     app = Application(make_rootings(fallback_handler=wsgi_app))
     server = HTTPServer(app)
+
+    parse()  # after loading wsgi_app
     server.listen(options.port)
 
     logger.info("Start main.py server at port = %s" % options.port)
