@@ -31,7 +31,6 @@ app.controller("ChatController", ["$scope", "$sce", function($scope, $sce){
         if (evt.which === 13)
             self.chat();
     };
-    self.a = $sce.trustAsHtml("<p>a</p>");
 
     // emoji
     var size = 10;  // colum size
