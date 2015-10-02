@@ -1,5 +1,6 @@
 import dj_database_url
 from napoleon.settings.base import *  # NOQA
+logger.info("Loading settings for production")
 
 # https://devcenter.heroku.com/articles/getting-started-with-django
 
