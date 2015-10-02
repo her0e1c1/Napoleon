@@ -31,6 +31,7 @@ if __name__ == "__main__":
     server = HTTPServer(app)
 
     parse()  # after loading wsgi_app
+    # use PORT env variable on heroku
     port = int(os.environ.get("PORT", options.port))
     server.listen(port)
 
