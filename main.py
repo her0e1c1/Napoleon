@@ -1,31 +1,36 @@
-import os
+import logging
 
 import tornado
-from tornado.options import options, define, parse_command_line
+from tornado.options import options
 from tornado.httpserver import HTTPServer
 from tornado.wsgi import WSGIContainer
 from tornado.web import Application
-from tornado.web import FallbackHandler
 
-from napoleon.game.handler import GameHandler
-from napoleon.chat.handler import ChatHandler
+from napoleon.wsgi import application
+from main_tornado import make_rootings, parse
+
+logger = logging.getLogger(__name__)
 
 
-def main():
-    define("port", type=int, default=80)
-    parse_command_line()
-    from napoleon.wsgi import application
-    wsgi_app = WSGIContainer(application)
-    app = Application([
-        (r"/ws/(?P<room_id>\d+)", GameHandler),
-        (r"/chat/(?P<room_id>\d+)", ChatHandler),
-        (r".*", FallbackHandler, {"fallback": wsgi_app}),
-    ])
-    server = HTTPServer(app)
-    port = int(os.environ.get("PORT", options.port))
-    server.listen(port)
-    tornado.ioloop.IOLoop.instance().start()
+"""
+How to serve
+============
+
+On heroku production, you can serve only one web server.
+To serve tornado and django at one time, run this ::
+
+    python main.py --port=8000
+
+"""
 
 
 if __name__ == "__main__":
-    main()
+    parse()
+    wsgi_app = WSGIContainer(application)
+    app = Application(make_rootings(fallback_handler=wsgi_app))
+    server = HTTPServer(app)
+    server.listen(options.port)
+
+    logger.info("Start main.py server at port = %s" % options.port)
+
+    tornado.ioloop.IOLoop.instance().start()
