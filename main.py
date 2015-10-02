@@ -1,3 +1,4 @@
+import os
 import logging
 
 import tornado
@@ -30,8 +31,8 @@ if __name__ == "__main__":
     server = HTTPServer(app)
 
     parse()  # after loading wsgi_app
-    # server.listen(options.port)
-    server.listen(80)
+    port = int(os.environ.get("PORT", options.port))
+    server.listen(port)
 
     logger.info("Start main.py server at port = %s" % options.port)
 
