@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from napoleon.game import card
 from napoleon.game import state
 from napoleon.game.adaptor import RedisAdaptor
+from napoleon.AI import ai_names
 from . import models
 
 
@@ -85,6 +86,7 @@ def detail(request, game_id):
         "room": room,
         "deck": [c.to_json() for c in card.deck],
         "declarations": [d.to_json() for d in card.declarations],
+        "ais": ai_names
     })
 
 
