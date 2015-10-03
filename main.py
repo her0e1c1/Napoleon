@@ -1,6 +1,8 @@
 import os
 import logging
 
+from django.conf import settings
+
 import tornado
 from tornado.options import options
 from tornado.httpserver import HTTPServer
@@ -27,7 +29,7 @@ To serve tornado and django at one time, run this ::
 
 if __name__ == "__main__":
     wsgi_app = WSGIContainer(application)
-    app = Application(make_rootings(fallback_handler=wsgi_app))
+    app = Application(make_rootings(fallback_handler=wsgi_app), debug=settings.DEBUG)
     server = HTTPServer(app)
 
     parse()  # after loading wsgi_app
