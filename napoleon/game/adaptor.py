@@ -42,6 +42,9 @@ def decode(s, type=None):
     if s is None:
         return None
 
+    if type is bool:
+        type = lambda x: True if x == 'True' else False
+
     if isinstance(s, (dict,)):
         if type:
             return {k.decode("utf-8"): type(v.decode("utf-8")) for k, v in s.items()}
@@ -53,6 +56,7 @@ def decode(s, type=None):
             return [type(i.decode("utf-8")) for i in s]
         else:
             return [i.decode("utf-8") for i in s]
+
     if type:
         return type(s.decode("utf-8"))
     else:
