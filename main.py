@@ -24,6 +24,10 @@ To serve tornado and django at one time, run this ::
 
     python main.py
 
+If you want to log to stderr, run this with an option::
+
+    python main.py --log_to_stderr
+
 """
 
 
@@ -32,11 +36,12 @@ if __name__ == "__main__":
     app = Application(make_rootings(fallback_handler=wsgi_app), debug=settings.DEBUG)
     server = HTTPServer(app)
 
-    parse()  # after loading wsgi_app
+    # after loading wsgi_app
+    parse()
+
     # use PORT env variable on heroku
     port = int(os.environ.get("PORT", options.port))
     server.listen(port)
 
-    logger.info("Start main.py server at port = %s" % options.port)
-
+    logger.info("Start main.py server at port = %s" % port)
     tornado.ioloop.IOLoop.instance().start()
