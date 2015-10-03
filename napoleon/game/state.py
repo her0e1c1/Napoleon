@@ -78,7 +78,8 @@ def to_json(obj):
     elif isinstance(obj, list):
         return [to_json(o) for o in obj]
     elif isinstance(obj, dict):
-        return {k: to_json(v) for k, v in obj.items()
+        # js側でintが桁溢れする
+        return {k: to_json(v) if k != "user_id" else str(v) for k, v in obj.items()
                 if not str(k).startswith("_") and not callable(v)}
     elif hasattr(obj, "to_json"):
         return obj.to_json()
