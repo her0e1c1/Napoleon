@@ -26,6 +26,10 @@ def get_key(key, room_id, user_id=None):
 
         # user
         "user": "user_{user_id}",  # hash
+        "isAI": "{room_id}_isAI",  # value (bool)
+
+        # ai
+        "AI": "{room_id}_{user_id}_AI",  # hash (int user_id: str name)
 
         # chat
         "chat_user_ids": "{room_id}_chat_user_ids",  # list
@@ -42,6 +46,9 @@ def decode(s, type=None):
     if s is None:
         return None
 
+    if type is bool:
+        type = lambda x: True if x == 'True' else False
+
     if isinstance(s, (dict,)):
         if type:
             return {k.decode("utf-8"): type(v.decode("utf-8")) for k, v in s.items()}
@@ -53,6 +60,7 @@ def decode(s, type=None):
             return [type(i.decode("utf-8")) for i in s]
         else:
             return [i.decode("utf-8") for i in s]
+
     if type:
         return type(s.decode("utf-8"))
     else:

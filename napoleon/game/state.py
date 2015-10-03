@@ -1,5 +1,7 @@
+import uuid
 import enum
 import logging
+
 from napoleon.game import card
 from napoleon.game.adaptor import RedisAdaptor
 
@@ -76,7 +78,8 @@ def to_json(obj):
     elif isinstance(obj, list):
         return [to_json(o) for o in obj]
     elif isinstance(obj, dict):
-        return {k: to_json(v) for k, v in obj.items()
+        # js側でintが桁溢れする
+        return {k: to_json(v) if k != "user_id" else str(v) for k, v in obj.items()
                 if not str(k).startswith("_") and not callable(v)}
     elif hasattr(obj, "to_json"):
         return obj.to_json()
@@ -102,7 +105,7 @@ def get_user_id(adaptor, session_id):
 
 class User(object):
 
-    def __init__(self, user_id, session_id, state, user):
+    def __init__(self, user_id, session_id, state):
         """
         Make sure user id is valid.
         """
@@ -110,14 +113,15 @@ class User(object):
         self.user_id = user_id
         self.session_id = session_id
         self.state = state
-        self.user = user
 
-    def join(self):
+    def join(self, user=None):
         self.adaptor.set_list("player_ids", self.user_id, delete=False)
         self.adaptor.set_dict("map", self.user_id, self.session_id)
+        self.adaptor.set_dict("isAI", self.user_id, False)
+
         # TODO: define a user dict and reduce a code
-        self.adaptor.set_dict("user", "username", self.user.get_username())
-        self.adaptor.set_dict("user", "user_id", self.user.id)
+        self.adaptor.set_dict("user", "username", user.get_username())
+        self.adaptor.set_dict("user", "user_id", user.id)
 
     def quit(self):
         self.adaptor.rem_list("player_ids", self.user_id)
@@ -127,6 +131,26 @@ class User(object):
     def reset(self):
         self.adaptor.rem_dict("map", self.user_id)
         self.adaptor.set_dict("map", self.user_id, self.session_id)
+
+
+class AI(object):
+
+    def __init__(self, state):
+        """
+        Make sure user id is valid.
+        """
+        self. user_id = int(uuid.uuid4())
+        self.adaptor = RedisAdaptor(state.room_id, self.user_id, state.adaptor.conn)
+
+    def add(self, name):
+        self.adaptor.set_list("player_ids", self.user_id, delete=False)
+        self.adaptor.set_dict("AI", "user_id", self.user_id)
+        self.adaptor.set_dict("AI", "username", name)
+        self.adaptor.set_dict("isAI", self.user_id, True)
+
+    def remove(self, user_id):
+        self.adaptor.rem_dict("AI", user_id)
+        self.adaptor.rem_list("player_ids", user_id)
 
 
 class Player(object):
@@ -380,7 +404,13 @@ class GameState(object):
     def create_player(self, user_id):
         if user_id is None:
             raise ValueError("user_id must not be None")
-        return Player(user_id, self)
+
+        # TODO: make user_id type of str
+        d = self.adaptor.get_dict("isAI", type=bool)
+        if d[str(user_id)]:
+            return PlayerAI(user_id, self)
+
+        return PlayerHuman(user_id, self)
 
     def flush(self):
         """
@@ -424,11 +454,16 @@ class GameState(object):
     def players(self):
         l = []
         for pid in self.adaptor.get_list("player_ids", type=int):
-            l.append(Player(user_id=pid, state=self))
+            l.append(self.create_player(user_id=pid))
         return l
 
     @property
+    def player_AIs(self):
+        return [p for p in self.players if p.is_AI]
+
+    @property
     def passed_players(self):
+        # TODO: self.playersを介す
         l = []
         for pid in self.adaptor.get_list("pass_ids", type=int):
             l.append(Player(user_id=pid, state=self))
@@ -538,3 +573,24 @@ class GameState(object):
     @property
     def number_of_face_cards_of_allied_forces(self):
         return sum([p.face for p in self.players if p.is_allied_forces])
+
+
+class PlayerHuman(Player):
+
+    is_AI = False
+
+    def __init__(self, user_id, state):
+        super().__init__(user_id, state)
+        self.user = self.adaptor.get_dict("user")
+
+
+class PlayerAI(Player):
+
+    is_AI = True
+
+    def __init__(self, user_id, state):
+        super().__init__(user_id, state)
+        self.user = self.adaptor.get_dict("AI")
+        name = self.user["username"]
+        from napoleon import AI
+        self._AI = getattr(AI, name)(self)

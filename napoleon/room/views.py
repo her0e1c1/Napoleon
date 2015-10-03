@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from napoleon.game import card
 from napoleon.game import state
 from napoleon.game.adaptor import RedisAdaptor
+from napoleon.AI import ai_names
 from . import models
 
 
@@ -45,7 +46,12 @@ def _get_user_state(request, adaptor):
     uid = request.user.id
     sid = request.COOKIES["sessionid"]
     sta = _get_game_state(request, adaptor)
-    return state.User(user_id=uid, session_id=sid, state=sta, user=request.user)
+    return state.User(user_id=uid, session_id=sid, state=sta)
+
+
+def _get_AI_state(request, adaptor):
+    st = state.GameState(adaptor)
+    return state.AI(state=st)
 
 
 def _get_myself(request, adaptor):
@@ -63,9 +69,7 @@ def game_state(request, room_id):
     except state.InvalidSession:
         myself = state.Player(user_id=request.user.id, state=state.GameState(adaptor))
 
-    users = models.get_by_user_id([p.user_id for p in myself.state.players])
     cxt = {
-        "users": {u.id: {"name": u.get_username()} for u in users},
         "myself": myself.to_json(),
         "state": myself.state.to_json(),
     }
@@ -80,6 +84,7 @@ def detail(request, game_id):
         "room": room,
         "deck": [c.to_json() for c in card.deck],
         "declarations": [d.to_json() for d in card.declarations],
+        "ais": ai_names
     })
 
 
@@ -97,7 +102,7 @@ def create(request):
 @require_http_methods(["POST"])
 def join(request, room_id):
     adaptor = RedisAdaptor(room_id)
-    _get_user_state(request, adaptor).join()
+    _get_user_state(request, adaptor).join(request.user)
     return redirect("napoleon.room.views.detail", game_id=room_id)
 
 
@@ -114,4 +119,12 @@ def quit(request, room_id):
 def reset(request, room_id):
     adaptor = RedisAdaptor(room_id)
     _get_user_state(request, adaptor).reset()
+    return redirect("napoleon.room.views.detail", game_id=room_id)
+
+
+@login_required
+@require_http_methods(["POST"])
+def add(request, room_id):
+    name = request.POST["name"]
+    _get_AI_state(request, adaptor=RedisAdaptor(room_id)).add(name)
     return redirect("napoleon.room.views.detail", game_id=room_id)
