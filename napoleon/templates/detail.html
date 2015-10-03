@@ -61,7 +61,7 @@
     </div>
   </div>
   <div ng-if="game.state.phase.waiting_next_turn" ng-class="{'alert alert-success': game.myself.is_my_turn, 'alert alert-danger': !game.myself.is_my_turn}">
-    [[ game.users[game.state.turn.user_id].name ]] [[ game.state.player_cards[game.state.turn.user_id].str ]] won
+    [[ game.state.turn.user.username ]] [[ game.state.player_cards[game.state.turn.user_id].str ]] won
   </div>
   <div ng-if="(game.state.phase.current == 'first_round' || game.state.phase.current == 'rounds') && game.myself.is_my_turn"  class="alert alert-info" role="alert">It's your turn</div>
   <p ng-if="game.impossible_card" class="alert alert-warning" role="alert">You can't select [[ game.impossible_card.str]]</p>
@@ -144,7 +144,7 @@
           <td ng-repeat="p in game.state.players track by $index" ng-class="{active: p.user_id == game.turn.user_id, 'alert-success': p.is_winner === true, 'alert-danger': p.is_winner === false}" role="alert">
             <span ng-if="p.user_id == game.myself.user_id" class="glyphicon glyphicon-star"></span>
             <strong class="text-info">
-              [[ game.users[p.user_id].name ]]
+              [[ p.user.username ]]
               <span ng-if="p.is_napoleon" class="label label-primary">N</span>
               <span ng-if="game.player_faces[p.user_id] !== null"><span class="label label-info">F</span><span class="badge">[[ p.face ]]</span>
               <span class="label label-info">C</span><span class="badge">[[p.number_of_hand ]]</span>
