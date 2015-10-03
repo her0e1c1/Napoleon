@@ -407,7 +407,7 @@ class GameState(object):
 
         # TODO: make user_id type of str
         d = self.adaptor.get_dict("isAI", type=bool)
-        if d[str(user_id)]:
+        if d.get(str(user_id)):  # b/c
             return PlayerAI(user_id, self)
 
         return PlayerHuman(user_id, self)
