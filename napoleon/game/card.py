@@ -287,8 +287,10 @@ def possible_cards(board, hand, trump_suit):
             cs.append(h)
     if not cs:
         return hand
-
-    return cs + always_cards(trump_suit)
+    for c in always_cards(trump_suit):
+        if c in hand:
+            cs.append(c)
+    return cs
 
 
 def always_cards(trump_suit):
