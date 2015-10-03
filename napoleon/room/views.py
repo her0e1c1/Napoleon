@@ -48,6 +48,11 @@ def _get_user_state(request, adaptor):
     return state.User(user_id=uid, session_id=sid, state=sta, user=request.user)
 
 
+def _get_AI_state(request, adaptor):
+    st = state.GameState(adaptor)
+    return state.AI(state=st)
+
+
 def _get_myself(request, adaptor):
     sid = request.COOKIES["sessionid"]
     st = state.GameState(adaptor)
@@ -114,4 +119,12 @@ def quit(request, room_id):
 def reset(request, room_id):
     adaptor = RedisAdaptor(room_id)
     _get_user_state(request, adaptor).reset()
+    return redirect("napoleon.room.views.detail", game_id=room_id)
+
+
+@login_required
+@require_http_methods(["POST"])
+def add(request, room_id):
+    name = request.POST["name"]
+    _get_AI_state(request, adaptor=RedisAdaptor(room_id)).add(name)
     return redirect("napoleon.room.views.detail", game_id=room_id)
