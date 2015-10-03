@@ -24,7 +24,7 @@ class Taro(BaseAI):
         # 他の出せるカードがあれば、副官のカードは出さない
         if len(cards) > 1:
             if self.state.declaration in cards:
-                cards.pop(self.state.declaration)
+                cards.remove(self.state.declaration)
 
         index = random.randint(0, len(cards) - 1)
         return cards[index]
