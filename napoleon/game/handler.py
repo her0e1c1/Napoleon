@@ -1,5 +1,6 @@
 import logging
 
+from tornado import gen
 import tornado.ioloop
 import tornado.options
 import tornado.web
@@ -36,6 +37,7 @@ class WSHandlerMixin(object):
     def to_json(self, message):
         return tornado.escape.json_decode(message)
 
+    @gen.coroutine
     def write_on_same_room(self, json):
         message = tornado.escape.json_encode(json)
         for con in WSHandlerMixin.connections[self.room_id]:
@@ -53,12 +55,14 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
     Also there are some audience, and then they have to update it.
     """
 
+    @gen.coroutine
     def on_message(self, message):
         # TODO: validate message
         try:
             json = self.to_json(message)
         except ValueError:
-            return
+            yield
+            raise gen.Return()
 
         action_name = json.pop("action", "")
         sid = json.pop("session_id")
@@ -66,14 +70,44 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         try:
             myself = state.Myself(session_id=sid, state=state.GameState(self.adaptor))
         except state.InvalidSession:
-            return self.write_on_same_room({"update": True})
+            yield self.write_on_same_room({"update": True})
+            raise gen.Return()
 
         action_class = phase.get_action(myself.state.phase.current, action_name)
         if not action_class:
-            return self.write_on_same_room({"update": True})
+            yield self.write_on_same_room({"update": True})
+            raise gen.Return()
 
         action = action_class(myself)
         if action.can_next:
             action.act(**json)
             action.next()
-        self.write_on_same_room({"update": True})
+
+        yield self.write_on_same_room({"update": True})
+
+        yield self.handle_ai(myself.state)
+
+    @gen.coroutine
+    def handle_ai(self, state):
+        """
+        If all the player AI have no action to the current state, then exit it.
+        Otherwise a player AI changes the state, so it needs to check whether
+        all the player AI have a action to the changed state. If at least one
+        of them have it, they act recusively.
+        """
+
+        for player in state.player_AIs:
+            json = player._AI.get_action()
+            if json:
+                logger.info("AI action: %s => %s" % (player, json))
+
+                # AI must wait for human's acitons here
+                yield gen.sleep(2)
+
+                action_class = phase.get_action(state.phase.current, json.pop("action"))
+                if action_class:
+                    action = action_class(player)
+                    action.act(**json)
+                    action.next()
+                    yield self.write_on_same_room({"update": True})
+                    yield self.handle_ai(player.state)
