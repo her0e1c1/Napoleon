@@ -46,7 +46,7 @@ def _get_user_state(request, adaptor):
     uid = request.user.id
     sid = request.COOKIES["sessionid"]
     sta = _get_game_state(request, adaptor)
-    return state.User(user_id=uid, session_id=sid, state=sta, user=request.user)
+    return state.User(user_id=uid, session_id=sid, state=sta)
 
 
 def _get_AI_state(request, adaptor):
@@ -69,9 +69,7 @@ def game_state(request, room_id):
     except state.InvalidSession:
         myself = state.Player(user_id=request.user.id, state=state.GameState(adaptor))
 
-    users = models.get_by_user_id([p.user_id for p in myself.state.players])
     cxt = {
-        "users": {u.id: {"name": u.get_username()} for u in users},
         "myself": myself.to_json(),
         "state": myself.state.to_json(),
     }
@@ -104,7 +102,7 @@ def create(request):
 @require_http_methods(["POST"])
 def join(request, room_id):
     adaptor = RedisAdaptor(room_id)
-    _get_user_state(request, adaptor).join()
+    _get_user_state(request, adaptor).join(request.user)
     return redirect("napoleon.room.views.detail", game_id=room_id)
 
 
