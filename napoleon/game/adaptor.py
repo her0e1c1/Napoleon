@@ -26,6 +26,10 @@ def get_key(key, room_id, user_id=None):
 
         # user
         "user": "user_{user_id}",  # hash
+        "isAI": "{room_id}_isAI",  # value (bool)
+
+        # ai
+        "AI": "{room_id}_{user_id}_AI",  # hash (int user_id: str name)
 
         # chat
         "chat_user_ids": "{room_id}_chat_user_ids",  # list
