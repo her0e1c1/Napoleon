@@ -102,10 +102,17 @@ app.controller("GameController", ["$scope", function($scope){
         self.send({"action": "start"});
     };
 
-    this.post = function(url){
-        $.post(url, {"csrfmiddlewaretoken": csrf_token}, function(){
+    this.post = function(url, json){
+        if (json === undefined)
+            json = {};
+        json["csrfmiddlewaretoken"] = csrf_token;
+        $.post(url, json, function(){
             self.send();  // just update on all the player's browsers
         });
+    };
+
+    this.add = function(name){
+        self.post(urls.add, {"name": name});
     };
 
     this.join = function(){
