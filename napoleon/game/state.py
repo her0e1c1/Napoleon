@@ -403,7 +403,13 @@ class GameState(object):
     def create_player(self, user_id):
         if user_id is None:
             raise ValueError("user_id must not be None")
-        return Player(user_id, self)
+
+        # TODO: make user_id type of str
+        d = self.adaptor.get_dict("isAI", type=bool)
+        if d[str(user_id)]:
+            return PlayerAI(user_id, self)
+
+        return PlayerHuman(user_id, self)
 
     def flush(self):
         """
@@ -447,11 +453,16 @@ class GameState(object):
     def players(self):
         l = []
         for pid in self.adaptor.get_list("player_ids", type=int):
-            l.append(Player(user_id=pid, state=self))
+            l.append(self.create_player(user_id=pid))
         return l
 
     @property
+    def player_AIs(self):
+        return [p for p in self.players if p.is_AI]
+
+    @property
     def passed_players(self):
+        # TODO: self.playersを介す
         l = []
         for pid in self.adaptor.get_list("pass_ids", type=int):
             l.append(Player(user_id=pid, state=self))
@@ -561,3 +572,24 @@ class GameState(object):
     @property
     def number_of_face_cards_of_allied_forces(self):
         return sum([p.face for p in self.players if p.is_allied_forces])
+
+
+class PlayerHuman(Player):
+
+    is_AI = False
+
+    def __init__(self, user_id, state):
+        super().__init__(user_id, state)
+        self.user = self.adaptor.get_dict("user")
+
+
+class PlayerAI(Player):
+
+    is_AI = True
+
+    def __init__(self, user_id, state):
+        super().__init__(user_id, state)
+        self.user = self.adaptor.get_dict("AI")
+        name = self.user["username"]
+        from napoleon import AI
+        self._AI = getattr(AI, name)(self)
