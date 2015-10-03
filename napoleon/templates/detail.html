@@ -10,6 +10,7 @@
      "state": "{{ url('napoleon.room.views.game_state', kwargs={'room_id': room.id})  }}",
      "join": "{{ url('napoleon.room.views.join', kwargs={'room_id': room.id}) }}",
      "quit": "{{ url('napoleon.room.views.quit', kwargs={'room_id': room.id}) }}",
+     "add": "{{ url('napoleon.room.views.add', kwargs={'room_id': room.id}) }}",
      "room": "{{ settings.WEBSOCKET_PROTOCOL }}://" + location.host + "/ws/{{ room.id }}",
      "chat": "{{ settings.WEBSOCKET_PROTOCOL }}://" + location.host + "/chat/{{ room.id }}",
    };
@@ -72,6 +73,12 @@
 
 {% macro start() %}
   <div ng-if="!game.state.phase.current">
+    <ul>
+      player AI
+      {% for ai in ais %}
+        <button ng-click="game.add('{{ ai }}')" class="btn btn-default">{{ ai }}</button>
+      {% endfor %}
+    </ul>
     <button ng-if="game.myself.is_joined" ng-click="game.quit()" class="btn btn-default">Leave</button>
     <button ng-if="!game.myself.is_joined" ng-click="game.join()" class="btn btn-default">Play</button>
     <button ng-if="game.state.phase.is_appropriate_player_number" ng-click="game.start()" class="btn btn-primary">Start</button>
