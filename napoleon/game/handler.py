@@ -102,7 +102,7 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
                 logger.info("AI action: %s => %s" % (player, json))
 
                 # AI must wait for human's acitons here
-                yield gen.sleep(2)
+                yield gen.sleep(1)
 
                 action_class = phase.get_action(state.phase.current, json.pop("action"))
                 if action_class:
