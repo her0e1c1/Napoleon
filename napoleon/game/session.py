@@ -85,6 +85,10 @@ class StatePrivilege(object):
         p = self.session.myself
         return value if self.session.is_valid and p.is_napoleon else []
 
+    def unused(self, value):
+        p = self.session.myself
+        return value if self.session.is_valid and p.is_napoleon else []
+
     def players(self, value):
         p = self.session.myself
         return [p if p.user_id == v.user_id else
