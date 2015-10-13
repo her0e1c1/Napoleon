@@ -5,11 +5,12 @@ from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, redirect, get_object_or_404
 
 from napoleon.game import card
-from napoleon.game import state
 from napoleon.game import session
 from napoleon.game.adaptor import RedisAdaptor
 from napoleon.AI import ai_names
+
 from . import models
+from . import state
 
 
 def index(request):
