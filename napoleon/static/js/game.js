@@ -21,7 +21,10 @@ app.controller("GameController", ["$scope", function($scope){
 
     this.update = function(){
         $.get(urls.state, {}, function(data){
-            $.extend(self, data);
+            var myself = _.find(data.state.players, (function(p){
+                return p.user_id == user_id;
+            }));
+            $.extend(self, data, {"myself": myself});
             self.impossible_card = null;
             $scope.$apply();
         });
