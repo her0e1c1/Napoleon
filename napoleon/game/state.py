@@ -297,10 +297,6 @@ class GameState(object):
         return l
 
     @property
-    def player_AIs(self):
-        return [p for p in self.players if p.is_AI]
-
-    @property
     def _passed_players(self):
         pids = self.adaptor.get_list("pass_ids", type=int)
         return [p for p in self.players if p.user_id in pids]
@@ -308,10 +304,6 @@ class GameState(object):
     @_passed_players.deleter
     def _passed_players(self):
         self.adaptor.delete("pass_ids")
-
-    @property
-    def allied_forces(self):
-        return [p for p in self.players if p.role == Role.allied_forces]
 
     @property
     def rest(self):
