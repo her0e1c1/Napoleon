@@ -8,98 +8,9 @@ from napoleon.game.adaptor import RedisAdaptor
 logger = logging.getLogger(__name__)
 
 
-class GameStateWithSession(object):
-
-    def __init__(self, adaptor, user_id, session_id):
-        self.state = GameState(adaptor)
-        self.privilege = Privilege(Myself(user_id=user_id, session_id=session_id, state=self.state))
-
-    def __getattr__(self, name):
-        meth = getattr(self.privilege, name, None)
-        value = getattr(self.state, name)
-        if meth:
-            return meth(value)
-        else:
-            return value
-
-
-class Privilege(object):
-
-    def __init__(self, player):
-        self.player = player
-
-    # for a game state instance
-    def rest(self, value):
-        return value if self.player.is_napoleon else []
-
-    # for a player instance
-    def role(self, value):
-        return value if self.state.phases.current == "finished" or self.is_valid else None
-
-    def possible_cards(self, value):
-        return value if self.is_valid else None
-
-
-class Myself(object):
-
-    def __init__(self, state, session_id, user_id=None):
-        if user_id is None:
-            user_id = get_user_id(state.adaptor, session_id)
-        self.player = Player(user_id, state)
-        self.session_id = session_id
-        self.privilege = Privilege(self.player)
-
-    def __getattr__(self, name):
-        meth = getattr(self.privilege, name, None)
-        value = getattr(self.player, name)
-        if meth:
-            return meth(value)
-        else:
-            return value
-
-    @property
-    def is_valid(self):
-        try:
-            get_user_id(self.state.adaptor, self.session_id)
-        except InvalidSession:
-            return False
-        else:
-            return True
-
-
-class InvalidSession(Exception):
-    pass
-
-
-def to_json(obj):
-    if isinstance(obj, (int, str)):
-        return obj
-    elif isinstance(obj, list):
-        return [to_json(o) for o in obj]
-    elif isinstance(obj, dict):
-        # js側でintが桁溢れする
-        return {k: to_json(v) if k != "user_id" else str(v) for k, v in obj.items()
-                if not str(k).startswith("_") and not callable(v)}
-    elif hasattr(obj, "to_json"):
-        return obj.to_json()
-    elif isinstance(obj, enum.Enum):
-        return obj.name
-    else:
-        return None
-
-
 class Role(enum.Enum):
     napoleon_forces = 1
     allied_forces = 2
-
-
-def get_user_id(adaptor, session_id):
-    user_dict = adaptor.get_dict("map")
-    inv = {v: k for k, v in user_dict.items()}
-    user_id = inv.get(session_id)
-    if not user_id:
-        raise InvalidSession("Session is invalid")
-    return int(user_id)
 
 
 class Player(object):
@@ -111,21 +22,12 @@ class Player(object):
         self.user_id = user_id
         self.state = state
 
-    def to_json(self):
-        # GameState has a players attribute.
-        # so state must be ignored here so as not to be recurcively called
-        return to_json({key: getattr(self, key) for key in dir(self) if key != "state"})
-
     def __repr__(self):
         return "Player {self.user_id}".format(self=self)
 
     def __eq__(self, other):
-        return self.user_id == other.user_id
-
-    @property
-    def is_valid(self):
-        # A player without a session is not valid
-        return False
+        if hasattr(other, "user_id"):
+            return self.user_id == other.user_id
 
     @property
     def is_napoleon(self):
@@ -137,24 +39,18 @@ class Player(object):
 
     @property
     def is_passed(self):
-        return self in self.state.passed_players
+        return self in self.state._passed_players
 
     @property
     def is_my_turn(self):
-        if self.state.turn:
-            return self == self.state.turn
-        else:
-            return False
+        return self == self.state.turn
 
     @property
     def is_winner(self):
-        if self.state.phase.current != "finished":
-            return None
         if self.state.phase.did_napoleon_forces_win is True:
             return True if self.is_napoleon_forces else False
         if self.state.phase.did_allied_forces_win is True:
             return True if self.is_allied_forces else False
-        return None  # a game is being played
 
     @property
     def is_napoleon_forces(self):
@@ -279,9 +175,6 @@ class Phase(object):
         self.state = state
         self.adaptor = state.adaptor
 
-    def to_json(self):
-        return to_json({key: getattr(self, key) for key in dir(self) if key != "state"})
-
     @property
     def current(self):
         return self.adaptor.get("phase")
@@ -305,11 +198,11 @@ class Phase(object):
 
     @property
     def is_napoleon_determined(self):
-        return bool(self.state.napoleon) and len(self.state.passed_players) >= len(self.state.players) - 1
+        return bool(self.state.napoleon) and len(self.state._passed_players) >= len(self.state.players) - 1
 
     @property
     def are_all_players_passed(self):
-        return len(self.state.passed_players) == len(self.state.players)
+        return len(self.state._passed_players) == len(self.state.players)
 
     @property
     def is_finished(self):
@@ -342,13 +235,10 @@ class Phase(object):
 
 class GameState(object):
 
-    def __init__(self, adaptor):
+    def __init__(self, adaptor, session=None):
         self.adaptor = adaptor
         self.room_id = adaptor.room_id
         self.phase = Phase(self)
-
-    def to_json(self):
-        return to_json({key: getattr(self, key) for key in dir(self)})
 
     def create_player(self, user_id):
         if user_id is None:
@@ -372,7 +262,7 @@ class GameState(object):
         Distribute cards to each player and leave the rest of cards which napoleon can change
         """
         if restart:
-            del self.passed_players
+            del self._passed_players
 
         players = list(self.players)
         number_of_players = len(players)
@@ -411,15 +301,12 @@ class GameState(object):
         return [p for p in self.players if p.is_AI]
 
     @property
-    def passed_players(self):
-        # TODO: self.playersを介す
-        l = []
-        for pid in self.adaptor.get_list("pass_ids", type=int):
-            l.append(Player(user_id=pid, state=self))
-        return l
+    def _passed_players(self):
+        pids = self.adaptor.get_list("pass_ids", type=int)
+        return [p for p in self.players if p.user_id in pids]
 
-    @passed_players.deleter
-    def passed_players(self):
+    @_passed_players.deleter
+    def _passed_players(self):
         self.adaptor.delete("pass_ids")
 
     @property
