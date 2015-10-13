@@ -41,13 +41,10 @@ def logout(request):
 @require_http_methods(["GET"])
 @login_required
 def game_state(request, room_id):
+    uid = request.user.id
     sid = request.COOKIES["sessionid"]
-    adaptor = RedisAdaptor(room_id)
-    player = state.Player(
-        user_id=request.user.id,
-        state=state.GameState(adaptor, session.Session(adaptor, sid))
-    )
-    return JsonResponse({"state": player.state.to_json()})
+    s = session.Session(RedisAdaptor(room_id), sid, uid)
+    return JsonResponse({"state": s.myself.state.to_json()})
 
 
 @login_required
