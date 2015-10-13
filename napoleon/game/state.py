@@ -341,6 +341,11 @@ class GameState(object):
         if user_id:
             return self.create_player(user_id)
 
+    @property
+    def turn_user_id(self):
+        if self.turn:
+            return self.turn.user_id
+
     @turn.setter
     def turn(self, user_id):
         if isinstance(user_id, Player):
