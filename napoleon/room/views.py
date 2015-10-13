@@ -101,5 +101,5 @@ def reset(request, room_id):
 @require_http_methods(["POST"])
 def add(request, room_id):
     name = request.POST["name"]
-    state.AI(request, adaptor=RedisAdaptor(room_id)).add(name)
+    state.AI(RedisAdaptor(room_id)).add(name)
     return redirect("napoleon.room.views.detail", game_id=room_id)
