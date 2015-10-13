@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from napoleon.game import card
 from napoleon.game import state
+from napoleon.game import session
 from napoleon.game.adaptor import RedisAdaptor
 from napoleon.AI import ai_names
 from . import models
@@ -36,45 +37,16 @@ def logout(request):
     return redirect("napoleon.room.views.index")
 
 
-def _get_game_state(request, adaptor):
-    uid = request.user.id
-    sid = request.COOKIES["sessionid"]
-    return state.GameStateWithSession(adaptor, user_id=uid, session_id=sid)
-
-
-def _get_user_state(request, adaptor):
-    uid = request.user.id
-    sid = request.COOKIES["sessionid"]
-    sta = _get_game_state(request, adaptor)
-    return state.User(user_id=uid, session_id=sid, state=sta)
-
-
-def _get_AI_state(request, adaptor):
-    st = state.GameState(adaptor)
-    return state.AI(state=st)
-
-
-def _get_myself(request, adaptor):
-    sid = request.COOKIES["sessionid"]
-    st = state.GameState(adaptor)
-    return state.Myself(session_id=sid, state=st)
-
-
 @require_http_methods(["GET"])
 @login_required
 def game_state(request, room_id):
+    sid = request.COOKIES["sessionid"]
     adaptor = RedisAdaptor(room_id)
-    try:
-        myself = _get_myself(request, adaptor)
-    except state.InvalidSession:
-        myself = state.Player(user_id=request.user.id, state=state.GameState(adaptor))
-
-    cxt = {
-        "myself": myself.to_json(),
-        "state": myself.state.to_json(),
-    }
-    cxt["myself"]["is_valid"] = myself.is_valid
-    return JsonResponse(cxt)
+    player = state.Player(
+        user_id=request.user.id,
+        state=state.GameState(adaptor, session.Session(adaptor, sid))
+    )
+    return JsonResponse({"state": player.state.to_json()})
 
 
 @login_required
@@ -97,28 +69,31 @@ def create(request):
     return redirect("napoleon.room.views.index")
 
 
+def _get_user_state(request, adaptor):
+    uid = request.user.id
+    sid = request.COOKIES["sessionid"]
+    return state.User(user_id=uid, session_id=sid, adaptor=adaptor)
+
+
 # Ajax better
 @login_required
 @require_http_methods(["POST"])
 def join(request, room_id):
-    adaptor = RedisAdaptor(room_id)
-    _get_user_state(request, adaptor).join(request.user)
+    _get_user_state(request, adaptor=RedisAdaptor(room_id)).join(request.user)
     return redirect("napoleon.room.views.detail", game_id=room_id)
 
 
 @login_required
 @require_http_methods(["POST"])
 def quit(request, room_id):
-    adaptor = RedisAdaptor(room_id)
-    _get_user_state(request, adaptor).quit()
+    _get_user_state(request, adaptor=RedisAdaptor(room_id)).quit()
     return redirect("napoleon.room.views.detail", game_id=room_id)
 
 
 @login_required
 @require_http_methods(["POST"])
 def reset(request, room_id):
-    adaptor = RedisAdaptor(room_id)
-    _get_user_state(request, adaptor).reset()
+    _get_user_state(request, adaptor=RedisAdaptor(room_id)).reset()
     return redirect("napoleon.room.views.detail", game_id=room_id)
 
 
@@ -126,5 +101,5 @@ def reset(request, room_id):
 @require_http_methods(["POST"])
 def add(request, room_id):
     name = request.POST["name"]
-    _get_AI_state(request, adaptor=RedisAdaptor(room_id)).add(name)
+    state.AI(request, adaptor=RedisAdaptor(room_id)).add(name)
     return redirect("napoleon.room.views.detail", game_id=room_id)
