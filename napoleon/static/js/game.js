@@ -74,7 +74,7 @@ app.controller("GameController", ["$scope", function($scope){
     };
 
     self.discard = function(card){
-        if (!elem(self.unused, card)){
+        if (!_.contains(self.unused, card)){
             self.unused.push(card);
             remove(self.myself.hand, card);
         }
@@ -90,7 +90,7 @@ app.controller("GameController", ["$scope", function($scope){
 
     self.select = function(card){
         var values = self.myself.possible_cards.map(function(i){ return i.value;});
-        if (!elem(values, card.value)){
+        if (!_.contains(values, card.value)){
             self.impossible_card = card;
             return;
         }
@@ -136,10 +136,4 @@ app.controller("GameController", ["$scope", function($scope){
         if (i >= 0)
             list.splice(i, 1);
     }
-
-    function elem(list, item){
-        var i = list.indexOf(item);
-        return (i >= 0) ? true : false;
-    }
-
 }]);
