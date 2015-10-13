@@ -82,10 +82,14 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
             raise gen.Return()
 
         sid = json.pop("session_id")
-        session = Session(self.adaptor, session_id=sid)
-        self._take_action(json, self.state.create_player(session.user_id))
-        yield self.write_on_same_room({"update": True})
-        yield self.handle_ai()
+        try:
+            session = Session(self.adaptor, session_id=sid)
+        except ValueError:
+            yield self.write_on_same_room({"update": True})
+        else:
+            self._take_action(json, self.state.create_player(session.user_id))
+            yield self.write_on_same_room({"update": True})
+            yield self.handle_ai()
 
     @gen.coroutine
     def handle_ai(self):

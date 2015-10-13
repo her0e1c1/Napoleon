@@ -297,6 +297,10 @@ class GameState(object):
         return l
 
     @property
+    def player_AIs(self):
+        return [p for p in self.players if p.is_AI]
+
+    @property
     def _passed_players(self):
         pids = self.adaptor.get_list("pass_ids", type=int)
         return [p for p in self.players if p.user_id in pids]
