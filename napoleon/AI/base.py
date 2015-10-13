@@ -35,12 +35,6 @@ class BaseAI(object):
 
         return None
 
-    def act(self):
-        """
-        dispatcher
-        """
-        pass
-
     def to_json(self):
         return {"name": self.__class__.name}
 

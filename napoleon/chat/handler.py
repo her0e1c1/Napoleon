@@ -3,6 +3,7 @@ from tornado.websocket import WebSocketHandler
 from napoleon.game.handler import WSHandlerMixin
 from napoleon.game.adaptor import RedisAdaptor
 from napoleon.game import state
+from napoleon.game import session
 
 
 class Chat(object):
@@ -39,7 +40,7 @@ class ChatHandler(WSHandlerMixin, WebSocketHandler):
         adaptor = RedisAdaptor(self.room_id)
         sid = json.pop("session_id")
         try:
-            uid = state.get_user_id(adaptor, session_id=sid)
+            uid = session.get_user_id(adaptor, session_id=sid)
         except state.InvalidSession:
             return self.close()
 

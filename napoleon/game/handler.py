@@ -8,7 +8,8 @@ import tornado.websocket
 from tornado.websocket import WebSocketHandler
 import tornado.escape
 from collections import defaultdict
-from . import state
+from . state import GameState
+from . session import Session
 from . import phase
 from . adaptor import RedisAdaptor
 
@@ -29,6 +30,7 @@ class WSHandlerMixin(object):
     def open(self, room_id):
         WSHandlerMixin.connections[room_id].add(self)
         self.adaptor = RedisAdaptor(room_id)
+        self.state = GameState(self.adaptor)
 
     def on_close(self):
         WSHandlerMixin.connections[self.room_id].remove(self)
@@ -55,6 +57,21 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
     Also there are some audience, and then they have to update it.
     """
 
+    def _take_action(self, json, player):
+        action_name = json.pop("action", "")
+        action_class = phase.get_action(self.state.phase.current, action_name)
+
+        if not action_class:
+            return False
+
+        action = action_class(player)
+        if action.can_next:
+            action.act(**json)
+            action.next()
+            return True
+
+        return False
+
     @gen.coroutine
     def on_message(self, message):
         # TODO: validate message
@@ -64,31 +81,18 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
             yield
             raise gen.Return()
 
-        action_name = json.pop("action", "")
         sid = json.pop("session_id")
-
         try:
-            myself = state.Myself(session_id=sid, state=state.GameState(self.adaptor))
-        except state.InvalidSession:
+            session = Session(self.adaptor, session_id=sid)
+        except ValueError:
             yield self.write_on_same_room({"update": True})
-            raise gen.Return()
-
-        action_class = phase.get_action(myself.state.phase.current, action_name)
-        if not action_class:
+        else:
+            self._take_action(json, self.state.create_player(session.user_id))
             yield self.write_on_same_room({"update": True})
-            raise gen.Return()
-
-        action = action_class(myself)
-        if action.can_next:
-            action.act(**json)
-            action.next()
-
-        yield self.write_on_same_room({"update": True})
-
-        yield self.handle_ai(myself.state)
+            yield self.handle_ai()
 
     @gen.coroutine
-    def handle_ai(self, state):
+    def handle_ai(self):
         """
         If all the player AI have no action to the current state, then exit it.
         Otherwise a player AI changes the state, so it needs to check whether
@@ -96,7 +100,7 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
         of them have it, they act recusively.
         """
 
-        for player in state.player_AIs:
+        for player in self.state.player_AIs:
             json = player._AI.get_action()
             if json:
                 logger.info("AI action: %s => %s" % (player, json))
@@ -104,10 +108,7 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
                 # AI must wait for human's acitons here
                 yield gen.sleep(1)
 
-                action_class = phase.get_action(state.phase.current, json.pop("action"))
-                if action_class:
-                    action = action_class(player)
-                    action.act(**json)
-                    action.next()
+                if self._take_action(json, player):
                     yield self.write_on_same_room({"update": True})
-                    yield self.handle_ai(player.state)
+                    yield self.handle_ai()
+                    break
