@@ -106,7 +106,8 @@ class PlayerWithSession(object):
     def to_json(self):
         # GameState has a players attribute.
         # so state must be ignored here so as not to be recurcively called
-        return to_json({key: getattr(self, key) for key in dir(self.player) if key != "state"})
+        keys = dir(self.player) + ["is_valid"]
+        return to_json({key: getattr(self, key) for key in keys if key != "state"})
 
     @classmethod
     def from_player(cls, player, session):
