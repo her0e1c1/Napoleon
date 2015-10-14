@@ -2,7 +2,11 @@
 {% macro chat(user_id) %}
   <div ng-controller="ChatController as chat">
     <div class="form-inline">
-      <input type="type" ng-model="chat.msg" ng-keydown="chat.handleKeydown($event)" size="50%" class="form-control" placeholder="Message">
+      <input type="type"
+             ng-model="chat.msg"
+             ng-keydown="chat.handleKeydown($event)"
+             ng-change="chat.changeMessage()"
+             size="50%" class="form-control" placeholder="Message">
       <button ng-click="chat.chat();" maxlength="30" class="btn btn-default">SEND</button>
       <button class="btn btn-default" data-toggle="modal" data-target="#emoji">Emoji</button>
     </div>

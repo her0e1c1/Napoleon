@@ -3,6 +3,8 @@ app.controller("ChatController", ["$scope", "$sce", function($scope, $sce){
     var wsChat = new WebSocket(urls.chat);
     var self = this;
 
+    self.msg = $.cookie("msg");
+
     wsChat.onopen= function () {
         self.send();
     };
@@ -25,11 +27,16 @@ app.controller("ChatController", ["$scope", "$sce", function($scope, $sce){
             return;
         self.send({"msg": self.msg});
         self.msg = "";
+        $.cookie("msg", "");
     };
 
     self.handleKeydown = function(evt){
         if (evt.which === 13)
             self.chat();
+    };
+
+    self.changeMessage = function(){
+        $.cookie("msg", self.msg);
     };
 
     // emoji
