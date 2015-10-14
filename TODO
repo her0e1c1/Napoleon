@@ -2,6 +2,8 @@
 Napoleon
 ========
 
+- using https://travis-ci.org/
+- facebook login
 - begginer mode
 - カード枚数の上限変更
 - 最低宣言数
