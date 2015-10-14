@@ -88,7 +88,7 @@ class Player(object):
         if (c == card.CLUB10
             and not self.state.board
             and not self.is_napoleon
-            and len(self.state.allied_forces) > 1
+            and len(self.state._allied_forces) > 1
         ):
             return True
         else:
@@ -235,7 +235,7 @@ class Phase(object):
 
 class GameState(object):
 
-    def __init__(self, adaptor, session=None):
+    def __init__(self, adaptor):
         self.adaptor = adaptor
         self.room_id = adaptor.room_id
         self.phase = Phase(self)

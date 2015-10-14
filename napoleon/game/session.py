@@ -31,23 +31,26 @@ class Session(object):
         if session_id:
             self.user_id = get_user_id(adaptor, session_id)
             if self.user_id:
-                if user_id == self.user_id:
+                if user_id is None or user_id == self.user_id:
                     self.is_valid = True
             else:
                 self.user_id = user_id
         else:
             self.user_id = user_id
 
-        if self.user_id is None:
-            raise ValueError("No user id")
-
     @property
     def myself(self):
-        return PlayerWithSession(GameState(self.adaptor), self)
+        if self.user_id:
+            return PlayerWithSession(GameState(self.adaptor), self)
+
+    @property
+    def state(self):
+        return GameStateWithSession(self)
 
     def create_player(self, user_id):
         session = Session(self.adaptor, user_id=user_id)
-        return PlayerWithSession(self.myself.state, session)
+        state = GameState(self.adaptor)
+        return PlayerWithSession(state, session)
 
 
 def get_user_id(adaptor, session_id):
@@ -91,7 +94,7 @@ class StatePrivilege(object):
 
     def players(self, value):
         p = self.session.myself
-        return [p if p.user_id == v.user_id else
+        return [p if p and p.user_id == v.user_id else
                 self.session.create_player(v.user_id) for v in value]
 
 
@@ -99,19 +102,15 @@ class PlayerWithSession(object):
 
     def __init__(self, state, session):
         self.state = GameStateWithSession(session)
+        self.player = state.create_player(session.user_id)
         self.privilege = PlayerPrivilege(session)
         self.is_valid = session.is_valid
-        self.player = state.create_player(session.user_id)
 
     def to_json(self):
         # GameState has a players attribute.
         # so state must be ignored here so as not to be recurcively called
         keys = dir(self.player) + ["is_valid"]
         return to_json({key: getattr(self, key) for key in keys if key != "state"})
-
-    @classmethod
-    def from_player(cls, player, session):
-        return PlayerWithSession(player.state, session)
 
     def __getattr__(self, name):
         meth = getattr(self.privilege, name, None)
@@ -126,8 +125,8 @@ class GameStateWithSession(object):
 
     def __init__(self, session):
         self.state = GameState(session.adaptor)
-        self.privilege = StatePrivilege(session)
         self.phase = PhaseWithSession(self.state, session)
+        self.privilege = StatePrivilege(session)
 
     def __getattr__(self, name):
         meth = getattr(self.privilege, name, None)

@@ -21,28 +21,29 @@ class WSHandlerMixin(object):
     connections = defaultdict(set)
 
     @property
-    def room_id(self):
-        return self.path_kwargs["room_id"]
+    def path(self):
+        return self.request.path
 
     def check_origin(self, origin):
         return True
 
     def open(self, room_id):
-        WSHandlerMixin.connections[room_id].add(self)
+        sid = self.get_cookie("sessionid")
+        WSHandlerMixin.connections[self.path].add((self, sid,))
         self.adaptor = RedisAdaptor(room_id)
         self.state = GameState(self.adaptor)
 
     def on_close(self):
-        WSHandlerMixin.connections[self.room_id].remove(self)
-        # self.adaptor.conn.close()  # ???
+        sid = self.get_cookie("sessionid")
+        WSHandlerMixin.connections[self.path].remove((self, sid,))
 
     def to_json(self, message):
         return tornado.escape.json_decode(message)
 
     @gen.coroutine
-    def write_on_same_room(self, json):
-        message = tornado.escape.json_encode(json)
-        for con in WSHandlerMixin.connections[self.room_id]:
+    def write_on_same_room(self, message):
+        message = tornado.escape.json_encode(message)
+        for con, sid in WSHandlerMixin.connections[self.path]:
             try:
                 con.write_message(message)
             except tornado.websocket.WebSocketClosedError:
@@ -57,13 +58,15 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
     Also there are some audience, and then they have to update it.
     """
 
-    def _take_action(self, json, player):
+    def _take_action(self, json, user_id):
         action_name = json.pop("action", "")
         action_class = phase.get_action(self.state.phase.current, action_name)
 
         if not action_class:
             return False
 
+        # player must be without session
+        player = self.state.create_player(user_id)
         action = action_class(player)
         if action.can_next:
             action.act(**json)
@@ -82,14 +85,13 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
             raise gen.Return()
 
         sid = json.pop("session_id")
-        try:
-            session = Session(self.adaptor, session_id=sid)
-        except ValueError:
-            yield self.write_on_same_room({"update": True})
-        else:
-            self._take_action(json, self.state.create_player(session.user_id))
-            yield self.write_on_same_room({"update": True})
+        session = Session(self.adaptor, session_id=sid)
+        if session.user_id:
+            self._take_action(json, session.user_id)
+            yield self.write_on_same_room()
             yield self.handle_ai()
+        else:
+            yield self.write_on_same_room()
 
     @gen.coroutine
     def handle_ai(self):
@@ -108,7 +110,17 @@ class GameHandler(WSHandlerMixin, WebSocketHandler):
                 # AI must wait for human's acitons here
                 yield gen.sleep(1)
 
-                if self._take_action(json, player):
-                    yield self.write_on_same_room({"update": True})
+                if self._take_action(json, player.user_id):
+                    yield self.write_on_same_room()
                     yield self.handle_ai()
                     break
+
+    @gen.coroutine
+    def write_on_same_room(self):
+        for con, sid in WSHandlerMixin.connections[self.path]:
+            session = Session(self.adaptor, session_id=sid)
+            message = tornado.escape.json_encode(session.state.to_json())
+            try:
+                con.write_message(message)
+            except tornado.websocket.WebSocketClosedError:
+                pass

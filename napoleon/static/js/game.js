@@ -19,28 +19,28 @@ app.controller("GameController", ["$scope", function($scope){
     // When a player sends data to a server, he can't select any before he gets its response.
     self.disabled = false;
 
-    this.update = function(){
-        $.get(urls.state, {}, function(data){
-            var myself = _.find(data.state.players, (function(p){
-                return p.user_id == user_id;
-            }));
-            data["state"]["turn"] = _.find(data.state.players, (function(p){
-                return p.user_id == data.state.turn_user_id;
-            }));
+    this.update = function(state){
+        var myself = _.find(state.players, (function(p){
+            return p.user_id == user_id;
+        }));
+        state["turn"] = _.find(state.players, (function(p){
+            return p.user_id == state.turn_user_id;
+        }));
 
-            $.extend(self, data, {"myself": myself});
-            self.impossible_card = null;
-            $scope.$apply();
-        });
+        $.extend(self, {"state": state, "myself": myself});
+        self.impossible_card = null;
+        self.disabled = false;
+        $scope.$apply();
     };
-    self.update();  // shoud update at init
+
+    // shoud update at init
+    $.get(urls.state, {}, function(data){
+        self.update(data.state);
+    });
 
     wsGame = new WebSocket(urls.room);
     wsGame.onmessage = function (evt) {
-        self.disabled = false;
-        var json = JSON.parse(evt.data);
-        if (json.update)
-            self.update();  // 本来はAjaxでなくWebSocketで更新すべき
+        self.update(JSON.parse(evt.data));
     };
     wsGame.onerror = function(err){  // when is this called?
         self.is_error = true;
@@ -53,7 +53,6 @@ app.controller("GameController", ["$scope", function($scope){
         if (json === undefined)
             json = {};
         json["session_id"] = $.cookie("sessionid");
-        // for (var i = 0; i < 10; i++)
         wsGame.send(JSON.stringify(json));
         self.disabled = true;
     };
@@ -69,7 +68,8 @@ app.controller("GameController", ["$scope", function($scope){
     self.select_or_discard = function(card){
         if (self.state.phase.current == 'discard')
             self.discard(card);
-        else if (self.state.phase.current == 'first_round' || self.state.phase.current == 'rounds')
+        else if (self.state.phase.current == 'first_round'
+              || self.state.phase.current == 'rounds')
             self.select(card);
     };
 

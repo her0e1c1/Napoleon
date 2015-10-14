@@ -37,14 +37,13 @@ class ChatHandler(WSHandlerMixin, WebSocketHandler):
         except ValueError:
             return
 
-        adaptor = RedisAdaptor(self.room_id)
         sid = json.pop("session_id")
         try:
-            uid = session.get_user_id(adaptor, session_id=sid)
+            uid = session.get_user_id(self.adaptor, session_id=sid)
         except state.InvalidSession:
             return self.close()
 
-        chat = Chat(adaptor)
+        chat = Chat(self.adaptor)
         msg = json.get("msg")
         if msg:
             chat.set(msg, uid)
