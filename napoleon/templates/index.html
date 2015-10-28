@@ -6,7 +6,7 @@
 <div>
   <h2 class="text-primary">Napoleon is an exciting card game!</h2>
   <p class="text-muted">You can play napoleon with AI players, if you don't have human players.</p>
-  <p class="text-muted">And soon, you won't need to login if you play with human players.</p>
+  <p class="text-muted">And soon, you won't need to login unless you play with human players.</p>
   {% if not request.user.is_authenticated() %}
     <p class="text-muted">If you want to play, you need to signup <a href="{{ url('signup') }}">here</a>.</p>
   {% endif %}
