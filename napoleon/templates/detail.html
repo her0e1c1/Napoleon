@@ -141,7 +141,7 @@
       <table class="table table-bordered">
         <tr>
           <th>Players</th>
-          <td ng-repeat="p in game.state.players track by $index" ng-class="{active: p.user_id == game.turn.user_id, 'alert-success': p.is_winner === true, 'alert-danger': p.is_winner === false}" role="alert">
+          <td ng-repeat="p in game.state.players track by $index" ng-class="{active: p.user_id == game.state.turn.user_id, 'alert-success': p.is_winner === true, 'alert-danger': p.is_winner === false}" role="alert">
             <span ng-if="p.user_id == game.myself.user_id" class="glyphicon glyphicon-star"></span>
             <strong class="text-info">
               [[ p.user.username ]]
