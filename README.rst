@@ -34,7 +34,7 @@ you can make a development environment with vagrant.::
 
     # run Napoleon server
     source /vagrant/pyvenv/bin/activate
-    python /vagrant/Napoleon/main.py
+    python /vagrant/Napoleon/main.py --log_to_stderr
 
 Now you can access a Napoleon server at ``http://192.168.56.11:8001/``
 
