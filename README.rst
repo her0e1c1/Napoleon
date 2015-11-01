@@ -9,86 +9,35 @@ Introduction
 ============
 
 Napoleon is a card game.
+
 You can play Napoleon at https://napolo.herokuapp.com if you want.
 
+Install on virtual box
+======================
+you can make a development environment with vagrant.::
 
-Install
-=======
+    # get image
+    # you don't need to run this if you have got the image once
+    vagrant box add ubuntu/trusty64
+    
+    # go to project root. you need to create it if it doesn't exist
+    cd /path/to/project_root
 
-FreeBSD::
+    # copy Vagrantfile
+    curl https://raw.githubusercontent.com/her0e1c1/Napoleon/master/Vagrantfile -O
 
-   pkg install devel/py-setuptools34
-   cd /usr/ports/databases/py-sqlite3   
-   make reinstall clean
+    # set up virtualbox and install
+    vagrant up --provision
+    
+    # login the server of Ubuntu
+    vagrant ssh
 
-   # project root
-   python manage.py migrate
+    # run Napoleon server
+    source /vagrant/pyvenv/bin/activate
+    python /vagrant/Napoleon/main.py
 
+Now you can access a Napoleon server at ``http://192.168.56.11:8001/``
 
-Heroku
-======
+uninstall ::
 
-Napoleon is served at heroku server.
-
-I'm not used to heroku commands, so I'll write it down here.
-
-install the heroku command ::
-
-    wget -qO- https://toolbelt.heroku.com/install.sh | sh
-
-login ::
-
-    heroku auth:login --app napolo
-
-info ::
-
-   heroku apps:info --app napolo
-
-log ::
-
-    heroku logs --app napolo --tail
-
-When using django, you need to migrate and create a super user ::
-
-    heroku run --app napolo python manage.py makemigrations
-    heroku run --app napolo python manage.py migrate
-    heroku run --app napolo python manage.py createsuperuser
-
-connect to postgres ::
-
-    heroku pg:psql --app napolo
-
-
-Redis
------
-
-conect to a remote server on cli ::
-
-    redis-cli -h HOST -p PORT -a PASSWORD
-    # if you need url do the command below
-    heroku config --app napolo
-
-
-Automatical Deploy
-------------------
-
-heroku supports this but you also need to configure settings of github.
-
-https://developer.github.com/guides/automating-deployments-to-integrators/
-
-Django
-======
-run server ::
-
-    python manage.py runserver 0.0.0.0:8001 --noreload --settings=napoleon.settings.local
-
-so you need to set an environment valiable on heroku ::
-
-    heroku config:set DJANGO_SETTINGS_MODULE=napoleon.settings.production --app napolo
-
-static files ::
-
-    # you don't need to run this command because heroku does somehow instead of you
-    heroku run python manage.py collectstatic --noinput
-
-https://devcenter.heroku.com/articles/django-assets#automatic-collectstatic
+    vagrant destroy -f
