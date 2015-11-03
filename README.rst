@@ -31,6 +31,8 @@ you can make a development environment with vagrant.::
     
     # login the server of Ubuntu
     vagrant ssh
+    # or just use ssh. password is vagrant
+    ssh vagrant@192.168.56.11
 
     # run Napoleon server
     source /vagrant/pyvenv/bin/activate
