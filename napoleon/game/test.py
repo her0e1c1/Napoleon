@@ -13,6 +13,7 @@ class DecideTestCase(TestCase):
         assert card.NUMBER_OF_FACE_CARDS == 20
 
     def test_ace(self):
+        # ace wins if there are only plain cards
         P = card.Plain
         c, d, h, s = list(card.Suit)
         assert card.decide([P(1, d), P(3, d), P(10, d)], c) == P(1, d)
@@ -21,12 +22,13 @@ class DecideTestCase(TestCase):
         assert card.decide([P(1, d), P(3, d), P(10, d)], s) == P(1, d)
 
     def test_trump(self):
+        # a trump wins if there are other cards which is not a trump
         P = card.Plain
         c, d, h, s = list(card.Suit)
         assert card.decide([P(1, c), P(3, c), P(10, c)], c) == P(1, c)
         assert card.decide([P(1, d), P(3, c), P(10, d)], c) == P(3, c)
         assert card.decide([P(1, d), P(3, h), P(10, s)], c) == P(10, s)  # lead won
-        assert card.decide([P(1, s), P(3, c), P(10, d)], c) == P(1, s)
+        assert card.decide([P(1, s), P(3, c), P(10, d)], c) == P(1, s)  # ALMIGHTY won
 
     def test_joker(self):
         P = card.Plain
@@ -81,7 +83,7 @@ class StateTestCase(TestCase):
         # sid = c.session["_auth_user_hash"]
         response = c.post(self.url_join)
         assert response.status_code == 302
-        assert self.state.players == [state.Player(user_id, self.state)]
+        assert self.state.players == [self.state.create_player(user_id)]
 
         response = c.post(self.url_quit)
         assert response.status_code == 302
@@ -91,6 +93,8 @@ class StateTestCase(TestCase):
         for c in self.player_clients:
             assert c.post(self.url_join).status_code == 302
         self.state.start()
+
+        # check if the distributed cards have not changed
         hands = [p.hand for p in self.state.players]
         rest = self.state.rest
         n = sum(len(h) for h in hands) + len(rest)
@@ -98,10 +102,13 @@ class StateTestCase(TestCase):
 
     def _test_declare(self):
         self._test_start()
+
+        # only one player declares as Napoleon
+        # while others passes
         players = list(self.state.players)
         for p in players[1:]:
             p.pass_()
-        assert len(list(self.state.passed_players)) == len(players) - 1
+        assert len(list(self.state._passed_players)) == len(players) - 1
         declaration = card.from_int(1)
         p = players[0]
         p.declare(declaration)
@@ -110,6 +117,8 @@ class StateTestCase(TestCase):
 
     def _test_adjutant(self):
         self._test_declare()
+
+        # Napoleon decides the card of adjutant as culb ace
         p = list(self.state.players)[0]
         adjutant = card.from_int(1)
         p.decide(adjutant)
@@ -117,9 +126,14 @@ class StateTestCase(TestCase):
 
     def test_discard(self):
         self._test_adjutant()
+
+        # Napoleon discards his cards
+        # There are three players in this current game.
+        # so the number of discards are 6
         p = list(self.state.players)[0]
-        num = 6
-        unused = p.hand[:num]
+        num = card.REST[len(self.state.players)]
+        assert num == 6
+        unused = p.hand[:num]  # discards cards from last to last but 6th
         hand = p.hand[num:] + self.state.rest
         p.add_rest_to_hand()
         p.discard(unused)
