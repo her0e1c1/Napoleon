@@ -14,7 +14,13 @@ You can play Napoleon at https://napolo.herokuapp.com if you want.
 
 Install on virtual box
 ======================
-you can make a development environment with vagrant.::
+These software required before installation:
+
+- virtualbox
+- vagrant
+- teraterm (if you use windows)
+
+You can make a development environment with vagrant.::
 
     # get image
     # you don't need to run this if you have got the image once
@@ -23,7 +29,7 @@ you can make a development environment with vagrant.::
     # go to project root. you need to create it if it doesn't exist
     cd /path/to/project_root
 
-    # copy Vagrantfile (just download the file. so you can get it from a web browser)
+    # copy Vagrantfile (just download the file. so you can get it from a web browser instead)
     curl https://raw.githubusercontent.com/her0e1c1/Napoleon/master/Vagrantfile -O
 
     # set up virtualbox and install
@@ -42,4 +48,5 @@ Now you can access a Napoleon server at ``http://192.168.56.11:8001/``
 
 uninstall ::
 
+    # in the directory containing Vagrantfile
     vagrant destroy -f
