@@ -32,7 +32,7 @@ You can make a development environment with vagrant.::
     # copy Vagrantfile (just download the file. so you can get it from a web browser instead)
     curl https://raw.githubusercontent.com/her0e1c1/Napoleon/master/Vagrantfile -O
 
-    # set up virtualbox and install
+    # set up virtualbox and install (in the directory containing Vagrantfile)
     vagrant up --provision
     
     # login the server of ubuntu
