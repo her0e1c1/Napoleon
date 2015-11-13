@@ -12,8 +12,9 @@ Napoleon is a card game.
 
 You can play Napoleon at https://napolo.herokuapp.com if you want.
 
-Install on virtual box
-======================
+Install on virtualbox
+=====================
+
 These software required before installation:
 
 - virtualbox
@@ -50,3 +51,18 @@ uninstall ::
 
     # in the directory containing Vagrantfile
     vagrant destroy -f
+
+Development
+===========
+
+If you finished `Install on virtualbox`, then you can access the repository on your host.
+
+The repository is located at `/path/to/project_root/Napoleon`,
+which is a directory synchronized between your host and ubuntu server.
+From the ubuntu server, you can access `/vagrant/Napoleon/`.
+
+So you can modify the source code of the repository from both of the sides.
+
+Once you have modified it and want to reload the server,
+type Controll and c at a time and kill the server.
+And try `python /vagrant/Napoleon/main.py --log_to_stderr` again.
