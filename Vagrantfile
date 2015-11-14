@@ -4,15 +4,16 @@
 $script = <<SCRIPT_LINES__
 # root
 apt-get update
-apt-get install -y redis-server git python3-setuptools postgresql python-psycopg2 postgresql-server-dev-all python3-dev
+apt-get install -y redis-server git python3-setuptools postgresql python-psycopg2 postgresql-server-dev-all python3-dev python-virtualenv
 
 # vagrant
 sudo -u vagrant sh <<SCRIPT_VAGRANT
 redis-server &
 
 [ -d /vagrant/pyvenv ] && rm -fr /vagrant/pyvenv
-pyvenv-3.4 --without-pip /vagrant/pyvenv
-. /vagrant/pyvenv/bin/activate && curl https://bootstrap.pypa.io/get-pip.py | /vagrant/pyvenv/bin/python
+virtualenv -p python3.4 /vagrant/pyvenv
+#pyvenv-3.4 --without-pip /vagrant/pyvenv
+#. /vagrant/pyvenv/bin/activate && curl https://bootstrap.pypa.io/get-pip.py | /vagrant/pyvenv/bin/python
 
 cd /vagrant
 [ -d Napoleon ] && rm -fr Napoleon
