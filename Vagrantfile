@@ -10,10 +10,13 @@ apt-get install -y redis-server git python3-setuptools postgresql python-psycopg
 sudo -u vagrant sh <<SCRIPT_VAGRANT
 redis-server &
 
-[ -d /vagrant/pyvenv ] && rm -fr /vagrant/pyvenv
-virtualenv -p python3.4 /vagrant/pyvenv
-#pyvenv-3.4 --without-pip /vagrant/pyvenv
-#. /vagrant/pyvenv/bin/activate && curl https://bootstrap.pypa.io/get-pip.py | /vagrant/pyvenv/bin/python
+# On windows, you can't put a pyvenv directory on /vagrant, because there is something wrong with
+# a synchronized directory between windows and ubuntu
+[ -d ~/pyvenv ] && rm -fr ~/pyvenv
+virtualenv -p python3.4 ~/pyvenv
+# Suddenly this doesn't work on ubuntu
+# pyvenv-3.4 --without-pip ~/pyvenv
+# . ~/pyvenv/bin/activate && curl https://bootstrap.pypa.io/get-pip.py | ~/pyvenv/bin/python
 
 cd /vagrant
 [ -d Napoleon ] && rm -fr Napoleon
@@ -21,8 +24,8 @@ git clone https://github.com/her0e1c1/Napoleon.git
 
 cd Napoleon
 # even if you are in python environment, you are deactevated on vagrant
-. /vagrant/pyvenv/bin/activate && python setup.py install
-. /vagrant/pyvenv/bin/activate && python manage.py migrate
+. ~/pyvenv/bin/activate && python setup.py install
+. ~/pyvenv/bin/activate && python manage.py migrate
 
 SCRIPT_VAGRANT
 

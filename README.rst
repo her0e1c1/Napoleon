@@ -42,7 +42,7 @@ You can make a development environment with vagrant.::
     ssh vagrant@192.168.56.11
 
     # run Napoleon server on ubuntu
-    source /vagrant/pyvenv/bin/activate
+    source ~/pyvenv/bin/activate
     python /vagrant/Napoleon/main.py --log_to_stderr
 
 Now you can access a Napoleon server at ``http://192.168.56.11:8001/``
