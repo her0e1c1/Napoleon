@@ -3,6 +3,7 @@
 
 $script = <<SCRIPT_LINES__
 # root
+apt-get update
 apt-get install -y redis-server git python3-setuptools postgresql python-psycopg2 postgresql-server-dev-all python3-dev
 
 # vagrant
