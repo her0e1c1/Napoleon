@@ -3,4 +3,49 @@
 How to play Napoleon
 ====================
 
-test
+Create Your Account
+===================
+
+If you want to play Napoleon with other human players,
+you need to create your account.
+
+You need a player name and a password to create your account.
+You don't need your email but don't forget your password.
+If you forget it, you can't login so you need to recreate your account.
+
+Players
+=======
+
+It's best to play Napoleon with five players,
+although you can play with from three to seven players.
+
+Players are divided to two teams, which are Napoleon forces and allied forces.
+When a player becomes Napoleon, he need to deciede an adjutant.
+If there are five players, Napoleon and an adjutant are on the team of Napoleon forces,
+and the three others of them are on the team of allied forces.
+
+Victory Conditions
+==================
+
+In order to win a game, a player is on the winning team.
+To win the game, Napoleon forces needs to collect the more number of faced cards than
+or equal to what Napoleon declares.
+On the other hand, to win the game, allied forces needs to prevent Napoleon forces from
+getting the number of faced cards he declares.
+
+There are twenty faced cards. The values of faced cards are ace, ten, jack, queen and king.
+The suits of faced cards are club, diamond, heart and spade.
+
+For example, if Napoleon declares 15 faced cards, Napoleon forces needs to collect more
+than or equal to 15 faced cards. On the other hand, allied forces needs to collect more
+than or equal to 6 cards.
+
+Auction
+=======
+
+In this game, there is an auction to decide which player is Napoleon.
+Each player can decide the number of faced cards they will get.
+
+If a player becomes Napoleon, he declares the larger number than any other player.
+In case another player declares the same number, a player who declares stronger suit becomes Napoleon.
+A suit is stronger in order of club, diamond, heart and spade.
