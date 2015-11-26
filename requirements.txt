@@ -14,6 +14,6 @@ tornado
 redis
 django-sslify>=0.2.0
 raven
+pytest
 # pytest-django
-
 django  # first install for dependency
