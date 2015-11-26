@@ -6,3 +6,4 @@ venv34
 staticfiles
 dist
 napoleon.egg-info
+.cache/
