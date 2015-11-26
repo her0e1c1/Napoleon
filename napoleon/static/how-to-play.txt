@@ -17,12 +17,12 @@ Players
 =======
 
 It's best to play Napoleon with five players,
-although you can play with from three to seven players.
+although you can play it with three to seven players.
 
 Players are divided to two teams, which are Napoleon forces and allied forces.
 When a player becomes Napoleon, he need to deciede an adjutant.
 If there are five players, Napoleon and an adjutant are on the team of Napoleon forces,
-and the three others of them are on the team of allied forces.
+and the three others are on the team of allied forces.
 
 Victory Conditions
 ==================
@@ -37,8 +37,7 @@ There are twenty faced cards. The values of faced cards are ace, ten, jack, quee
 The suits of faced cards are club, diamond, heart and spade.
 
 For example, if Napoleon declares 15 faced cards, Napoleon forces needs to collect more
-than or equal to 15 faced cards. On the other hand, allied forces needs to collect more
-than or equal to 6 cards.
+than or equal to 15 faced cards. On the other hand, allied forces needs to collect at least 6 faced cards.
 
 Auction
 =======
