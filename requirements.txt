@@ -5,7 +5,6 @@ psycopg2  # install postgresql first
 python-dateutil
 requests
 six
-django
 dj-database-url
 dj-static
 django-debug-toolbar
