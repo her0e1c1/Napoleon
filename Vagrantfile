@@ -6,6 +6,9 @@ $script = <<SCRIPT_LINES__
 apt-get update
 apt-get install -y redis-server git python3-setuptools postgresql python-psycopg2 postgresql-server-dev-all python3-dev python-virtualenv
 
+# install the heroku command
+wget -qO- https://toolbelt.heroku.com/install.sh | sh
+
 # vagrant
 sudo -u vagrant sh <<SCRIPT_VAGRANT
 redis-server &
