@@ -297,6 +297,10 @@ class GameState(object):
         return l
 
     @property
+    def _allied_forces(self):
+        return [p for p in self.players if p.is_allied_forces]
+
+    @property
     def player_AIs(self):
         return [p for p in self.players if p.is_AI]
 
