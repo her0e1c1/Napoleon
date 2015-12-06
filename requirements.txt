@@ -1,3 +1,4 @@
+apscheduler
 Jinja2
 ipython
 ipdb
