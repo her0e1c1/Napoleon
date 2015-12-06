@@ -7,8 +7,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "napoleon.settings.local")
 setup()
 
 
-#@sched.scheduled_job('cron', hour=0)
-@sched.scheduled_job('interval', seconds=1)
+@sched.scheduled_job('cron', hour=0)
 def scheduled_finish_room():
     print('finish room every day')
     from napoleon.room.management.commands.finish_room import Command    
