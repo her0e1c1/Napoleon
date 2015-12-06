@@ -72,7 +72,11 @@
 {% endmacro %}
 
 {% macro start() %}
-  <div ng-if="game.state.phase.current === ''">
+  {#
+  https://github.com/angular/angular.js/issues/3954
+  before initialization, even if ng-if="false", tags is displayed for a short time.
+  #}
+  <div ng-if="game.state && !game.state.phase.current">
     <ul>
       player AI
       {% for ai in ais %}
