@@ -23,7 +23,7 @@ app.controller("GameController", ["$scope", function($scope){
         var myself = _.find(state.players, (function(p){
             return p.user_id == user_id;
         }));
-        state["turn"] = _.find(state.players, (function(p){
+        state.turn = _.find(state.players, (function(p){
             return p.user_id == state.turn_user_id;
         }));
 
@@ -52,7 +52,7 @@ app.controller("GameController", ["$scope", function($scope){
     this.send = function (json){
         if (json === undefined)
             json = {};
-        json["session_id"] = $.cookie("sessionid") || $.cookie("user_session");
+        json.session_id = $.cookie("sessionid") || $.cookie("user_session");
         wsGame.send(JSON.stringify(json));
         self.disabled = true;
     };
@@ -112,7 +112,7 @@ app.controller("GameController", ["$scope", function($scope){
     this.post = function(url, json){
         if (json === undefined)
             json = {};
-        json["csrfmiddlewaretoken"] = csrf_token;
+        json.csrfmiddlewaretoken = csrf_token;
         $.post(url, json, function(){
             self.send();  // just update on all the player's browsers
         });
