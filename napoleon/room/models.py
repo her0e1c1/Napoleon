@@ -3,16 +3,6 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 
 
-def get_by_user_id(user_ids):
-    if not user_ids:
-        return []
-    first = user_ids[0]
-    q = Q(id=first)
-    for i in user_ids[1:]:
-        q |= Q(id=i)
-    return User.objects.filter(q).all()
-
-
 class Room(models.Model):
     label = models.CharField(max_length=200, blank=False)
     waiting = models.BooleanField(default=True, null=False)
