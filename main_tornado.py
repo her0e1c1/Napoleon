@@ -40,8 +40,8 @@ def make_rootings(fallback_handler=None):
     :fallback_handler: wsgi_app if not matching routings
     """
     rootings = [
-        (r"/ws/(?P<room_id>\d+)", GameHandler),
-        (r"/chat/(?P<room_id>\d+)", ChatHandler),
+        (r"/ws/(?P<room_id>\w+)", GameHandler),
+        (r"/chat/(?P<room_id>\w+)", ChatHandler),
     ]
     if fallback_handler:
         rootings.append((r".*", FallbackHandler, {"fallback": fallback_handler}))

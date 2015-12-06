@@ -61,10 +61,14 @@ def logout(request):
 
 
 @require_http_methods(["GET"])
-@login_required
 def game_state(request, room_id):
-    uid = request.user.id
-    sid = request.COOKIES["sessionid"]
+    if request.user.is_authenticated():
+        uid = request.user.id
+        sid = request.COOKIES["sessionid"]
+    else:
+        uid = request.COOKIES["anonymous_user_id"]
+        sid = request.COOKIES["user_session"]
+        room_id = request.COOKIES["anonymous_room_id"]
     s = session.Session(RedisAdaptor(room_id), sid, uid)
     return JsonResponse({"state": s.myself.state.to_json()})
 
@@ -123,3 +127,39 @@ def add(request, room_id):
     name = request.POST["name"]
     state.AI(RedisAdaptor(room_id)).add(name)
     return redirect("napoleon.room.views.detail", game_id=room_id)
+
+
+def play(request):
+    import random
+    # TODO: make the type of user_id string
+    # So you can distinguish an anonymous user from a login user
+    uid = random.randint(10 ** 6, 10 ** 7)
+    sid = uid
+    room_id = "anonymous_%s" % uid
+
+    # TODO: data of this player must be removed after game is over or 30 minutes
+    adaptor = RedisAdaptor(room_id)
+    sess = session.Session(RedisAdaptor(room_id), sid, uid)
+    sess.state.flush()
+
+    user_state = state.User(user_id=uid, session_id=sid, adaptor=adaptor)
+    user_state.join()
+    state.AI(RedisAdaptor(room_id)).add("Taro")
+    state.AI(RedisAdaptor(room_id)).add("Taro")
+    state.AI(RedisAdaptor(room_id)).add("Taro")
+    state.AI(RedisAdaptor(room_id)).add("Taro")
+
+    response = render(request, "play.html", {
+        "user_id": uid,
+        "room": {"id": room_id},
+        "deck": [c.to_json() for c in card.deck],
+        "declarations": [d.to_json() for d in card.declarations],
+    })
+
+    # TODO: stop getting sessionid directly
+    response.set_cookie("sessionid", sid)
+    response.set_cookie("user_session", sid)
+    response.set_cookie("anonymous_user_id", uid)
+    response.set_cookie("anonymous_room_id", room_id)
+
+    return response

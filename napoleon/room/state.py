@@ -18,8 +18,8 @@ class User(object):
         self.adaptor.set_dict("isAI", self.user_id, False)
 
         # TODO: define a user dict and reduce a code
-        self.adaptor.set_dict("user", "username", user.get_username())
-        self.adaptor.set_dict("user", "user_id", user.id)
+        self.adaptor.set_dict("user", "username", user and user.get_username() or "ANONYMOUS USER")
+        self.adaptor.set_dict("user", "user_id", self.user_id)
 
     def quit(self):
         self.adaptor.rem_list("player_ids", self.user_id)

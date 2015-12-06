@@ -52,7 +52,7 @@ app.controller("GameController", ["$scope", function($scope){
     this.send = function (json){
         if (json === undefined)
             json = {};
-        json["session_id"] = $.cookie("sessionid");
+        json["session_id"] = $.cookie("sessionid") || $.cookie("user_session");
         wsGame.send(JSON.stringify(json));
         self.disabled = true;
     };
