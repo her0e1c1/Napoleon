@@ -72,7 +72,7 @@
 {% endmacro %}
 
 {% macro start() %}
-  <div ng-if="!game.state.phase.current">
+  <div ng-if="game.state.phase.current === ''">
     <ul>
       player AI
       {% for ai in ais %}
