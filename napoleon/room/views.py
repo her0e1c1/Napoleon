@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, redirect, get_object_or_404
@@ -19,14 +20,35 @@ def index(request):
     return render(request, "index.html", ctx)
 
 
-@require_http_methods(["POST"])
-def login(request):
+def _login(request, username, password):
     from django.contrib.auth import login
-    username = request.POST["username"]
-    password = request.POST["password"]
     user = authenticate(username=username, password=password)
     if user and user.is_active:
         login(request, user)
+        return True
+    return False
+
+
+def signup(request):
+    if request.method != 'POST':
+        return render(request, "signup.html", {"signup_form": UserCreationForm()})
+
+    d = dict(request.POST.items())
+    d["password2"] = d.get("password1")
+    form = UserCreationForm(d)
+    if form.is_valid():
+        form.save()
+        if _login(request, form.cleaned_data["username"], form.cleaned_data["password1"]):
+            return redirect("napoleon.room.views.index")
+
+    return render(request, "signup.html", {"signup_form": form})
+
+
+@require_http_methods(["POST"])
+def login(request):
+    username = request.POST.get("username")
+    password = request.POST.get("password")
+    _login(request, username, password)
     return redirect("napoleon.room.views.index")
 
 
