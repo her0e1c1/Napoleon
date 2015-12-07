@@ -20,16 +20,16 @@ It's best to play Napoleon with five players,
 although you can play it with three to seven players.
 
 Players are divided to two teams, which are Napoleon forces and allied forces.
-When a player becomes Napoleon, he need to deciede an adjutant.
-If there are five players, Napoleon and an adjutant are on the team of Napoleon forces,
+When a player becomes Napoleon, he need to deciede his adjutant.
+If there are five players, Napoleon and his adjutant are on the team of Napoleon forces,
 and the three others are on the team of allied forces.
 
 Victory Conditions
 ==================
 
-In order to win a game, a player is on the winning team.
-To win the game, Napoleon forces needs to collect the more number of faced cards than
-or equal to what Napoleon declares.
+In order to win a game, a player needs to be on the winning team.
+To win the game, Napoleon and his adjutant on Napoleon forces needs to collect altogether
+the more number of faced cards than or equal to what Napoleon declares.
 On the other hand, to win the game, allied forces needs to prevent Napoleon forces from
 getting the number of faced cards he declares.
 
@@ -48,3 +48,80 @@ Each player can decide the number of faced cards they will get.
 If a player becomes Napoleon, he declares the larger number than any other player.
 In case another player declares the same number, a player who declares stronger suit becomes Napoleon.
 A suit is stronger in order of club, diamond, heart and spade.
+
+Adjutant and Exchange
+=====================
+
+When a player becomes Napoleon, he decides his adjutant who usually has the strongest card Napoleon doesn't have.
+
+After the decision, he can exchange his cards with the rest of cards.
+For example, if there are five players and fifty four cards including two jokers, each player have ten cards
+and the number of the rest of cards are four. So Napoleon can exchange them with his cards.
+
+Rounds
+======
+
+On each round, a player puts only one card he has. However he must put a card of the same suit as that of the lead card.
+If he doesn't have a card of the same suit, he can put any card.
+
+After all the players put thier cards, the player who put the strongest card can get all the faced cards.
+
+If there are five players, the max ten rounds take place.
+Once Napoleon forces gets the more number of cards than he declares, the game comes to an end.
+In that case, the tenth round may not take place.
+
+Order of card strength
+======================
+
+- Spade ace is always the strongest card.
+- Trump joker is the second strongest card.
+- The other joker is the third strongest card.
+
+Trump joker is JB, which stands for Joker Black,
+if Napoleon declares the suit of club or spade.
+Otherwise, trump joker is JR, which stands for Joker Red.
+if Napoleon declares the suit of diamond or heart.
+
+- Right jack is the fourth strongest.
+- Counter jack is the fifth strongest.
+
+Right jack is the jack of the same suit as Napoleon declares.
+Counter jack is the jack of the same color suit as Napoleon declares.
+If Napoleon declares the suit club, right jack is club jack and counter jack is spade jack.
+
+- Trump Ace is the sixth strongest. and Trump king, queen, ten, , , two is strongest in order.
+
+Trump Ace is ace of the same suit as Napoleon declares.
+
+- In other cases, the card of the same suit as a lead card is strong.
+
+For example, if Napoleon declares the suit heart and there are club two and spade king
+and club two is a lead card, club two is stronger than spade king.
+
+In addtions, there are some rules below.
+
+Same two
+--------
+
+If there are same suit cards including two, two wins the round.
+
+However same two is not stronger than counter jack.
+
+Yoromeki
+--------
+
+If there are spade ace and heart queen at the same time, heart queen wins the round.
+
+Betray
+------
+
+If the lead card is club ten, the player joins the other forces.
+If an adjutant puts it, he joins allied forces.
+If one of players on allied forces puts it, he joins Napoleon forces.
+
+However Napoleon can't betray.
+
+Request Joker
+-------------
+
+If the lead card is club three, players must put joker if they have.
