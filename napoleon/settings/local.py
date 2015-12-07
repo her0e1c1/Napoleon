@@ -27,6 +27,8 @@ WEBSOCKET_PROTOCOL = "ws"
 
 TORNADO_PORT = 8001
 
+# play time. unit is sec
+GAME_TIME_FOR_ANONYMOUS_PLAYER = 5 * 60
 
 LOGGING = {
     'version': 1,
@@ -38,7 +40,7 @@ LOGGING = {
     },
     'handlers': {
         'sentry': {
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
         },
         'console': {
@@ -54,7 +56,7 @@ LOGGING = {
             'propagate': True,
         },
         'raven': {
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'handlers': ['sentry'],
             'propagate': False,
         },

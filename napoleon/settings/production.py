@@ -23,6 +23,7 @@ MIDDLEWARE_CLASSES += [
     'sslify.middleware.SSLifyMiddleware',
 ]
 
+GAME_TIME_FOR_ANONYMOUS_PLAYER = 15 * 60
 
 # https://ultimatedjango.com/learn-django/lessons/configure-error-logging-reporting/
 LOGGING = {
