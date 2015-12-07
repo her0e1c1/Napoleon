@@ -139,10 +139,10 @@ def play(request):
     user_state = state.User(user_id=uid, session_id=sid, adaptor=adaptor)
     user_state.join()
 
-    state.AI(RedisAdaptor(room_id)).add("Taro")
-    state.AI(RedisAdaptor(room_id)).add("Taro")
-    state.AI(RedisAdaptor(room_id)).add("Taro")
-    state.AI(RedisAdaptor(room_id)).add("Taro")
+    state.AI(adaptor).add("Taro")
+    state.AI(adaptor).add("Taro")
+    state.AI(adaptor).add("Taro")
+    state.AI(adaptor).add("Taro")
 
     response = render(request, "detail.html", {
         "user_id": uid,
