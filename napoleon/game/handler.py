@@ -1,18 +1,19 @@
 import logging
+from collections import defaultdict
 
 from django.conf import settings
 
 from tornado import gen
+from tornado.websocket import WebSocketHandler
 import tornado.ioloop
 import tornado.options
 import tornado.web
 import tornado.websocket
-from tornado.websocket import WebSocketHandler
 import tornado.escape
-from collections import defaultdict
+
+from . import phase
 from . state import GameState
 from . session import Session
-from . import phase
 from . adaptor import RedisAdaptor
 
 

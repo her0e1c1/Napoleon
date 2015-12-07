@@ -1,3 +1,5 @@
+import random
+
 from django.conf import settings
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
@@ -132,10 +134,7 @@ def add(request, room_id):
 
 
 def play(request):
-    import random
     room_id = sid = uid = "anonymous_%s" % str(random.randint(10 ** 6, 10 ** 7))
-
-    # TODO: data of this player must be removed after game is over or after 30 minutes
     adaptor = RedisAdaptor(room_id, timer=settings.GAME_TIME_FOR_ANONYMOUS_PLAYER)
     user_state = state.User(user_id=uid, session_id=sid, adaptor=adaptor)
     user_state.join()
