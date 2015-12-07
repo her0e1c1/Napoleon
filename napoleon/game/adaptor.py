@@ -75,6 +75,15 @@ class RedisAdaptor(object):
         self.user_id = user_id
         self.timer = timer
 
+    @classmethod
+    def create(cls, adaptor, user_id):
+        return RedisAdaptor(
+            room_id=adaptor.room_id,
+            user_id=user_id,
+            conn=adaptor.conn,
+            timer=adaptor.timer,
+        )
+
     def key(self, k):
         return get_key(k, room_id=self.room_id, user_id=self.user_id)
 

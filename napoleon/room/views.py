@@ -131,8 +131,6 @@ def add(request, room_id):
 
 def play(request):
     import random
-    # TODO: make the type of user_id string
-    # So you can distinguish an anonymous user from a login user
     room_id = sid = uid = "anonymous_%s" % str(random.randint(10 ** 6, 10 ** 7))
 
     # TODO: data of this player must be removed after game is over or after 30 minutes

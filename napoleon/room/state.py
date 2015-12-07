@@ -8,7 +8,7 @@ class User(object):
         """
         Make sure user id is valid.
         """
-        self.adaptor = RedisAdaptor(adaptor.room_id, user_id, adaptor.conn)
+        self.adaptor = RedisAdaptor.create(adaptor, user_id)
         self.user_id = user_id
         self.session_id = session_id
 
@@ -38,7 +38,7 @@ class AI(object):
         Make sure user id is valid.
         """
         self.user_id = str(uuid.uuid4())
-        self.adaptor = RedisAdaptor(adaptor.room_id, self.user_id, adaptor.conn)
+        self.adaptor = RedisAdaptor.create(adaptor, self.user_id)
 
     def add(self, name):
         self.adaptor.set_list("player_ids", self.user_id, delete=False)

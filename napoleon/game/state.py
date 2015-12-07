@@ -19,7 +19,7 @@ class Player(object):
         user_id = str(user_id)
         if user_id is None:
             raise ValueError("user_id must not be None")
-        self.adaptor = RedisAdaptor(state.room_id, user_id, state.adaptor.conn)
+        self.adaptor = RedisAdaptor.create(state.adaptor, user_id)
         self.user_id = user_id
         self.state = state
 
@@ -245,7 +245,6 @@ class GameState(object):
         if user_id is None:
             raise ValueError("user_id must not be None")
 
-        # TODO: make user_id type of str
         d = self.adaptor.get_dict("isAI", type=bool)
         if d.get(str(user_id)):  # b/c
             return PlayerAI(user_id, self)
