@@ -69,10 +69,11 @@ def decode(s, type=None):
 
 class RedisAdaptor(object):
 
-    def __init__(self, room_id, user_id=None, conn=None):
+    def __init__(self, room_id, user_id=None, conn=None, timer=None):
         self.conn = conn or settings.REDIS_CONNECTION
         self.room_id = room_id
         self.user_id = user_id
+        self.timer = timer
 
     def key(self, k):
         return get_key(k, room_id=self.room_id, user_id=self.user_id)
