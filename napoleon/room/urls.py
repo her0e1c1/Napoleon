@@ -11,8 +11,7 @@ urlpatterns = [
     url(r'^logout$', views.logout),
     url(r'^signup$', views.signup, name="signup"),
     url(r'^room/(?P<game_id>\d+)$', views.detail),
-    url(r'^state/(?P<room_id>)', views.game_state),
-    # url(r'^state/(?P<room_id>)$', views.game_state),
+    url(r'^state/(?P<room_id>\w)', views.game_state),
 
     # for user
     url(r'^room/(?P<room_id>\w+)/join$', views.join),
