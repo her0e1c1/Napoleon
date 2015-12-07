@@ -77,6 +77,7 @@ def game_state(request, room_id):
 def detail(request, game_id):
     room = get_object_or_404(models.Room, pk=game_id)
     return render(request, "detail.html", {
+        "user_id": request.user.id,
         "room": room,
         "deck": [c.to_json() for c in card.deck],
         "declarations": [d.to_json() for d in card.declarations],
@@ -134,22 +135,20 @@ def play(request):
     # TODO: make the type of user_id string
     # So you can distinguish an anonymous user from a login user
     uid = random.randint(10 ** 6, 10 ** 7)
-    sid = uid
+    sid = str(uid)
     room_id = "anonymous_%s" % uid
 
-    # TODO: data of this player must be removed after game is over or 30 minutes
+    # TODO: data of this player must be removed after game is over or after 30 minutes
     adaptor = RedisAdaptor(room_id)
-    sess = session.Session(RedisAdaptor(room_id), sid, uid)
-    sess.state.flush()
-
     user_state = state.User(user_id=uid, session_id=sid, adaptor=adaptor)
     user_state.join()
+
     state.AI(RedisAdaptor(room_id)).add("Taro")
     state.AI(RedisAdaptor(room_id)).add("Taro")
     state.AI(RedisAdaptor(room_id)).add("Taro")
     state.AI(RedisAdaptor(room_id)).add("Taro")
 
-    response = render(request, "play.html", {
+    response = render(request, "detail.html", {
         "user_id": uid,
         "room": {"id": room_id},
         "deck": [c.to_json() for c in card.deck],

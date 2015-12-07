@@ -5,7 +5,7 @@
 {% block javascript %}
  <script type="text/javascript">
    var csrf_token = "{{ csrf_token }}";
-   var user_id={{ request.user.id }};
+   var user_id={{ user_id }};
    var urls = {
      "state": "{{ url('napoleon.room.views.game_state', kwargs={'room_id': room.id})  }}",
      "join": "{{ url('napoleon.room.views.join', kwargs={'room_id': room.id}) }}",
