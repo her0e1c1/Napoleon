@@ -66,9 +66,7 @@ def game_state(request, room_id):
         uid = request.user.id
         sid = request.COOKIES["sessionid"]
     else:
-        uid = request.COOKIES["anonymous_user_id"]
-        sid = request.COOKIES["user_session"]
-        room_id = request.COOKIES["anonymous_room_id"]
+        room_id = sid = uid = request.COOKIES["user_session"]
     s = session.Session(RedisAdaptor(room_id), sid, uid)
     return JsonResponse({"state": s.myself.state.to_json()})
 
@@ -134,9 +132,7 @@ def play(request):
     import random
     # TODO: make the type of user_id string
     # So you can distinguish an anonymous user from a login user
-    uid = str(random.randint(10 ** 6, 10 ** 7))
-    sid = str(uid)
-    room_id = "anonymous_%s" % uid
+    room_id = sid = uid = "anonymous_%s" % str(random.randint(10 ** 6, 10 ** 7))
 
     # TODO: data of this player must be removed after game is over or after 30 minutes
     adaptor = RedisAdaptor(room_id)
@@ -155,10 +151,6 @@ def play(request):
         "declarations": [d.to_json() for d in card.declarations],
     })
 
-    # TODO: stop getting sessionid directly
-    response.set_cookie("sessionid", sid)
     response.set_cookie("user_session", sid)
-    response.set_cookie("anonymous_user_id", uid)
-    response.set_cookie("anonymous_room_id", room_id)
-
+    response.set_cookie("sessionid", sid)
     return response
