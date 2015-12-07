@@ -31,7 +31,7 @@ class Session(object):
         if session_id:
             self.user_id = get_user_id(adaptor, session_id)
             if self.user_id:
-                if user_id is None or user_id == self.user_id:
+                if user_id is None or str(user_id) == str(self.user_id):
                     self.is_valid = True
             else:
                 self.user_id = user_id

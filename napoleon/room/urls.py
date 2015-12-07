@@ -15,11 +15,11 @@ urlpatterns = [
     # url(r'^state/(?P<room_id>)$', views.game_state),
 
     # for user
-    url(r'^room/(?P<room_id>\d+)/join$', views.join),
-    url(r'^room/(?P<room_id>\d+)/quit$', views.quit),
-    url(r'^room/(?P<room_id>\d+)/reset$', views.reset),
+    url(r'^room/(?P<room_id>\w+)/join$', views.join),
+    url(r'^room/(?P<room_id>\w+)/quit$', views.quit),
+    url(r'^room/(?P<room_id>\w+)/reset$', views.reset),
     # for AI
-    url(r'^room/(?P<room_id>\d+)/add$', views.add),
+    url(r'^room/(?P<room_id>\w+)/add$', views.add),
 
     url(r'^play$', views.play),
 ]
