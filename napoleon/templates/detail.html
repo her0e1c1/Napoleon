@@ -77,12 +77,14 @@
   before initialization, even if ng-if="false", tags is displayed for a short time.
   #}
   <div ng-if="game.state && !game.state.phase.current">
+    {% if ais %}
     <ul>
       player AI
       {% for ai in ais %}
         <button ng-click="game.add('{{ ai }}')" class="btn btn-default">{{ ai }}</button>
       {% endfor %}
     </ul>
+    {% endif %}
     <button ng-if="game.myself.is_joined" ng-click="game.quit()" class="btn btn-default">Leave</button>
     <button ng-if="!game.myself.is_joined" ng-click="game.join()" class="btn btn-default">Play</button>
     <button ng-if="game.state.phase.is_appropriate_player_number" ng-click="game.start()" class="btn btn-primary">Start</button>
