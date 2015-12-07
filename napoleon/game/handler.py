@@ -1,5 +1,7 @@
 import logging
 
+from django.conf import settings
+
 from tornado import gen
 import tornado.ioloop
 import tornado.options
@@ -30,7 +32,10 @@ class WSHandlerMixin(object):
     def open(self, room_id):
         sid = self.get_cookie("sessionid")
         WSHandlerMixin.connections[self.path].add((self, sid,))
-        self.adaptor = RedisAdaptor(room_id)
+        if sid.startswith("anonymous_"):
+            self.adaptor = RedisAdaptor(room_id, timer=settings.GAME_TIME_FOR_ANONYMOUS_PLAYER)
+        else:
+            self.adaptor = RedisAdaptor(room_id)
         self.state = GameState(self.adaptor)
 
     def on_close(self):

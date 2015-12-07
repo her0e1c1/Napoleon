@@ -66,9 +66,11 @@ def game_state(request, room_id):
     if request.user.is_authenticated():
         uid = request.user.id
         sid = request.COOKIES["sessionid"]
+        timer = None
     else:
         room_id = sid = uid = request.COOKIES["user_session"]
-    s = session.Session(RedisAdaptor(room_id), sid, uid)
+        timer = settings.GAME_TIME_FOR_ANONYMOUS_PLAYER
+    s = session.Session(RedisAdaptor(room_id, timer=timer), sid, uid)
     return JsonResponse({"state": s.myself.state.to_json()})
 
 
