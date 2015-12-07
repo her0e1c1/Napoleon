@@ -37,7 +37,7 @@ class AI(object):
         """
         Make sure user id is valid.
         """
-        self.user_id = int(uuid.uuid4())
+        self.user_id = str(uuid.uuid4())
         self.adaptor = RedisAdaptor(adaptor.room_id, self.user_id, adaptor.conn)
 
     def add(self, name):
