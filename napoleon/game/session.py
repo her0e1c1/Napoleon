@@ -8,8 +8,7 @@ def to_json(obj):
     elif isinstance(obj, list):
         return [to_json(o) for o in obj]
     elif isinstance(obj, dict):
-        # js側でintが桁溢れする
-        return {k: to_json(v) if k != "user_id" else str(v) for k, v in obj.items()
+        return {k: to_json(v) for k, v in obj.items()
                 if not str(k).startswith("_") and not callable(v)}
     elif hasattr(obj, "to_json"):
         return obj.to_json()
@@ -22,6 +21,9 @@ def to_json(obj):
 class Session(object):
 
     def __init__(self, adaptor, session_id=None, user_id=None):
+        # request.user.id is int. so here make it type of string
+        if user_id:
+            user_id = str(user_id)
 
         # if session is valid for user id, then True
         self.is_valid = False
@@ -31,7 +33,7 @@ class Session(object):
         if session_id:
             self.user_id = get_user_id(adaptor, session_id)
             if self.user_id:
-                if user_id is None or str(user_id) == str(self.user_id):
+                if user_id is None or user_id == self.user_id:
                     self.is_valid = True
             else:
                 self.user_id = user_id
@@ -58,7 +60,7 @@ def get_user_id(adaptor, session_id):
     inv = {v: k for k, v in user_dict.items()}
     user_id = inv.get(session_id)
     if user_id:
-        return int(user_id)
+        return user_id
 
 
 class PlayerPrivilege(object):

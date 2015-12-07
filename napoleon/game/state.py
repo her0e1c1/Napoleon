@@ -16,6 +16,7 @@ class Role(enum.Enum):
 class Player(object):
 
     def __init__(self, user_id, state):
+        user_id = str(user_id)
         if user_id is None:
             raise ValueError("user_id must not be None")
         self.adaptor = RedisAdaptor(state.room_id, user_id, state.adaptor.conn)
@@ -292,7 +293,7 @@ class GameState(object):
     @property
     def players(self):
         l = []
-        for pid in self.adaptor.get_list("player_ids", type=int):
+        for pid in self.adaptor.get_list("player_ids", type=str):
             l.append(self.create_player(user_id=pid))
         return l
 
@@ -306,7 +307,7 @@ class GameState(object):
 
     @property
     def _passed_players(self):
-        pids = self.adaptor.get_list("pass_ids", type=int)
+        pids = self.adaptor.get_list("pass_ids", type=str)
         return [p for p in self.players if p.user_id in pids]
 
     @_passed_players.deleter
@@ -333,15 +334,15 @@ class GameState(object):
 
     @property
     def napoleon(self):
-        return self.adaptor.get("napoleon", type=int)
+        return self.adaptor.get("napoleon", type=str)
 
     @napoleon.setter
     def napoleon(self, user_id):
-        return self.adaptor.set("napoleon", user_id)
+        return self.adaptor.set("napoleon", str(user_id))
 
     @property
     def turn(self):
-        user_id = self.adaptor.get("turn", type=int)
+        user_id = self.adaptor.get("turn", type=str)
         if user_id:
             return self.create_player(user_id)
 
@@ -354,7 +355,7 @@ class GameState(object):
     def turn(self, user_id):
         if isinstance(user_id, Player):
             user_id = user_id.user_id
-        self.adaptor.set("turn", user_id)
+        self.adaptor.set("turn", str(user_id))
 
     @property
     def adjutant(self):
@@ -401,7 +402,7 @@ class GameState(object):
     @player_cards.setter
     def player_cards(self, value):
         user_id, card = value
-        self.adaptor.set_dict("player_cards", user_id, int(card))
+        self.adaptor.set_dict("player_cards", str(user_id), int(card))
 
     @player_cards.deleter
     def player_cards(self):

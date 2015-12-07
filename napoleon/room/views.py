@@ -134,7 +134,7 @@ def play(request):
     import random
     # TODO: make the type of user_id string
     # So you can distinguish an anonymous user from a login user
-    uid = random.randint(10 ** 6, 10 ** 7)
+    uid = str(random.randint(10 ** 6, 10 ** 7))
     sid = str(uid)
     room_id = "anonymous_%s" % uid
 
