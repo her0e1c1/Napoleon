@@ -181,7 +181,9 @@
     {{ adjutant() }}
     {{ hand() }}
 
-    <div ng-if="game.myself.is_joined && game.myself.is_valid">{{ chat.chat(request.user.id) }}</div>
+    {% if request.user.is_authenticated() %}
+      <div ng-if="game.myself.is_joined && game.myself.is_valid">{{ chat.chat(request.user.id) }}</div>
+    {% endif %}
   </div>
 
 {% endblock %}
