@@ -42,7 +42,13 @@
   </div>
   <div ng-if="!game.state.phase.current" ng-switch="!game.myself.is_joined">
     <span ng-switch-when="true">Do you want to paly Napoleon?</span>
-    <span ng-switch-when="false">Waiting for other players to join ...</span>
+    <span ng-switch-when="false">
+    {% if request.user.is_authenticated() %}
+      Waiting for other players to join ...
+    {% else %}
+      Let's play Napoleon!
+    {% endif %}
+    </span>
   </div>
   <div ng-if="game.state.phase.current == 'declare'" ng-switch="!game.myself.is_passed">
     <span ng-switch-when="true">Do you declare as Napoleon?</span>
@@ -85,7 +91,9 @@
       {% endfor %}
     </ul>
     {% endif %}
-    <button ng-if="game.myself.is_joined" ng-click="game.quit()" class="btn btn-default">Leave</button>
+    {% if request.user.is_authenticated() %}
+      <button ng-if="game.myself.is_joined" ng-click="game.quit()" class="btn btn-default">Leave</button>
+    {% endif %}
     <button ng-if="!game.myself.is_joined" ng-click="game.join()" class="btn btn-default">Play</button>
     <button ng-if="game.state.phase.is_appropriate_player_number" ng-click="game.start()" class="btn btn-primary">Start</button>
   </div>
