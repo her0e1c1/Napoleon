@@ -104,6 +104,9 @@ class RedisAdaptor(object):
         for i in iterable:
             self.conn.lpush(key, i)
 
+        if self.timer:
+            self.expire(bak, self.timer)
+
     def rem_list(self, key, value):
         self.conn.lrem(self.key(key), value, 0)
 
@@ -112,12 +115,16 @@ class RedisAdaptor(object):
 
     def set(self, key, value):
         self.conn.set(self.key(key), value)
+        if self.timer:
+            self.expire(key, self.timer)
 
     def get_dict(self, key, type=None):
         return decode(self.conn.hgetall(self.key(key)), type=type)
 
     def set_dict(self, key, k, v):
         self.conn.hset(self.key(key), k, v)
+        if self.timer:
+            self.expire(key, self.timer)
 
     def rem_dict(self, key, k):
         self.conn.hdel(self.key(key), k)
