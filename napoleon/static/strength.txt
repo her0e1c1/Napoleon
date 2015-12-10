@@ -1,0 +1,60 @@
+There are the order of strength about cards. (top 10)
+The strength changes depending on trump
+In addtions, the words in parentheses are alias names of special cards.
+
+If trump is club:
+
+- spade ace (almighty)
+- joker black (JB)
+- joker red (JR)
+- club jack (right jack)
+- spade jack (counter jack)
+- club ace
+- club king
+- club queen
+- club ten
+- club 9
+
+If trump is diamond:
+
+- spade ace
+- joker red
+- joker black
+- diamond jack (right jack)
+- heart jack (counter jack)
+- diamond ace
+- diamond king
+- diamond queen
+- diamond ten
+- diamond 9
+
+If trump is heart:
+
+- spade ace
+- joker red
+- joker black
+- heart jack (right jack)
+- diamond jack (counter jack)
+- heart ace
+- heart king
+- heart queen
+- heart ten
+- heart 9
+
+If trump is spade:
+
+- spade ace
+- joker black
+- joker red
+- spade jack (right jack)
+- club jack (counter jack)
+- spade king
+- spade queen
+- spade ten
+- spade 9
+- spade 8
+
+Basically cards are under the rules above.
+However there are also other rules, Same Two and Yoromeki.
+In these cases, cards are not under the rules above.
+

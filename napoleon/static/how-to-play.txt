@@ -49,6 +49,7 @@ If a player becomes Napoleon, he declares the larger number than any other playe
 In case another player declares the same number, a player who declares stronger suit becomes Napoleon.
 A suit is stronger in order of club, diamond, heart and spade.
 
+
 Adjutant and Exchange
 =====================
 
@@ -100,12 +101,17 @@ and club two is a lead card, club two is stronger than spade king.
 
 In addtions, there are some rules below.
 
+Special cards
+-------------
+
+Cards from spade ace to counter jack are special cards.
+
 Same two
 --------
 
 If there are same suit cards including two, two wins the round.
 
-However same two is not stronger than counter jack.
+However same two is not stronger than special cards. 
 
 Yoromeki
 --------
