@@ -16,8 +16,7 @@ If you forget it, you can't login so you need to recreate your account.
 Players
 =======
 
-It's best to play Napoleon with five players,
-although you can play it with three to seven players.
+The number of participants are 3 ~ 7 (5 is best).
 
 Players are divided to two teams, which are Napoleon forces and allied forces.
 When a player becomes Napoleon, he need to deciede his adjutant.
