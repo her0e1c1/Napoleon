@@ -8,7 +8,7 @@
   {% if not request.user.is_authenticated() %}
     <p class="text-muted">
       You can play napoleon with AI players without login.
-      <a href="{{ url('napoleon.room.views.play') }}">HERE</a><br>
+      <a href="{{ url('napoleon.room.views.play') }}">HERE</a>(if you reload the page, the game is always reset)<br>
       However it's more exiting to play it with human players.<br>
       All you have to do is create your account below.<br>
     </p>
