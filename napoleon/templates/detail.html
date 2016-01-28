@@ -138,6 +138,7 @@
 {% endmacro %}
 
 {% block content %}
+  <div ng-app="GameApp">
   <div ng-controller="GameController as game">
 
     <table class="table table-condensed">
@@ -192,6 +193,7 @@
     {% if request.user.is_authenticated() %}
       <div ng-if="game.myself.is_joined && game.myself.is_valid">{{ chat.chat(request.user.id) }}</div>
     {% endif %}
+  </div>
   </div>
 
 {% endblock %}
